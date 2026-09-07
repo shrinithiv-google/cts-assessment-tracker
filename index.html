@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; user-select: none; -webkit-user-select: none; }
     .pulse-dot { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -44,16 +45,23 @@
       <div class="absolute top-3 left-3 bg-black/80 px-2.5 py-1 rounded-xl text-[10px] font-mono text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span> DESK STREAM ACTIVE
       </div>
-      <div id="phone-tamper-warning" class="absolute inset-0 bg-red-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white text-center space-y-3 hidden">
-        <span class="text-4xl">⚠️</span>
-        <h3 class="font-bold text-base text-red-400">VIOLATION DETECTED!</h3>
-        <p class="text-xs leading-relaxed">You left or minimized the proctor screen on your mobile device. A malpractice strike has been recorded on your exam session.</p>
-        <button onclick="dismissPhoneTamper()" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-bold shadow-lg">Return to Proctor Guard</button>
+      
+      <!-- Instant Tamper Warning Overlay on Mobile Screen -->
+      <div id="phone-tamper-warning" class="absolute inset-0 bg-red-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white text-center space-y-4 hidden z-50">
+        <span class="text-5xl animate-bounce">⚠️</span>
+        <h3 class="font-bold text-lg text-red-400">MALPRACTICE DETECTED!</h3>
+        <div class="p-3 bg-red-900/40 rounded-xl border border-red-700/50 text-xs text-red-200 text-left space-y-1">
+          <p class="font-bold">VIOLATION: PHONE TAB SWITCHED / MINIMIZED</p>
+          <p class="text-[11px] text-slate-300">You switched away from the Sentinel screen. A malpractice strike has been transmitted to your main assessment screen.</p>
+        </div>
+        <button onclick="dismissPhoneTamper()" class="w-full py-3 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-bold shadow-lg text-white">
+          Return to Proctor Screen
+        </button>
       </div>
     </div>
 
     <div class="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300 flex items-center justify-between">
-      <span>Status: <strong id="phone-guard-status" class="text-emerald-400">Screen Monitored</strong></span>
+      <span>Status: <strong id="phone-guard-status" class="text-emerald-400">Connecting...</strong></span>
       <span id="phone-ping-clock" class="text-[10px] text-slate-400">Active</span>
     </div>
   </div>
@@ -115,7 +123,7 @@
             <h4 class="text-xs font-bold text-slate-300">Anti-Cheating Rules:</h4>
             <ul class="text-[11px] text-slate-400 space-y-1.5 list-disc pl-4">
               <li>Your phone can remain beside you on your desk, but its screen is locked into Sentinel mode.</li>
-              <li><strong>Switching tabs or opening other apps on your phone is prohibited</strong> and triggers an instant strike.</li>
+              <li><strong>Switching tabs or opening other apps on your phone is strictly prohibited</strong> and strikes down attempts on the main screen.</li>
               <li>Biometric identity verification is conducted exclusively via your <strong>Lab Webcam</strong>.</li>
             </ul>
           </div>
@@ -141,7 +149,10 @@
                 Scan this code with your phone camera, prop the phone on your desk, and do not switch to other apps during the test.
               </p>
               <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1">
-                <div>Session: <span id="pairing-session-id" class="text-indigo-400 font-bold">CTS-SESSION</span></div>
+                <div class="flex justify-between">
+                  <span>Session: <strong id="pairing-session-id" class="text-indigo-400 font-bold">CTS-SESSION</strong></span>
+                  <span id="webrtc-peer-status" class="text-[10px] text-indigo-300">WebRTC Ready</span>
+                </div>
                 <div id="phone-pairing-indicator" class="text-amber-400 font-semibold flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-amber-400 pulse-dot"></span> Waiting for phone to connect...
                 </div>
@@ -166,14 +177,28 @@
     <div id="stage-biometrics" class="hidden space-y-6">
       <div class="bg-slate-900/90 border border-slate-800 p-6 md:p-8 rounded-3xl shadow-xl space-y-6">
 
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-800 pb-4 gap-2">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-800 pb-4 gap-3">
           <div>
             <div class="inline-flex px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20 mb-2">STEP 2 OF 2: LAB CAMERA ONLY</div>
             <h2 class="text-lg md:text-xl font-bold text-white flex items-center gap-2"><span>👁️</span> 1:1 Biometric Facial Identity Verification</h2>
             <p class="text-xs text-slate-400 mt-1">Upload your official ID portrait, then look into your <strong>Lab Webcam</strong> to verify facial geometry.</p>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-xs text-slate-400 font-mono">📱 Phone Guard: <strong class="text-emerald-400">LOCKED</strong></span>
+          
+          <!-- Status & Malpractice Pool during Lab Biometrics -->
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+              <span class="text-xs text-slate-400">📱 Phone Guard:</span>
+              <strong id="stage2-phone-status" class="text-xs text-emerald-400 font-mono">LOCKED & PROCTORING</strong>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+              <span class="text-xs text-slate-400">Malpractice Pool:</span>
+              <div class="flex gap-1.5" id="stage2-strike-indicators">
+                <span id="stage2-strike-dot-1" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400"></span>
+                <span id="stage2-strike-dot-2" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400"></span>
+                <span id="stage2-strike-dot-3" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400"></span>
+              </div>
+              <span id="stage2-strike-count-text" class="text-xs font-mono font-bold text-emerald-400 ml-1">0/3 Strikes</span>
+            </div>
             <div id="ai-model-badge" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-amber-400 flex items-center gap-1.5">
               <span class="h-1.5 w-1.5 rounded-full bg-amber-400 pulse-dot"></span> Loading BlazeFace AI...
             </div>
@@ -243,39 +268,33 @@
         <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
           <div class="flex justify-between items-center text-xs">
             <span class="font-semibold text-slate-300">1:1 Landmark Distance & Facial Similarity:</span>
-            <span id="biometric-match-pct" class="font-bold text-sm text-slate-400 font-mono">0.0% Match</span>
+            <span id="biometric-match-pct" class="font-bold text-sm text-slate-400 font-mono">0% Match</span>
           </div>
           <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-800">
             <div id="biometric-match-bar" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
           </div>
-          <div class="flex items-center justify-between text-[11px]">
-            <div id="biometric-status-msg" class="text-slate-400 font-medium">
-              Upload passport photo and activate lab camera to begin real-time verification.
-            </div>
-            <span class="text-slate-400 text-[10px] font-mono">Required: ≥ 70.0%</span>
+          <div id="biometric-status-msg" class="text-xs text-slate-400 leading-relaxed text-center">
+            Upload candidate official ID portrait and turn on the Lab Webcam to run 1:1 biometric comparison.
           </div>
         </div>
 
-        <!-- Launch Button -->
+        <!-- Launch Assessment Button -->
         <button id="btn-enter-exam" onclick="startAssessment()" disabled class="w-full py-4 rounded-2xl bg-slate-800 text-slate-500 font-bold text-sm tracking-wide cursor-not-allowed transition flex items-center justify-center gap-2 shadow-xl">
-          <span>🔒 Locked: Biometric Verification Required to Enter Exam</span>
+          <span>🔒 Complete 1:1 Lab Biometric Verification to Proceed</span>
         </button>
 
       </div>
     </div>
 
-    <!-- STEP 3: ACTIVE EXAM PLATFORM (DUAL-PERSPECTIVE PROCTORING) -->
+    <!-- STEP 3: EXAM RUNTIME WITH DUAL-PERSPECTIVE PROCTORING -->
     <div id="stage-exam-active" class="hidden space-y-6">
 
-      <!-- Exam Sub-Header Status Bar -->
-      <div class="bg-slate-900 border border-slate-800 px-6 py-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2">
-            <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 pulse-dot"></span>
-            <span class="text-xs font-bold text-white">ACTIVE EXAM SESSION</span>
-          </div>
-          <span class="text-xs text-slate-400">|</span>
-          <span id="exam-candidate-display" class="text-xs font-medium text-slate-300">Alex Mercer (CTS-884920)</span>
+      <!-- Exam Top Bar with Timer and Strikes -->
+      <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-2xl gap-4">
+        <div class="flex items-center gap-3">
+          <span class="h-3 w-3 rounded-full bg-emerald-400 pulse-dot"></span>
+          <span class="font-bold text-sm text-white">Live Proctored Assessment</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-400 border border-blue-800/60 font-mono">Cognizant CTS-L2</span>
         </div>
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-2">
@@ -308,103 +327,114 @@
               Loading question...
             </div>
             <div id="question-options" class="space-y-3 pt-2">
-              <!-- Dynamically populated options -->
+              <!-- Options injected by JS -->
             </div>
           </div>
-          <div class="flex justify-between items-center border-t border-slate-800 pt-6">
-            <button id="btn-prev-q" onclick="navigateQuestion(-1)" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">← Previous</button>
+
+          <div class="flex items-center justify-between border-t border-slate-800 pt-6 gap-3">
             <div class="flex gap-2">
-              <button onclick="flagQuestion()" class="px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition">🚩 Review Later</button>
-              <button id="btn-next-q" onclick="navigateQuestion(1)" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition">Next →</button>
+              <button id="btn-prev-q" onclick="navigateQuestion(-1)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">← Previous</button>
+              <button id="btn-next-q" onclick="navigateQuestion(1)" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white shadow-lg shadow-blue-600/20">Next Question →</button>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="flagQuestion()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-amber-400">🚩 Flag</button>
+              <button onclick="submitExamEarly()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white shadow-lg">Submit Exam</button>
             </div>
           </div>
         </div>
 
-        <!-- Sticky Proctoring Telemetry HUD (Lab Cam + Mobile Desk Guard + Audio) -->
-        <div class="lg:col-span-4 space-y-4">
-          <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-3xl shadow-xl space-y-4 sticky top-6">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-red-500 pulse-dot"></span> Dual-Camera Proctor HUD
-              </h3>
-              <span class="text-[10px] font-mono bg-blue-950 text-blue-400 border border-blue-800 px-2 py-0.5 rounded">● BIOMETRIC LOCK</span>
-            </div>
+        <!-- Right Column: Dual-Perspective Live Sentinel HUD -->
+        <div class="lg:col-span-4 space-y-5">
 
-            <!-- Primary: Lab Webcam Stream -->
-            <div class="space-y-1">
-              <div class="flex justify-between text-[10px] font-mono text-slate-400">
-                <span>1. LAB WEBCAM (FRONTAL)</span>
-                <span class="text-emerald-400">IDENTITY VERIFIED</span>
-              </div>
-              <div class="relative rounded-2xl overflow-hidden bg-black aspect-video border border-slate-800 shadow-inner">
-                <video id="proctor-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
-                <div id="hud-face-warning" class="absolute bottom-2 inset-x-2 bg-red-600/90 text-white text-[10px] py-1 px-2 rounded text-center font-bold hidden border border-red-400">
-                  ⚠️ INTRUDER / MULTI-PERSON DETECTED!
-                </div>
+          <!-- 1. Lab Facial Tracking Feed -->
+          <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-3xl shadow-xl space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span> 1. Lab Camera Sentinel
+              </span>
+              <span class="text-[10px] bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-emerald-400 font-mono">Continuous</span>
+            </div>
+            <div class="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-800">
+              <video id="proctor-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+              <div id="hud-face-warning" class="absolute top-2 left-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg text-center hidden animate-pulse">
+                ⚠️ INTRUDER / MULTIPLE FACES DETECTED
               </div>
             </div>
-
-            <!-- Secondary: Mobile Phone Desk Guard Status -->
-            <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-2">
-              <div class="flex justify-between items-center text-[11px]">
-                <span class="text-slate-300 font-semibold flex items-center gap-1.5">📱 Phone Sentinel Guard:</span>
-                <span id="phone-proctor-live-status" class="font-mono text-emerald-400 font-bold">LOCKED & GUARDING</span>
-              </div>
-              <p class="text-[10px] text-slate-400">If phone is minimized or another browser tab is opened to search for answers, a strike is consumed instantly.</p>
+            <div class="flex justify-between items-center text-[11px] text-slate-400 font-mono">
+              <span>Face Lock: <strong class="text-emerald-400">Verified ID</strong></span>
+              <span>Intruder Scan: <strong class="text-emerald-400">Active</strong></span>
             </div>
-
-            <!-- Audio Voice Activity Meter -->
-            <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-2">
-              <div class="flex justify-between text-[11px]">
-                <span class="text-slate-400 font-medium flex items-center gap-1.5">🎙️ Microphone Decibel Meter:</span>
-                <span id="audio-db-label" class="font-mono text-emerald-400 font-bold">Silent</span>
-              </div>
-              <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                <div id="audio-vu-bar" class="bg-emerald-500 h-full w-0 transition-all duration-100"></div>
-              </div>
-              <p class="text-[10px] text-slate-400">Speech or voice discussion exceeding 3.5s consumes 1 strike.</p>
-            </div>
-
-            <!-- Live Proctor Event Log -->
-            <div class="space-y-1.5">
-              <div class="text-[11px] font-semibold text-slate-400">Live Telemetry Feed:</div>
-              <div id="live-audit-log" class="h-28 overflow-y-auto bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[10px] font-mono text-slate-300 space-y-1">
-                <div class="text-slate-400">[SYSTEM] Lab biometric match verified. Mobile sentinel guard active.</div>
-              </div>
-            </div>
-
-            <button onclick="submitExamEarly()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 transition">
-              ✓ Finish & Submit Assessment
-            </button>
           </div>
+
+          <!-- 2. Mobile Phone Screen & Desk Monitor HUD -->
+          <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-3xl shadow-xl space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-400 pulse-dot"></span> 2. Mobile Phone Sentinel
+              </span>
+              <span class="text-[10px] bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40 text-indigo-300 font-mono">Sync Active</span>
+            </div>
+            <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">Phone Status:</span>
+                <span id="phone-proctor-live-status" class="font-mono text-emerald-400 font-bold">LOCKED & MONITORING</span>
+              </div>
+              <p class="text-[11px] text-slate-500 leading-tight">
+                Any attempt to switch tabs or minimize the phone triggers an automatic strike.
+              </p>
+            </div>
+          </div>
+
+          <!-- 3. Acoustic Voice Activity Monitor -->
+          <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-3xl shadow-xl space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-slate-300">🎙️ Lab Audio Monitor</span>
+              <span id="audio-db-label" class="font-mono text-emerald-400 text-[11px] font-bold">Silent</span>
+            </div>
+            <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+              <div id="audio-vu-bar" class="bg-emerald-500 h-full w-2 transition-all duration-150"></div>
+            </div>
+            <div class="text-[10px] text-slate-500 text-center">Multi-voice detection triggers malpractice after 3.5s.</div>
+          </div>
+
         </div>
+
       </div>
+
     </div>
 
-    <!-- ADMIN TELEMETRY DASHBOARD -->
+    <!-- ADMIN TELEMETRY AUDIT VIEW -->
     <div id="stage-admin-view" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl space-y-5">
+      <div class="bg-slate-900/90 border border-slate-800 p-6 md:p-8 rounded-3xl shadow-xl space-y-5">
         <div class="flex justify-between items-center border-b border-slate-800 pb-4">
           <div>
-            <h2 class="text-base font-bold text-white flex items-center gap-2">📊 Proctor Audit Log & Candidate Telemetry</h2>
-            <p class="text-xs text-slate-400">Chronological telemetry of tab switches, speech, phone tampering, and face events.</p>
+            <h2 class="text-lg font-bold text-white">Assessment Telemetry & Malpractice Audit</h2>
+            <p class="text-xs text-slate-400 mt-1">Real-time tamper logs, biometric landmark ratios, and strike history.</p>
           </div>
-          <button onclick="exportAuditLogJSON()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold">📥 Export JSON</button>
+          <button onclick="exportAuditLogJSON()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-xl text-slate-300">Export JSON Audit</button>
         </div>
+
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300 border-collapse">
-            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase font-mono text-[10px]">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 uppercase font-mono text-[10px] border-b border-slate-800">
               <tr>
                 <th class="p-3">Timestamp</th>
                 <th class="p-3">Candidate ID</th>
-                <th class="p-3">Violation / Event</th>
-                <th class="p-3">Strike Penalty</th>
-                <th class="p-3">Remaining Pool</th>
+                <th class="p-3">Event / Violation</th>
+                <th class="p-3">Strike Impact</th>
+                <th class="p-3">Strikes Remaining</th>
                 <th class="p-3">Status</th>
               </tr>
             </thead>
-            <tbody id="telemetry-table-body" class="divide-y divide-slate-800 font-mono text-[11px]">
-              <!-- Dynamically appended rows -->
+            <tbody id="telemetry-table-body" class="divide-y divide-slate-800/60 font-mono">
+              <tr>
+                <td class="p-3 text-slate-400">Init</td>
+                <td class="p-3 text-white">CTS-884920</td>
+                <td class="p-3 text-emerald-400">Session Initialized</td>
+                <td class="p-3 text-slate-400">0</td>
+                <td class="p-3 text-emerald-400">3/3</td>
+                <td class="p-3 text-emerald-400 font-semibold">Active</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -413,9 +443,8 @@
 
   </div>
 
-  <!-- ==================== MODALS ==================== -->
-
-  <!-- Malpractice Strike Warning Modal -->
+  <!-- ==================== STRIKE & DISQUALIFICATION MODALS ==================== -->
+  <!-- Warning Modal (Strikes 1 and 2) -->
   <div id="modal-warning" class="fixed inset-0 bg-red-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-slate-900 border-2 border-red-600 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-center">
       <div class="h-14 w-14 rounded-2xl bg-red-600/20 border border-red-500/40 text-red-500 flex items-center justify-center text-3xl mx-auto">⚠️</div>
@@ -426,28 +455,29 @@
       <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300">
         Remaining Strikes: <span id="warning-strikes-left" class="text-red-400 font-bold">2 of 3</span>
       </div>
-      <p class="text-[11px] text-slate-400">Refocus on the exam window. Reaching 3 strikes results in immediate disqualification.</p>
+      <p class="text-[11px] text-slate-400 leading-relaxed">Refocus on the proctored window. Reaching 3 strikes results in immediate disqualification.</p>
       <button onclick="dismissWarningModal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 font-bold rounded-xl text-xs text-white shadow-lg shadow-red-600/30">
-        I Acknowledge & Return to Exam
+        I Acknowledge & Return
       </button>
     </div>
   </div>
 
-  <!-- Disqualified Modal -->
+  <!-- Disqualified Modal (Strike 3) -->
   <div id="modal-disqualified" class="fixed inset-0 bg-black/95 backdrop-blur-lg flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-slate-900 border-2 border-red-600 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-5 text-center">
       <div class="h-16 w-16 rounded-2xl bg-red-600/20 border border-red-500 text-red-500 flex items-center justify-center text-4xl mx-auto">🚫</div>
       <div>
         <h3 class="text-xl font-bold text-red-500">EXAMINATION DISQUALIFIED</h3>
-        <p class="text-xs text-slate-300 mt-2 leading-relaxed">All 3 malpractice strikes have been consumed. Your assessment has been <strong>permanently locked and terminated</strong>.</p>
+        <p class="text-xs text-slate-300 mt-2 leading-relaxed">All 3 malpractice strikes have been consumed. Your assessment has been <strong>permanently locked and terminated</strong> due to prohibited mobile phone or proctor violations.</p>
       </div>
       <div class="p-3 bg-slate-950 rounded-xl border border-red-900/40 text-[11px] text-red-400 font-mono">Status: DISQUALIFIED_MALPRACTICE (3/3 Strikes Reached)</div>
       <button onclick="showTab('admin')" class="w-full py-3 bg-slate-800 hover:bg-slate-700 font-bold rounded-xl text-xs text-slate-300">View Telemetry Submission</button>
     </div>
   </div>
 
+  <!-- Copy / Paste Disabled Toast -->
   <div id="clipboard-toast" class="fixed bottom-6 right-6 bg-red-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-xl border border-red-400 hidden z-50">
-    <span>🔒 Copying, pasting, and shortcuts are completely disabled!</span>
+    <span>🔒 Copying, pasting, and keyboard shortcuts are disabled!</span>
   </div>
 
   <canvas id="photo-cv-canvas" width="240" height="240" class="hidden"></canvas>
@@ -461,12 +491,13 @@
     const urlParams = new URLSearchParams(window.location.search);
     const isMobileGuardMode = urlParams.get('mode') === 'phone_guard';
 
-    // In phone_guard mode, use the session from URL; on desktop, generate a unique fresh session each attempt
+    // Session IDs: Unique session on desktop; mobile phone receives it via URL parameter
     let currentSessionId = isMobileGuardMode 
       ? (urlParams.get('session') || 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase())
       : ('CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase());
 
     const remoteSessionId = urlParams.get('session') || currentSessionId;
+    const cleanPeerSessionId = 'cts-' + (isMobileGuardMode ? remoteSessionId : currentSessionId).toLowerCase().replace(/[^a-z0-9]/g, '');
 
     let blazefaceModel = null;
     let labCamStream = null;
@@ -479,9 +510,13 @@
     let isPhonePaired = false;
     let isExamActive = false;
 
+    // Unified 3-strike malpractice pool (active across Biometrics & Exam)
     let strikesRemaining = 3;
     let strikesConsumed = 0;
     let strikeCooldownActive = false;
+    let lastTamperHandledTime = 0;
+    let lastPhoneHeartbeatTime = 0;
+    let isFilePickerOpen = false;
 
     let faceMissingStart = null;
     let multiPersonStart = null;
@@ -491,6 +526,13 @@
     let examTimeRemaining = 45 * 60;
     let currentQuestionIdx = 0;
 
+    // WebRTC PeerJS instances
+    let desktopPeer = null;
+    let desktopDataConn = null;
+    let mobilePeer = null;
+    let mobileDataConn = null;
+
+    // BroadcastChannel for same-device local testing
     let broadcastChannel = null;
     try {
       broadcastChannel = new BroadcastChannel('cts_sentinel_bus');
@@ -498,7 +540,7 @@
       console.warn("BroadcastChannel unsupported:", e);
     }
 
-    // ==================== PHONE PROCTOR GUARD MODE (?mode=phone_guard) ====================
+    // ==================== APP INITIALIZATION ====================
     if (isMobileGuardMode) {
       document.getElementById('desktop-app').classList.add('hidden');
       document.getElementById('mobile-guard-view').classList.remove('hidden');
@@ -509,47 +551,58 @@
       initDesktopPairingUI();
     }
 
+    // ==================== PHONE PROCTOR GUARD MODE (?mode=phone_guard) ====================
     async function initPhoneGuardMode() {
       const statusEl = document.getElementById('phone-guard-status');
+      
+      // 1. Establish WebRTC connection directly to desktop
+      initMobilePeer();
+
+      // 2. Start Phone Desk Stream
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment', width: { ideal: 640 } }
         });
         document.getElementById('phone-cam-video').srcObject = stream;
-        statusEl.innerText = "Phone Guard Active: Screen & Desk Monitored";
+        if (statusEl) statusEl.innerText = "Phone Guard Active: Screen & Desk Monitored";
       } catch (err) {
-        statusEl.innerText = "Phone Guard Active: Screen Monitored";
+        if (statusEl) statusEl.innerText = "Phone Guard Active: Screen Monitored";
       }
 
-      // Immediately inform the desktop that the phone is actively connected
-      sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId });
+      // 3. Immediately signal connection across all channels
+      sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId, time: Date.now() });
 
-      // Send periodic heartbeat every 2 seconds
+      // 4. Send periodic heartbeat every 2 seconds
       setInterval(() => {
         sendProctorMessage({ action: 'PHONE_HEARTBEAT', sessionId: remoteSessionId, time: Date.now() });
         const clk = document.getElementById('phone-ping-clock');
         if (clk) clk.innerText = new Date().toLocaleTimeString();
       }, 2000);
 
-      // Strict Anti-Cheating: Detect if candidate switches apps, opens a new tab, or minimizes
+      // 5. Strict Anti-Cheating: Detect if candidate switches apps, opens a new tab, or minimizes
+      const triggerMobileTamper = (reason) => {
+        sendProctorMessage({ 
+          action: 'PHONE_TAMPERED', 
+          reason: reason, 
+          sessionId: remoteSessionId,
+          time: Date.now()
+        });
+        const tamperBox = document.getElementById('phone-tamper-warning');
+        if (tamperBox) tamperBox.classList.remove('hidden');
+      };
+
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-          sendProctorMessage({ 
-            action: 'PHONE_TAMPERED', 
-            reason: 'MOBILE TAB SWITCHED / MINIMIZED (Candidate left proctor page on phone to browse)', 
-            sessionId: remoteSessionId 
-          });
-          document.getElementById('phone-tamper-warning').classList.remove('hidden');
+          triggerMobileTamper('MOBILE TAB SWITCHED / MINIMIZED ON PHONE (Candidate browsed away)');
         }
       });
 
       window.addEventListener('blur', () => {
-        sendProctorMessage({ 
-          action: 'PHONE_TAMPERED', 
-          reason: 'PHONE SCREEN TOUCHED / APP SWITCHED (Mobile focus lost)', 
-          sessionId: remoteSessionId 
-        });
-        document.getElementById('phone-tamper-warning').classList.remove('hidden');
+        triggerMobileTamper('PHONE SCREEN TOUCHED / APP SWITCHED (Mobile focus lost)');
+      });
+
+      window.addEventListener('pagehide', () => {
+        triggerMobileTamper('MOBILE PROCTOR PAGE CLOSED OR NAVIGATED AWAY');
       });
     }
 
@@ -557,60 +610,247 @@
       document.getElementById('phone-tamper-warning').classList.add('hidden');
     }
 
-    function sendProctorMessage(msg) {
-      if (broadcastChannel) broadcastChannel.postMessage(msg);
-      localStorage.setItem('cts_event_' + msg.sessionId, JSON.stringify({ ...msg, time: Date.now() }));
+    // Connect Phone to Desktop via WebRTC PeerJS
+    function initMobilePeer() {
+      if (typeof Peer === 'undefined') {
+        console.warn("PeerJS library unavailable, using fallback channels.");
+        return;
+      }
+      try {
+        mobilePeer = new Peer({
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:global.stun.twilio.com:3478' }
+            ]
+          }
+        });
+
+        mobilePeer.on('open', (id) => {
+          console.log('Mobile peer initialized:', id);
+          connectMobileToDesktop(cleanPeerSessionId);
+        });
+
+        mobilePeer.on('error', (err) => {
+          console.warn('Mobile peer error:', err);
+          setTimeout(() => connectMobileToDesktop(cleanPeerSessionId), 2500);
+        });
+      } catch (err) {
+        console.error('Mobile peer exception:', err);
+      }
     }
 
+    function connectMobileToDesktop(targetPeerId) {
+      if (!mobilePeer || mobilePeer.destroyed) return;
+      try {
+        mobileDataConn = mobilePeer.connect(targetPeerId, { reliable: true });
+
+        mobileDataConn.on('open', () => {
+          console.log('✓ WebRTC DataChannel connected to Desktop!');
+          const guardStatus = document.getElementById('phone-guard-status');
+          if (guardStatus) {
+            guardStatus.innerText = "Phone Guard Active (Live Synced to Desktop)";
+            guardStatus.className = "text-emerald-400 font-bold";
+          }
+          sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId, time: Date.now() });
+        });
+
+        mobileDataConn.on('error', (err) => {
+          console.warn('Mobile connection error:', err);
+          setTimeout(() => connectMobileToDesktop(targetPeerId), 3000);
+        });
+
+        mobileDataConn.on('close', () => {
+          console.warn('Connection closed. Re-establishing WebRTC link...');
+          setTimeout(() => connectMobileToDesktop(targetPeerId), 3000);
+        });
+      } catch (err) {
+        console.error('connectMobileToDesktop error:', err);
+      }
+    }
+
+    // Send proctor message over WebRTC + BroadcastChannel + localStorage
+    function sendProctorMessage(msg) {
+      if (mobileDataConn && mobileDataConn.open) {
+        try {
+          mobileDataConn.send(msg);
+          console.log('Sent WebRTC proctor packet:', msg.action);
+        } catch (e) {
+          console.warn('WebRTC send failed:', e);
+        }
+      }
+      if (broadcastChannel) {
+        try { broadcastChannel.postMessage(msg); } catch(e){}
+      }
+      try {
+        localStorage.setItem('cts_event_' + msg.sessionId, JSON.stringify({ ...msg, time: Date.now() }));
+      } catch(e){}
+    }
+
+    // ==================== DESKTOP PROCTOR SYNC & WebRTC SERVER ====================
     function setupDesktopProctorSync() {
-      const handleMsg = (data) => {
-        if (!data || data.sessionId !== currentSessionId) return;
-        if (data.action === 'PHONE_CONNECTED' || data.action === 'PHONE_HEARTBEAT') {
-          if (!isPhonePaired) markPhoneAsPaired();
-          const liveStatus = document.getElementById('phone-proctor-live-status');
-          if (liveStatus) {
-            liveStatus.innerText = "LOCKED & MONITORING (Phone Active)";
-            liveStatus.className = "font-mono text-emerald-400 font-bold";
+      initDesktopPeer();
+
+      if (broadcastChannel) {
+        broadcastChannel.onmessage = (e) => handleIncomingProctorMessage(e.data);
+      }
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'cts_event_' + currentSessionId && e.newValue) {
+          try { handleIncomingProctorMessage(JSON.parse(e.newValue)); } catch(err){}
+        }
+      });
+
+      // Watchdog: detect if phone is silenced/suspended
+      setInterval(() => {
+        if (isPhonePaired && lastPhoneHeartbeatTime > 0) {
+          const elapsed = Date.now() - lastPhoneHeartbeatTime;
+          if (elapsed > 10000 && !strikeCooldownActive) {
+            const liveStatus = document.getElementById('phone-proctor-live-status');
+            if (liveStatus) {
+              liveStatus.innerText = "⚠️ PHONE UNREACHABLE / APP SUSPENDED";
+              liveStatus.className = "font-mono text-red-500 font-bold animate-pulse";
+            }
+            deductMalpracticeStrike('PHONE UNREACHABLE / APP SUSPENDED ON MOBILE DEVICE (Connection lost)');
+            lastPhoneHeartbeatTime = Date.now();
           }
         }
-        if (data.action === 'PHONE_TAMPERED' && isExamActive) {
-          deductMalpracticeStrike(data.reason || 'PHONE UNLOCKED / APP SWITCHED ON MOBILE DEVICE');
+      }, 3000);
+    }
+
+    function initDesktopPeer() {
+      if (typeof Peer === 'undefined') {
+        console.warn("PeerJS not loaded. Using local storage & broadcast fallback.");
+        return;
+      }
+      try {
+        desktopPeer = new Peer(cleanPeerSessionId, {
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:global.stun.twilio.com:3478' }
+            ]
+          }
+        });
+
+        desktopPeer.on('open', (id) => {
+          console.log('✓ Desktop Peer ready with ID:', id);
+          const badge = document.getElementById('webrtc-peer-status');
+          if (badge) {
+            badge.innerText = "WebRTC Ready";
+            badge.className = "text-[10px] text-emerald-400 font-mono";
+          }
+        });
+
+        desktopPeer.on('connection', (conn) => {
+          console.log('⚡ Smartphone connected via WebRTC PeerJS DataChannel!');
+          desktopDataConn = conn;
+
+          conn.on('open', () => {
+            console.log('WebRTC DataChannel OPEN from mobile');
+            markPhoneAsPaired();
+          });
+
+          conn.on('data', (data) => {
+            console.log('Received WebRTC message from phone:', data);
+            handleIncomingProctorMessage(data);
+          });
+
+          conn.on('close', () => {
+            console.warn('WebRTC connection closed from mobile');
+            if (isPhonePaired && !strikeCooldownActive) {
+              deductMalpracticeStrike('MOBILE PHONE DISCONNECTED / PROCTOR SCREEN CLOSED');
+            }
+          });
+        });
+
+        desktopPeer.on('error', (err) => {
+          console.warn('Desktop peer error:', err);
+        });
+      } catch (err) {
+        console.error('Desktop peer exception:', err);
+      }
+    }
+
+    function handleIncomingProctorMessage(data) {
+      if (!data || data.sessionId !== currentSessionId) return;
+
+      if (data.action === 'PHONE_CONNECTED' || data.action === 'PHONE_HEARTBEAT') {
+        lastPhoneHeartbeatTime = Date.now();
+        if (!isPhonePaired) markPhoneAsPaired();
+
+        const liveStatus = document.getElementById('phone-proctor-live-status');
+        if (liveStatus) {
+          liveStatus.innerText = "LOCKED & MONITORING (Phone Active)";
+          liveStatus.className = "font-mono text-emerald-400 font-bold";
+        }
+        const stage2Status = document.getElementById('stage2-phone-status');
+        if (stage2Status) {
+          stage2Status.innerText = "LOCKED & PROCTORING";
+          stage2Status.className = "text-xs text-emerald-400 font-mono font-bold";
+        }
+      }
+
+      if (data.action === 'PHONE_TAMPERED') {
+        const now = Date.now();
+        // Debounce duplicate packets within 2 seconds
+        if (now - lastTamperHandledTime > 2000) {
+          lastTamperHandledTime = now;
+          const reason = data.reason || 'MOBILE TAB SWITCHED / APP SWITCHED ON MOBILE PHONE';
+
           const liveStatus = document.getElementById('phone-proctor-live-status');
           if (liveStatus) {
             liveStatus.innerText = "⚠️ PHONE TAMPER DETECTED!";
             liveStatus.className = "font-mono text-red-500 font-bold animate-pulse";
           }
-        }
-      };
+          const stage2Status = document.getElementById('stage2-phone-status');
+          if (stage2Status) {
+            stage2Status.innerText = "⚠️ PHONE TAMPER DETECTED";
+            stage2Status.className = "text-xs text-red-500 font-mono font-bold animate-pulse";
+          }
 
-      if (broadcastChannel) {
-        broadcastChannel.onmessage = (e) => handleMsg(e.data);
-      }
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'cts_event_' + currentSessionId && e.newValue) {
-          try { handleMsg(JSON.parse(e.newValue)); } catch(err){}
+          // STRIKE DOWN ATTEMPTS IN MAIN SCREEN (Active during Biometrics & Exam)
+          deductMalpracticeStrike(reason);
         }
-      });
+      }
     }
 
     function initDesktopPairingUI() {
-      const mobileUrl = `${window.location.origin}${window.location.pathname}?mode=phone_guard&session=${currentSessionId}`;
+      let baseUrl = `${window.location.origin}${window.location.pathname}`;
+      if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
+        baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+      }
+      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
       document.getElementById('pairing-session-id').innerText = currentSessionId;
       document.getElementById('pairing-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mobileUrl)}`;
     }
 
     function openPhoneGuardInTab() {
-      const mobileUrl = `${window.location.origin}${window.location.pathname}?mode=phone_guard&session=${currentSessionId}`;
+      let baseUrl = `${window.location.origin}${window.location.pathname}`;
+      if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
+        baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+      }
+      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
       window.open(mobileUrl, '_blank', 'width=420,height=750');
     }
 
     function markPhoneAsPaired() {
       isPhonePaired = true;
       const ind = document.getElementById('phone-pairing-indicator');
-      ind.innerHTML = "<span class='text-emerald-400 font-bold'>✓ Smartphone Guard Connected & Locked!</span>";
+      if (ind) {
+        ind.innerHTML = "<span class='text-emerald-400 font-bold'>✓ Smartphone Guard Connected & Locked!</span>";
+      }
       const btn = document.getElementById('btn-proceed-to-biometrics');
-      btn.disabled = false;
-      btn.className = "flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30 cursor-pointer";
+      if (btn) {
+        btn.disabled = false;
+        btn.className = "flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30 cursor-pointer";
+        btn.innerHTML = "<span>Continue to Lab Biometrics →</span>";
+      }
     }
 
     function proceedToBiometricStage() {
@@ -624,8 +864,10 @@
       try {
         blazefaceModel = await blazeface.load();
         const badge = document.getElementById('ai-model-badge');
-        badge.className = "px-2.5 py-1 rounded-lg bg-emerald-950/70 border border-emerald-500/50 text-[11px] text-emerald-400 flex items-center gap-1.5";
-        badge.innerHTML = "<span class='h-1.5 w-1.5 rounded-full bg-emerald-400'></span> BlazeFace AI Active";
+        if (badge) {
+          badge.className = "px-2.5 py-1 rounded-lg bg-emerald-950/70 border border-emerald-500/50 text-[11px] text-emerald-400 flex items-center gap-1.5";
+          badge.innerHTML = "<span class='h-1.5 w-1.5 rounded-full bg-emerald-400'></span> BlazeFace AI Active";
+        }
       } catch (err) {
         console.warn("BlazeFace load warning:", err);
       }
@@ -637,12 +879,25 @@
     }
 
     function handlePassportUpload(event) {
+      isFilePickerOpen = false;
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (e) => setPassportImageAndExtract(e.target.result, file.name);
       reader.readAsDataURL(file);
     }
+
+    // Avoid false blur violation during file picker dialog
+    const fileInputEl = document.getElementById('passport-file-input');
+    if (fileInputEl) {
+      fileInputEl.addEventListener('click', () => {
+        isFilePickerOpen = true;
+        setTimeout(() => { isFilePickerOpen = false; }, 10000);
+      });
+    }
+    window.addEventListener('focus', () => {
+      setTimeout(() => { isFilePickerOpen = false; }, 1000);
+    });
 
     async function setPassportImageAndExtract(dataUrl, fileName) {
       const previewImg = document.getElementById('passport-preview');
@@ -659,31 +914,30 @@
       tempImg.crossOrigin = "anonymous";
       tempImg.onload = async () => {
         const desc = await extractDescriptorFromElement(tempImg, 'photo-cv-canvas');
-        if (!desc || !desc.hasFace) {
-          passportDescriptor = null;
+
+        if (!desc.hasFace) {
           tag.classList.add('hidden');
           errBox.classList.remove('hidden');
-          errBox.innerText = `❌ Invalid ID Photo: No human face detected in "${fileName}" (e.g. text screenshot or document). Please upload a clear front-facing portrait!`;
-          updateBiometricScoreUI(0, false, "Invalid ID Photo: No face detected. Verification locked.");
+          errBox.innerText = "❌ No face detected. Official ID photo must clearly show candidate's face.";
+          passportDescriptor = null;
+          updateBiometricScoreUI(0, false, "Invalid ID photo. Please re-upload a front-facing portrait.");
           return;
         }
 
         passportDescriptor = desc;
         tag.classList.remove('hidden');
-        tag.innerText = `✓ Face Landmarks Detected (${Math.round(desc.confidence * 100)}%)`;
-        updateBiometricScoreUI(0, false, "Passport loaded successfully! Now activate your Lab Webcam to match.");
+        tag.innerText = "✓ Valid Official ID Face Verified";
+
         if (labCamStream) {
           forceBiometricScan();
+        } else {
+          updateBiometricScoreUI(0, false, "ID photo verified. Activate the Lab Webcam on the right.");
         }
-      };
-      tempImg.onerror = () => {
-        errBox.classList.remove('hidden');
-        errBox.innerText = "Error loading image file. Please provide a valid JPG or PNG image.";
       };
       tempImg.src = dataUrl;
     }
 
-    // ==================== LAB WEBCAM ACTIVATION & BIOMETRIC VERIFICATION ====================
+    // ==================== LAB WEBCAM 1:1 BIOMETRIC CAPTURE ====================
     async function startLabWebcam() {
       const video = document.getElementById('lab-webcam-video');
       try {
@@ -791,81 +1045,54 @@
     async function extractDescriptorFromElement(el, canvasId) {
       if (!el) return { hasFace: false, reason: "NO_ELEMENT" };
 
-      // 1. Direct BlazeFace AI Detection (Aspect-ratio & scale invariant)
+      // 1. Direct BlazeFace AI Detection
       if (blazefaceModel) {
         try {
           const preds = await blazefaceModel.estimateFaces(el, false);
           if (preds && preds.length > 0) {
             const face = preds[0];
             const lm = face.landmarks;
-            const re = lm[0], le = lm[1], nose = lm[2], mouth = lm[3];
+            const re = lm[0];
+            const le = lm[1];
+            const nose = lm[2];
+            const mouth = lm[3];
             const normLandmarks = normalizeFaceLandmarks(re, le, nose, mouth);
 
             return {
               hasFace: true,
               confidence: face.probability ? face.probability[0] : 0.95,
               normLandmarks: normLandmarks,
-              method: 'blazeface'
+              method: 'blazeface_normalized'
             };
+          } else {
+            return { hasFace: false, reason: "NO_FACE_BLAZEFACE" };
           }
         } catch (err) {
-          console.warn("BlazeFace direct inference note:", err);
+          console.warn("BlazeFace inference issue:", err);
         }
       }
 
-      // 2. Fallback Canvas with Uniform Scaling (No distortion!)
+      // 2. Optical Computer Vision Fallback
       const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      canvas.width = 240;
-      canvas.height = 240;
-      ctx.clearRect(0, 0, 240, 240);
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(el, 0, 0, 240, 240);
+      const imgData = ctx.getImageData(0, 0, 240, 240);
+      const data = imgData.data;
 
-      try {
-        const srcW = el.videoWidth || el.naturalWidth || el.width || 240;
-        const srcH = el.videoHeight || el.naturalHeight || el.height || 240;
-        const scale = Math.min(240 / srcW, 240 / srcH);
-        const drawW = srcW * scale;
-        const drawH = srcH * scale;
-        const offsetX = (240 - drawW) / 2;
-        const offsetY = (240 - drawH) / 2;
-        ctx.drawImage(el, offsetX, offsetY, drawW, drawH);
-      } catch (e) {
-        return { hasFace: false, reason: "DRAW_FAIL" };
-      }
-
-      if (blazefaceModel) {
-        try {
-          const preds = await blazefaceModel.estimateFaces(canvas, false);
-          if (preds && preds.length > 0) {
-            const face = preds[0];
-            const lm = face.landmarks;
-            const normLandmarks = normalizeFaceLandmarks(lm[0], lm[1], lm[2], lm[3]);
-            return {
-              hasFace: true,
-              confidence: face.probability ? face.probability[0] : 0.95,
-              normLandmarks: normLandmarks,
-              method: 'blazeface'
-            };
-          }
-        } catch(e) {}
-      }
-
-      // 3. Optical Skin & Face Contour Detector
-      const imgData = ctx.getImageData(0, 0, 240, 240).data;
       let skinCount = 0;
       let minX = 240, maxX = 0, minY = 240, maxY = 0;
 
-      for (let i = 0; i < imgData.length; i += 4) {
-        const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
-        const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
-        const isSkin = (r > 40 && g > 25 && b > 15 && (r > g) && (maxC - minC > 6)) ||
-                       (r > 70 && g > 45 && b > 30 && (r >= g) && (g >= b));
-        if (isSkin) {
-          skinCount++;
-          const pixelIdx = i / 4;
-          const x = pixelIdx % 240, y = Math.floor(pixelIdx / 240);
-          if (x < minX) minX = x; if (x > maxX) maxX = x;
-          if (y < minY) minY = y; if (y > maxY) maxY = y;
+      for (let y = 0; y < 240; y++) {
+        for (let x = 0; x < 240; x++) {
+          const idx = (y * 240 + x) * 4;
+          const r = data[idx], g = data[idx+1], b = data[idx+2];
+          if (r > 60 && g > 40 && b > 20 && r > g && r > b && (Math.max(r, g, b) - Math.min(r, g, b) > 15) && Math.abs(r - g) > 15) {
+            skinCount++;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
         }
       }
 
@@ -904,8 +1131,6 @@
           sumSq += diff * diff;
         }
         const dist = Math.sqrt(sumSq);
-        // Dist <= 0.15 => 85%-98% (Same person)
-        // Dist >= 0.40 => < 60% (Different person)
         similarity = Math.max(15, Math.min(99, Math.round((1.0 - dist * 1.5) * 100)));
       } else if (ref.ratios && live.ratios) {
         let sumSq = 0;
@@ -1053,8 +1278,9 @@
     }
 
     // ==================== UNIFIED 3-STRIKE MALPRACTICE ENGINE ====================
+    // Enforces strikes during BOTH Biometric Verification (Stage 2) AND Exam (Stage 3)
     function deductMalpracticeStrike(reason) {
-      if (!isExamActive || strikesRemaining <= 0 || strikeCooldownActive) return;
+      if ((!isPhonePaired && !isExamActive) || strikesRemaining <= 0 || strikeCooldownActive) return;
 
       strikeCooldownActive = true;
       strikesRemaining--;
@@ -1064,6 +1290,7 @@
         reason: reason,
         strikeNumber: strikesConsumed,
         strikesRemaining: strikesRemaining,
+        stage: isExamActive ? 'Stage 3: Assessment' : 'Stage 2: Lab Biometric Scan',
         timestamp: new Date().toLocaleTimeString()
       });
 
@@ -1081,16 +1308,34 @@
     }
 
     function updateStrikeHUD() {
+      // Update Stage 3 (Exam) dots
       for (let i = 1; i <= 3; i++) {
         const dot = document.getElementById(`strike-dot-${i}`);
         if (dot) {
-          dot.className = i <= strikesConsumed ? "h-3 w-3 rounded-full bg-red-600 border border-red-400" : "h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400";
+          dot.className = i <= strikesConsumed 
+            ? "h-3 w-3 rounded-full bg-red-600 border border-red-400 shadow-lg shadow-red-500/50" 
+            : "h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400";
         }
       }
       const label = document.getElementById('strike-count-text');
       if (label) {
         label.innerText = `${strikesConsumed}/3 Strikes`;
         label.className = strikesConsumed >= 2 ? "text-xs font-mono font-bold text-red-500 ml-1" : "text-xs font-mono font-bold text-amber-400 ml-1";
+      }
+
+      // Update Stage 2 (Biometrics) dots
+      for (let i = 1; i <= 3; i++) {
+        const s2dot = document.getElementById(`stage2-strike-dot-${i}`);
+        if (s2dot) {
+          s2dot.className = i <= strikesConsumed 
+            ? "h-3 w-3 rounded-full bg-red-600 border border-red-400 shadow-lg shadow-red-500/50" 
+            : "h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400";
+        }
+      }
+      const s2label = document.getElementById('stage2-strike-count-text');
+      if (s2label) {
+        s2label.innerText = `${strikesConsumed}/3 Strikes`;
+        s2label.className = strikesConsumed >= 2 ? "text-xs font-mono font-bold text-red-500 ml-1" : (strikesConsumed === 1 ? "text-xs font-mono font-bold text-amber-400 ml-1" : "text-xs font-mono font-bold text-emerald-400 ml-1");
       }
     }
 
@@ -1102,21 +1347,26 @@
     // ==================== STRICT INPUT & WINDOW LOCKS ====================
     function setupStrictExamSecurityLocks() {
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden && isExamActive && !strikeCooldownActive) {
+        if (document.hidden && (isExamActive || isPhonePaired) && !strikeCooldownActive && !isFilePickerOpen) {
           deductMalpracticeStrike("DESKTOP TAB SWITCHED OR WINDOW MINIMIZED");
         }
       });
       window.addEventListener('blur', () => {
-        if (isExamActive && !strikeCooldownActive) {
+        if ((isExamActive || isPhonePaired) && !strikeCooldownActive && !isFilePickerOpen) {
           deductMalpracticeStrike("DESKTOP WINDOW FOCUS LOST (Secondary Screen or Browser Tab Clicked)");
         }
       });
       document.addEventListener('contextmenu', (e) => { e.preventDefault(); showCopyToast(); });
       document.addEventListener('copy', (e) => { e.preventDefault(); showCopyToast(); });
+      document.addEventListener('cut', (e) => { e.preventDefault(); showCopyToast(); });
       document.addEventListener('paste', (e) => { e.preventDefault(); showCopyToast(); });
       document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && ['c','v','x','a','p','s','u'].includes(e.key.toLowerCase())) {
-          e.preventDefault(); showCopyToast();
+        if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a', 's', 'p', 'u', 'i', 'j'].includes(e.key.toLowerCase())) {
+          e.preventDefault();
+          showCopyToast();
+        }
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key))) {
+          e.preventDefault();
         }
         if (['F12', 'F5'].includes(e.key)) { e.preventDefault(); showCopyToast(); }
       });
@@ -1189,12 +1439,11 @@
         entry.className = "text-red-400";
         entry.innerText = `[${event.timestamp}] STRIKE: ${event.reason}`;
         logBox.appendChild(entry);
-        logBox.scrollTop = logBox.scrollHeight;
       }
       const tbody = document.getElementById('telemetry-table-body');
       if (tbody) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="p-3 text-slate-400">${event.timestamp}</td><td class="p-3 text-white">CTS-884920</td><td class="p-3 text-red-400 font-bold">${event.reason}</td><td class="p-3 text-red-400">-1</td><td class="p-3 text-slate-300">${event.strikesRemaining}/3</td><td class="p-3 text-amber-400 font-semibold">Strike Applied</td>`;
+        tr.innerHTML = `<td class="p-3 text-slate-400">${event.timestamp}</td><td class="p-3 text-white">CTS-884920</td><td class="p-3 text-red-400 font-bold">${event.reason}</td><td class="p-3 text-red-400">-1 Strike</td><td class="p-3 text-slate-300">${event.strikesRemaining}/3</td><td class="p-3 text-amber-400 font-semibold">Strike Recorded</td>`;
         tbody.prepend(tr);
       }
     }
@@ -1208,9 +1457,13 @@
     function submitFinalExam(isForced) {
       clearInterval(examTimerInterval);
       isExamActive = false;
-      if (labCamStream) labCamStream.getTracks().forEach(t => t.stop());
-      alert(isForced ? "Assessment locked: Terminated due to 3 malpractice strikes." : "Assessment completed! Telemetry and responses transmitted successfully.");
-      showTab('admin');
+      if (labCamStream) {
+        try { labCamStream.getTracks().forEach(t => t.stop()); } catch(e){}
+      }
+      if (!isForced) {
+        alert("Assessment completed! Telemetry and responses transmitted successfully.");
+        showTab('admin');
+      }
     }
 
     function showTab(tab) {
