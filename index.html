@@ -21,17 +21,19 @@
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased min-h-screen p-3 md:p-6 flex flex-col justify-between select-none">
 
-  <!-- ==================== MOBILE PROCTOR GUARD SCREEN (?mode=phone_guard) ==================== -->
+  <!-- ==================== MOBILE PHONE SENTINEL SCREEN (?mode=phone_guard) ==================== -->
   <div id="mobile-guard-view" class="hidden max-w-md mx-auto w-full min-h-screen flex flex-col justify-between p-4 space-y-4 text-center">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-2">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-3">
       <div class="inline-flex p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 text-3xl border border-indigo-500/20">📱 ⇄ 💻</div>
-      <h1 class="text-base font-bold text-white">CTS Sentinel Mobile Guard</h1>
-      <p class="text-xs text-slate-400">Session ID: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">CTS-SESSION</span></p>
-      <div class="p-3 bg-red-950/40 border border-red-900/50 rounded-2xl text-[11px] text-red-300 text-left space-y-1">
-        <div class="font-bold flex items-center gap-1.5 text-red-400">
+      <h1 class="text-base font-bold text-white">CTS Sentinel Phone Guard</h1>
+      <p class="text-xs text-slate-400">Connected to Exam Session: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">CTS-SESSION</span></p>
+      
+      <div class="p-3.5 bg-red-950/50 border border-red-800/60 rounded-2xl text-[11px] text-red-200 text-left space-y-1.5">
+        <div class="font-bold flex items-center gap-1.5 text-red-400 text-xs">
           <span>🔒 PHONE PROCTOR LOCK ACTIVE</span>
         </div>
-        <p>Position phone on your side facing your desk and keyboard. <strong>Do NOT minimize this tab or switch apps</strong> to search for answers—doing so will trigger an immediate malpractice strike on your exam!</p>
+        <p class="leading-relaxed">Keep your phone placed on your desk beside you. <strong>DO NOT switch apps, minimize this browser tab, or search for answers.</strong></p>
+        <p class="text-red-400 font-semibold">Switching away from this screen will instantly trigger a malpractice strike on your exam!</p>
       </div>
     </div>
 
@@ -42,10 +44,17 @@
       <div class="absolute top-3 left-3 bg-black/80 px-2.5 py-1 rounded-xl text-[10px] font-mono text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span> DESK STREAM ACTIVE
       </div>
+      <div id="phone-tamper-warning" class="absolute inset-0 bg-red-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white text-center space-y-3 hidden">
+        <span class="text-4xl">⚠️</span>
+        <h3 class="font-bold text-base text-red-400">VIOLATION DETECTED!</h3>
+        <p class="text-xs leading-relaxed">You left or minimized the proctor screen on your mobile device. A malpractice strike has been recorded on your exam session.</p>
+        <button onclick="dismissPhoneTamper()" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-bold shadow-lg">Return to Proctor Guard</button>
+      </div>
     </div>
 
-    <div class="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300">
-      Status: <span id="phone-guard-status" class="text-emerald-400 font-bold">Syncing with Desktop Exam...</span>
+    <div class="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300 flex items-center justify-between">
+      <span>Status: <strong id="phone-guard-status" class="text-emerald-400">Screen Monitored</strong></span>
+      <span id="phone-ping-clock" class="text-[10px] text-slate-400">Active</span>
     </div>
   </div>
 
@@ -78,7 +87,7 @@
           <div class="border-b border-slate-800 pb-4">
             <div class="inline-flex px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-bold border border-blue-500/20 mb-2">STEP 1 OF 2</div>
             <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>👤</span> Candidate Credential Verification</h2>
-            <p class="text-xs text-slate-400 mt-1">Enter your candidate information before connecting the proctoring scanner.</p>
+            <p class="text-xs text-slate-400 mt-1">Enter your candidate information before connecting your phone proctor.</p>
           </div>
 
           <div class="space-y-4">
@@ -103,11 +112,11 @@
           </div>
 
           <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
-            <h4 class="text-xs font-bold text-slate-300">Proctoring Rules & Requirements:</h4>
+            <h4 class="text-xs font-bold text-slate-300">Anti-Cheating Rules:</h4>
             <ul class="text-[11px] text-slate-400 space-y-1.5 list-disc pl-4">
-              <li>Your smartphone will be paired as a secondary desk & anti-browser proctor.</li>
-              <li>Biometric facial verification must be confirmed via your <strong>Lab Webcam</strong>.</li>
-              <li>Unified 3-strike pool applies across tab switches, speech, phone tampering, and intruder faces.</li>
+              <li>Your phone can remain beside you on your desk, but its screen is locked into Sentinel mode.</li>
+              <li><strong>Switching tabs or opening other apps on your phone is prohibited</strong> and triggers an instant strike.</li>
+              <li>Biometric identity verification is conducted exclusively via your <strong>Lab Webcam</strong>.</li>
             </ul>
           </div>
         </div>
@@ -116,8 +125,8 @@
         <div class="lg:col-span-6 bg-slate-900/90 border border-slate-800 p-6 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between space-y-5">
           <div class="border-b border-slate-800 pb-4">
             <div class="inline-flex px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20 mb-2">MOBILE SECURITY GUARD</div>
-            <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>📱</span> Pair Mobile Phone Proctor</h2>
-            <p class="text-xs text-slate-400 mt-1">Scan the QR code with your phone. The phone locks onto the desk proctor screen to prevent browsing answers.</p>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>📱</span> Pair Mobile Phone Sentinel</h2>
+            <p class="text-xs text-slate-400 mt-1">Scan the QR code with your phone. The phone screen will lock into desk proctor mode.</p>
           </div>
 
           <div class="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl bg-slate-950 border border-slate-800">
@@ -127,22 +136,22 @@
             </div>
 
             <div class="space-y-2.5 text-left w-full">
-              <div class="text-xs font-bold text-white">How to position your phone:</div>
+              <div class="text-xs font-bold text-white">Pairing Instructions:</div>
               <p class="text-[11px] text-slate-400 leading-relaxed">
-                Scan this code on your phone, then prop your phone on your desk pointing at your keyboard and hands.
+                Scan this code with your phone camera, prop the phone on your desk, and do not switch to other apps during the test.
               </p>
               <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1">
                 <div>Session: <span id="pairing-session-id" class="text-indigo-400 font-bold">CTS-SESSION</span></div>
                 <div id="phone-pairing-indicator" class="text-amber-400 font-semibold flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-amber-400 pulse-dot"></span> Waiting for phone to scan...
+                  <span class="w-2 h-2 rounded-full bg-amber-400 pulse-dot"></span> Waiting for phone to connect...
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="flex gap-3">
-            <button onclick="simulatePhonePairing()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
-              <span>⚡ Test / Simulate Phone Connection</span>
+          <div class="flex flex-col sm:flex-row gap-2.5">
+            <button onclick="openPhoneGuardInTab()" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
+              <span>📱 Open Mobile Guard in Split Tab (Test)</span>
             </button>
             <button id="btn-proceed-to-biometrics" onclick="proceedToBiometricStage()" disabled class="flex-1 py-3.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed transition flex items-center justify-center gap-1.5 shadow-lg">
               <span>Continue to Lab Biometrics →</span>
@@ -338,10 +347,10 @@
             <!-- Secondary: Mobile Phone Desk Guard Status -->
             <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-2">
               <div class="flex justify-between items-center text-[11px]">
-                <span class="text-slate-300 font-semibold flex items-center gap-1.5">📱 Phone Guard Status:</span>
+                <span class="text-slate-300 font-semibold flex items-center gap-1.5">📱 Phone Sentinel Guard:</span>
                 <span id="phone-proctor-live-status" class="font-mono text-emerald-400 font-bold">LOCKED & GUARDING</span>
               </div>
-              <p class="text-[10px] text-slate-400">If the phone is unlocked or tabs are switched to check answers, a strike is consumed instantly.</p>
+              <p class="text-[10px] text-slate-400">If phone is minimized or another browser tab is opened to search for answers, a strike is consumed instantly.</p>
             </div>
 
             <!-- Audio Voice Activity Meter -->
@@ -360,7 +369,7 @@
             <div class="space-y-1.5">
               <div class="text-[11px] font-semibold text-slate-400">Live Telemetry Feed:</div>
               <div id="live-audit-log" class="h-28 overflow-y-auto bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[10px] font-mono text-slate-300 space-y-1">
-                <div class="text-slate-400">[SYSTEM] Lab biometric match verified. Mobile guard active. Exam initialized.</div>
+                <div class="text-slate-400">[SYSTEM] Lab biometric match verified. Mobile sentinel guard active.</div>
               </div>
             </div>
 
@@ -446,22 +455,21 @@
 
   <!-- ==================== JAVASCRIPT PROCTORING ENGINE ==================== -->
   <script>
-    const GAS_WEBAPP_URL = https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQsWYcLFsT1xOi88ARYE2TWtJhVqiat5X1dR-bgqDrX0c9X5cDYxe_pFgNd3/exec
+    const GAS_WEBAPP_URL = "https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQsWYcLFsT1xOi88ARYE2TWtJhVqiat5X1dR-bgqDrX0c9X5cDYxe_pFgNd3/exec";
     const SAMPLE_PASSPORT_B64 = "data:image/jpeg;base64,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";
-
-    let currentSessionId = localStorage.getItem('cts_active_session_id');
-    if (!currentSessionId) {
-      currentSessionId = 'CTS-' + Math.random().toString(36).substring(2, 9).toUpperCase();
-      localStorage.setItem('cts_active_session_id', currentSessionId);
-    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const isMobileGuardMode = urlParams.get('mode') === 'phone_guard';
+
+    // In phone_guard mode, use the session from URL; on desktop, generate a unique fresh session each attempt
+    let currentSessionId = isMobileGuardMode 
+      ? (urlParams.get('session') || 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase())
+      : ('CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase());
+
     const remoteSessionId = urlParams.get('session') || currentSessionId;
 
     let blazefaceModel = null;
     let labCamStream = null;
-    let proctorCamStream = null;
     let audioContext = null;
     let audioAnalyser = null;
     let audioDataArray = null;
@@ -508,36 +516,70 @@
           video: { facingMode: 'environment', width: { ideal: 640 } }
         });
         document.getElementById('phone-cam-video').srcObject = stream;
-        statusEl.innerText = "Phone Guard Active: Streaming desk & monitoring screen.";
+        statusEl.innerText = "Phone Guard Active: Screen & Desk Monitored";
       } catch (err) {
-        statusEl.innerText = "Phone Guard Active: Camera restricted, monitoring screen.";
+        statusEl.innerText = "Phone Guard Active: Screen Monitored";
       }
 
+      // Immediately inform the desktop that the phone is actively connected
       sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId });
 
+      // Send periodic heartbeat every 2 seconds
+      setInterval(() => {
+        sendProctorMessage({ action: 'PHONE_HEARTBEAT', sessionId: remoteSessionId, time: Date.now() });
+        const clk = document.getElementById('phone-ping-clock');
+        if (clk) clk.innerText = new Date().toLocaleTimeString();
+      }, 2000);
+
+      // Strict Anti-Cheating: Detect if candidate switches apps, opens a new tab, or minimizes
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-          sendProctorMessage({ action: 'PHONE_TAMPERED', reason: 'PHONE APP SWITCHED / MINIMIZED (Attempting to check answers on phone)', sessionId: remoteSessionId });
+          sendProctorMessage({ 
+            action: 'PHONE_TAMPERED', 
+            reason: 'MOBILE TAB SWITCHED / MINIMIZED (Candidate left proctor page on phone to browse)', 
+            sessionId: remoteSessionId 
+          });
+          document.getElementById('phone-tamper-warning').classList.remove('hidden');
         }
       });
+
       window.addEventListener('blur', () => {
-        sendProctorMessage({ action: 'PHONE_TAMPERED', reason: 'PHONE LOST FOCUS (Screen touched or secondary app accessed)', sessionId: remoteSessionId });
+        sendProctorMessage({ 
+          action: 'PHONE_TAMPERED', 
+          reason: 'PHONE SCREEN TOUCHED / APP SWITCHED (Mobile focus lost)', 
+          sessionId: remoteSessionId 
+        });
+        document.getElementById('phone-tamper-warning').classList.remove('hidden');
       });
+    }
+
+    function dismissPhoneTamper() {
+      document.getElementById('phone-tamper-warning').classList.add('hidden');
     }
 
     function sendProctorMessage(msg) {
       if (broadcastChannel) broadcastChannel.postMessage(msg);
-      localStorage.setItem('cts_event_' + remoteSessionId, JSON.stringify({ ...msg, time: Date.now() }));
+      localStorage.setItem('cts_event_' + msg.sessionId, JSON.stringify({ ...msg, time: Date.now() }));
     }
 
     function setupDesktopProctorSync() {
       const handleMsg = (data) => {
         if (!data || data.sessionId !== currentSessionId) return;
-        if (data.action === 'PHONE_CONNECTED') {
-          markPhoneAsPaired();
+        if (data.action === 'PHONE_CONNECTED' || data.action === 'PHONE_HEARTBEAT') {
+          if (!isPhonePaired) markPhoneAsPaired();
+          const liveStatus = document.getElementById('phone-proctor-live-status');
+          if (liveStatus) {
+            liveStatus.innerText = "LOCKED & MONITORING (Phone Active)";
+            liveStatus.className = "font-mono text-emerald-400 font-bold";
+          }
         }
         if (data.action === 'PHONE_TAMPERED' && isExamActive) {
           deductMalpracticeStrike(data.reason || 'PHONE UNLOCKED / APP SWITCHED ON MOBILE DEVICE');
+          const liveStatus = document.getElementById('phone-proctor-live-status');
+          if (liveStatus) {
+            liveStatus.innerText = "⚠️ PHONE TAMPER DETECTED!";
+            liveStatus.className = "font-mono text-red-500 font-bold animate-pulse";
+          }
         }
       };
 
@@ -557,6 +599,11 @@
       document.getElementById('pairing-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mobileUrl)}`;
     }
 
+    function openPhoneGuardInTab() {
+      const mobileUrl = `${window.location.origin}${window.location.pathname}?mode=phone_guard&session=${currentSessionId}`;
+      window.open(mobileUrl, '_blank', 'width=420,height=750');
+    }
+
     function markPhoneAsPaired() {
       isPhonePaired = true;
       const ind = document.getElementById('phone-pairing-indicator');
@@ -564,11 +611,6 @@
       const btn = document.getElementById('btn-proceed-to-biometrics');
       btn.disabled = false;
       btn.className = "flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30 cursor-pointer";
-    }
-
-    function simulatePhonePairing() {
-      markPhoneAsPaired();
-      alert("✓ Simulated Phone Handshake Successful: Smartphone is now locked in Desk Proctor mode.");
     }
 
     function proceedToBiometricStage() {
@@ -791,7 +833,6 @@
         return { hasFace: false, reason: "DRAW_FAIL" };
       }
 
-      // Check BlazeFace on uniformly scaled canvas if direct passed 0
       if (blazefaceModel) {
         try {
           const preds = await blazefaceModel.estimateFaces(canvas, false);
@@ -829,7 +870,6 @@
       }
 
       const skinRatio = skinCount / (240 * 240);
-      // Strictly reject non-face images (text screenshots, icons, blanks have < 5% skin pixels)
       if (skinRatio < 0.05 || skinCount < 300) {
         return { hasFace: false, reason: "NO_SKIN_CONTOUR" };
       }
