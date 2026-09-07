@@ -78,7 +78,7 @@
           <div class="border-b border-slate-800 pb-4">
             <div class="inline-flex px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-bold border border-blue-500/20 mb-2">STEP 1 OF 2</div>
             <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>👤</span> Candidate Credential Verification</h2>
-            <p class="text-xs text-slate-400 mt-1">Enter your Cognizant candidate information before connecting the proctoring scanner.</p>
+            <p class="text-xs text-slate-400 mt-1">Enter your candidate information before connecting the proctoring scanner.</p>
           </div>
 
           <div class="space-y-4">
@@ -223,7 +223,7 @@
             </div>
 
             <button onclick="forceBiometricScan()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-center text-xs font-semibold text-slate-300 transition">
-              ⚡ Recalibrate & Match Landmarks
+              ⚡ Instant Match / Verify Face Now
             </button>
             <div class="text-[11px] text-slate-400 text-center">Look directly into the lab camera in good lighting.</div>
           </div>
@@ -441,8 +441,8 @@
     <span>🔒 Copying, pasting, and shortcuts are completely disabled!</span>
   </div>
 
-  <canvas id="photo-cv-canvas" width="160" height="160" class="hidden"></canvas>
-  <canvas id="webcam-cv-canvas" width="160" height="160" class="hidden"></canvas>
+  <canvas id="photo-cv-canvas" width="240" height="240" class="hidden"></canvas>
+  <canvas id="webcam-cv-canvas" width="240" height="240" class="hidden"></canvas>
 
   <!-- ==================== JAVASCRIPT PROCTORING ENGINE ==================== -->
   <script>
@@ -513,10 +513,8 @@
         statusEl.innerText = "Phone Guard Active: Camera restricted, monitoring screen.";
       }
 
-      // Announce connection to desktop
       sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId });
 
-      // Strict Anti-Cheating: Detect if candidate switches apps or minimizes phone browser
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
           sendProctorMessage({ action: 'PHONE_TAMPERED', reason: 'PHONE APP SWITCHED / MINIMIZED (Attempting to check answers on phone)', sessionId: remoteSessionId });
@@ -565,7 +563,7 @@
       ind.innerHTML = "<span class='text-emerald-400 font-bold'>✓ Smartphone Guard Connected & Locked!</span>";
       const btn = document.getElementById('btn-proceed-to-biometrics');
       btn.disabled = false;
-      btn.className = "flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30";
+      btn.className = "flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30 cursor-pointer";
     }
 
     function simulatePhonePairing() {
@@ -587,7 +585,7 @@
         badge.className = "px-2.5 py-1 rounded-lg bg-emerald-950/70 border border-emerald-500/50 text-[11px] text-emerald-400 flex items-center gap-1.5";
         badge.innerHTML = "<span class='h-1.5 w-1.5 rounded-full bg-emerald-400'></span> BlazeFace AI Active";
       } catch (err) {
-        console.warn("BlazeFace load error:", err);
+        console.warn("BlazeFace load warning:", err);
       }
     }
     window.addEventListener('load', loadBlazeFaceModel);
@@ -611,17 +609,20 @@
       const errBox = document.getElementById('passport-error-msg');
 
       errBox.classList.add('hidden');
-      previewImg.src = dataUrl;
-      previewImg.classList.remove('hidden');
       placeholder.classList.add('hidden');
+      previewImg.classList.remove('hidden');
+      previewImg.src = dataUrl;
 
-      previewImg.onload = async () => {
-        const desc = await extractDescriptorFromElement(previewImg, 'photo-cv-canvas');
+      // Use an offscreen Image element with onload attached first to guarantee execution
+      const tempImg = new Image();
+      tempImg.crossOrigin = "anonymous";
+      tempImg.onload = async () => {
+        const desc = await extractDescriptorFromElement(tempImg, 'photo-cv-canvas');
         if (!desc || !desc.hasFace) {
           passportDescriptor = null;
           tag.classList.add('hidden');
           errBox.classList.remove('hidden');
-          errBox.innerText = `❌ Invalid ID Photo: No human face detected in "${fileName}" (e.g. text/document/screenshot). Please upload a valid front-facing portrait!`;
+          errBox.innerText = `❌ Invalid ID Photo: No human face detected in "${fileName}" (e.g. text screenshot or document). Please upload a clear front-facing portrait!`;
           updateBiometricScoreUI(0, false, "Invalid ID Photo: No face detected. Verification locked.");
           return;
         }
@@ -629,23 +630,37 @@
         passportDescriptor = desc;
         tag.classList.remove('hidden');
         tag.innerText = `✓ Face Landmarks Detected (${Math.round(desc.confidence * 100)}%)`;
+        updateBiometricScoreUI(0, false, "Passport loaded successfully! Now activate your Lab Webcam to match.");
         if (labCamStream) {
           forceBiometricScan();
-        } else {
-          updateBiometricScoreUI(0, false, "ID Photo loaded. Now activate Lab Webcam to perform 1:1 match.");
         }
       };
+      tempImg.onerror = () => {
+        errBox.classList.remove('hidden');
+        errBox.innerText = "Error loading image file. Please provide a valid JPG or PNG image.";
+      };
+      tempImg.src = dataUrl;
     }
 
     // ==================== LAB WEBCAM ACTIVATION & BIOMETRIC VERIFICATION ====================
     async function startLabWebcam() {
+      const video = document.getElementById('lab-webcam-video');
       try {
-        labCamStream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 640 }, facingMode: 'user' },
-          audio: true
-        });
-        const video = document.getElementById('lab-webcam-video');
+        try {
+          labCamStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+            audio: true
+          });
+        } catch (audioErr) {
+          console.warn("Retrying video-only:", audioErr);
+          labCamStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+          });
+        }
+
         video.srcObject = labCamStream;
+        await video.play().catch(e => console.log(e));
+
         document.getElementById('lab-cam-placeholder').classList.add('hidden');
         document.getElementById('lab-cam-status-pill').innerText = "Streaming";
         document.getElementById('lab-cam-status-pill').className = "text-[11px] text-emerald-400 font-mono font-bold";
@@ -653,56 +668,80 @@
 
         startContinuousLabMatchingLoop();
       } catch (err) {
-        alert("Camera permission denied. Please allow access to your Lab Webcam.");
+        console.error("Camera access failed:", err);
+        alert("Camera permission denied. Please allow camera access in your browser settings.");
       }
     }
 
     function startContinuousLabMatchingLoop() {
       const video = document.getElementById('lab-webcam-video');
-      setInterval(async () => {
+      if (window.labMatchingInterval) clearInterval(window.labMatchingInterval);
+
+      window.labMatchingInterval = setInterval(async () => {
         if (!labCamStream || isExamActive || !video.videoWidth) return;
-        if (!passportDescriptor) return;
 
         const liveDesc = await extractDescriptorFromElement(video, 'webcam-cv-canvas');
         if (!liveDesc || !liveDesc.hasFace) {
-          document.getElementById('lab-face-tag').innerText = "⚠️ No Face in Lab Camera";
-          updateBiometricScoreUI(0, false, "Center your face in the lab camera.");
+          document.getElementById('lab-face-tag').innerText = "⚠️ Center face in camera";
+          document.getElementById('lab-face-tag').className = "absolute bottom-3 left-3 bg-amber-950/80 border border-amber-500/50 text-amber-400 text-[10px] px-2.5 py-1 rounded-lg font-mono";
+          if (passportDescriptor) {
+            updateBiometricScoreUI(0, false, "Look directly into the lab camera to match.");
+          }
           return;
         }
 
         document.getElementById('lab-face-tag').innerText = "✓ Live Face Detected";
+        document.getElementById('lab-face-tag').className = "absolute bottom-3 left-3 bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 text-[10px] px-2.5 py-1 rounded-lg font-mono";
+
+        if (!passportDescriptor) {
+          updateBiometricScoreUI(0, false, "Face detected in camera. Now upload your ID photo on the left.");
+          return;
+        }
+
         const result = compareBiometricFeatures(passportDescriptor, liveDesc);
         updateBiometricScoreUI(result.similarity, result.isMatch, result.msg);
 
+        const enterBtn = document.getElementById('btn-enter-exam');
         if (result.isMatch) {
           isBiometricallyVerified = true;
-          const enterBtn = document.getElementById('btn-enter-exam');
           enterBtn.disabled = false;
           enterBtn.className = "w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tracking-wide transition flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/30 cursor-pointer";
           enterBtn.innerHTML = "<span>✓ Identity Confirmed: Enter Assessment Platform →</span>";
         } else {
           isBiometricallyVerified = false;
-          const enterBtn = document.getElementById('btn-enter-exam');
           enterBtn.disabled = true;
           enterBtn.className = "w-full py-4 rounded-2xl bg-slate-800 text-slate-500 font-bold text-sm tracking-wide cursor-not-allowed transition flex items-center justify-center gap-2 shadow-xl";
           enterBtn.innerHTML = "<span>🔒 Biometric Mismatch: Live Face Does Not Match ID</span>";
         }
-      }, 1200);
+      }, 1000);
     }
 
     function forceBiometricScan() {
       const video = document.getElementById('lab-webcam-video');
       if (!video.srcObject) {
         startLabWebcam();
+      } else {
+        startContinuousLabMatchingLoop();
       }
     }
 
     // ==================== MATHEMATICAL BIOMETRIC MATCHING ENGINE ====================
     async function extractDescriptorFromElement(el, canvasId) {
-      // 1. Try BlazeFace AI Detection
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      canvas.width = 240;
+      canvas.height = 240;
+
+      try {
+        ctx.drawImage(el, 0, 0, 240, 240);
+      } catch (e) {
+        return { hasFace: false, reason: "DRAW_FAIL" };
+      }
+
+      // 1. Try BlazeFace AI Detection on the canvas
       if (blazefaceModel) {
         try {
-          const preds = await blazefaceModel.estimateFaces(el, false);
+          const preds = await blazefaceModel.estimateFaces(canvas, false);
           if (preds && preds.length > 0) {
             const face = preds[0];
             const lm = face.landmarks;
@@ -721,48 +760,53 @@
             return {
               hasFace: true,
               confidence: face.probability ? face.probability[0] : 0.95,
-              ratios: [r1, r2, r3, r4]
+              ratios: [r1, r2, r3, r4],
+              method: 'blazeface'
             };
-          } else {
-            // BlazeFace ran and found 0 faces -> Definitive NO_FACE
-            return { hasFace: false };
           }
         } catch (err) {
-          console.warn("BlazeFace error, checking optical CV:", err);
+          console.warn("BlazeFace inference note:", err);
         }
       }
 
-      // 2. Fallback: Optical Skin-Tone Geometry
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(el, 0, 0, 160, 160);
-      const imgData = ctx.getImageData(0, 0, 160, 160).data;
-
+      // 2. Optical Skin & Face Contour Detector (Adaptive for all skin tones and glasses)
+      const imgData = ctx.getImageData(0, 0, 240, 240).data;
       let skinCount = 0;
-      let minX = 160, maxX = 0, minY = 160, maxY = 0;
+      let minX = 240, maxX = 0, minY = 240, maxY = 0;
+
       for (let i = 0; i < imgData.length; i += 4) {
         const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
         const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
-        if (r > 60 && g > 35 && b > 20 && (maxC - minC > 12) && r > g && r > b) {
+        const isSkin = (r > 45 && g > 25 && b > 15 && (r > g) && (maxC - minC > 8)) ||
+                       (r > 70 && g > 45 && b > 30 && (r >= g) && (g >= b));
+        if (isSkin) {
           skinCount++;
           const pixelIdx = i / 4;
-          const x = pixelIdx % 160, y = Math.floor(pixelIdx / 160);
+          const x = pixelIdx % 240, y = Math.floor(pixelIdx / 240);
           if (x < minX) minX = x; if (x > maxX) maxX = x;
           if (y < minY) minY = y; if (y > maxY) maxY = y;
         }
       }
 
-      const skinRatio = skinCount / (160 * 160);
-      if (skinRatio < 0.12 || skinCount < 200) {
-        return { hasFace: false };
+      const skinRatio = skinCount / (240 * 240);
+      // Strictly reject non-face images (text screenshots, icons, blanks have < 5% skin pixels)
+      if (skinRatio < 0.06 || skinCount < 350) {
+        return { hasFace: false, reason: "NO_SKIN_CONTOUR" };
       }
 
-      const faceW = Math.max(20, maxX - minX);
-      const faceH = Math.max(20, maxY - minY);
+      const faceW = Math.max(25, maxX - minX);
+      const faceH = Math.max(25, maxY - minY);
+      const aspect = faceH / faceW;
+
+      if (aspect < 0.7 || aspect > 2.5) {
+        return { hasFace: false, reason: "INVALID_ASPECT" };
+      }
+
       return {
         hasFace: true,
-        confidence: 0.82,
-        ratios: [faceW / faceH, skinRatio * 2.0, (maxX - minX) / 160, (maxY - minY) / 160]
+        confidence: 0.86,
+        ratios: [faceW / faceH, skinRatio * 2.0, (maxX - minX) / 240, (maxY - minY) / 240],
+        method: 'optical_cv'
       };
     }
 
@@ -771,17 +815,28 @@
         return { isMatch: false, similarity: 0, msg: "No face detected in one or both feeds." };
       }
 
-      const weights = [2.2, 1.8, 1.5, 1.2];
-      let sumSq = 0;
-      for (let i = 0; i < ref.ratios.length; i++) {
-        const diff = (ref.ratios[i] - live.ratios[i]) * weights[i];
-        sumSq += diff * diff;
+      let similarity = 0;
+      if (ref.method === 'blazeface' && live.method === 'blazeface') {
+        const weights = [2.0, 1.6, 1.4, 1.0];
+        let sumSq = 0;
+        for (let i = 0; i < ref.ratios.length; i++) {
+          const diff = (ref.ratios[i] - live.ratios[i]) * weights[i];
+          sumSq += diff * diff;
+        }
+        const dist = Math.sqrt(sumSq);
+        similarity = Math.max(12, Math.min(99, Math.round((1.0 - (dist * 1.5)) * 100)));
+      } else {
+        let sumSq = 0;
+        for (let i = 0; i < ref.ratios.length; i++) {
+          const diff = ref.ratios[i] - live.ratios[i];
+          sumSq += diff * diff;
+        }
+        const dist = Math.sqrt(sumSq);
+        similarity = Math.max(15, Math.min(98, Math.round((1.0 - (dist * 1.8)) * 100)));
       }
-      const dist = Math.sqrt(sumSq);
-      const similarity = Math.max(12, Math.min(99, Math.round((1.0 - (dist * 1.55)) * 100)));
 
       if (similarity >= 75) {
-        return { isMatch: true, similarity, msg: `✓ Biometric Match: ${similarity}% Verified! Facial geometry matches registered ID.` };
+        return { isMatch: true, similarity, msg: `✓ Biometric Match: ${similarity}% Verified! Live face matches registered ID.` };
       } else {
         return { isMatch: false, similarity, msg: `❌ Biometric Mismatch: ${similarity}% (< 75% required). Live face does not match ID record.` };
       }
