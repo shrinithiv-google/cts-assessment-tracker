@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CTS Assessment Integrity Platform - AI Proctor</title>
+  <title>CTS Sentinel - AI Proctor & Biometric Integrity Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
@@ -13,43 +13,40 @@
     .pulse-dot { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     @keyframes scanline { 0% { top: 5%; opacity: 0.3; } 50% { top: 85%; opacity: 1; } 100% { top: 5%; opacity: 0.3; } }
-    .scan-laser { position: absolute; left: 10%; right: 10%; height: 2px; background: #10b981; box-shadow: 0 0 12px #34d399; animation: scanline 2.2s ease-in-out infinite; }
+    .scan-laser { position: absolute; left: 8%; right: 8%; height: 2px; background: #10b981; box-shadow: 0 0 12px #34d399; animation: scanline 2.2s ease-in-out infinite; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased min-h-screen p-4 md:p-6 flex flex-col justify-between select-none">
+<body class="bg-slate-950 text-slate-100 antialiased min-h-screen p-3 md:p-6 flex flex-col justify-between select-none">
 
-  <!-- ==================== MOBILE SCANNER COMPANION VIEW (?mode=mobile) ==================== -->
-  <div id="mobile-scanner-view" class="hidden max-w-md mx-auto w-full min-h-screen flex flex-col justify-between p-4 space-y-4 text-center">
+  <!-- ==================== MOBILE PROCTOR GUARD SCREEN (?mode=phone_guard) ==================== -->
+  <div id="mobile-guard-view" class="hidden max-w-md mx-auto w-full min-h-screen flex flex-col justify-between p-4 space-y-4 text-center">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-2">
-      <div class="inline-flex p-3 rounded-2xl bg-blue-500/10 text-blue-400 text-3xl border border-blue-500/20">📱 ⇄ 💻</div>
-      <h1 class="text-base font-bold text-white">CTS Mobile Biometric Scanner</h1>
-      <p class="text-xs text-slate-400">Connected to Session: <span id="mobile-session-display" class="font-mono text-blue-400 font-bold">CTS-SESSION</span></p>
-      <div class="text-[11px] text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-        Align your face in the oval and tap capture to sync your identity to your desktop exam.
-      </div>
-    </div>
-    <div class="relative rounded-3xl overflow-hidden bg-black aspect-[3/4] border-2 border-blue-500/40 shadow-2xl flex items-center justify-center">
-      <video id="mobile-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
-      <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-        <div class="w-56 h-72 border-2 border-emerald-400/80 rounded-[50px] relative shadow-[0_0_20px_rgba(52,211,153,0.3)]">
-          <div class="scan-laser"></div>
+      <div class="inline-flex p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 text-3xl border border-indigo-500/20">📱 ⇄ 💻</div>
+      <h1 class="text-base font-bold text-white">CTS Sentinel Mobile Guard</h1>
+      <p class="text-xs text-slate-400">Session ID: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">CTS-SESSION</span></p>
+      <div class="p-3 bg-red-950/40 border border-red-900/50 rounded-2xl text-[11px] text-red-300 text-left space-y-1">
+        <div class="font-bold flex items-center gap-1.5 text-red-400">
+          <span>🔒 PHONE PROCTOR LOCK ACTIVE</span>
         </div>
+        <p>Position phone on your side facing your desk and keyboard. <strong>Do NOT minimize this tab or switch apps</strong> to search for answers—doing so will trigger an immediate malpractice strike on your exam!</p>
       </div>
-      <div id="mobile-snap-flash" class="absolute inset-0 bg-white hidden"></div>
     </div>
-    <div class="space-y-2.5">
-      <button onclick="captureMobilePhotoAndSync()" class="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-sm text-white shadow-xl shadow-blue-600/30 flex items-center justify-center gap-2">
-        <span>📸 Capture Photo & Sync to Desktop</span>
-      </button>
-      <label class="block w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 border border-slate-800 cursor-pointer">
-        📁 Or Select Photo from Phone Gallery
-        <input type="file" accept="image/*" onchange="handleMobileGalleryUpload(this)" class="hidden">
-      </label>
+
+    <!-- Phone Camera Preview -->
+    <div class="relative rounded-3xl overflow-hidden bg-black aspect-[3/4] border-2 border-indigo-500/40 shadow-2xl flex items-center justify-center">
+      <video id="phone-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+      <div class="scan-laser"></div>
+      <div class="absolute top-3 left-3 bg-black/80 px-2.5 py-1 rounded-xl text-[10px] font-mono text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span> DESK STREAM ACTIVE
+      </div>
     </div>
-    <div id="mobile-sync-status" class="text-xs text-slate-400 font-medium pb-2">Camera streaming live. Ready to capture.</div>
+
+    <div class="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300">
+      Status: <span id="phone-guard-status" class="text-emerald-400 font-bold">Syncing with Desktop Exam...</span>
+    </div>
   </div>
 
   <!-- ==================== MAIN DESKTOP APPLICATION ==================== -->
@@ -57,11 +54,11 @@
 
     <!-- Header Navigation -->
     <header class="flex flex-col sm:flex-row justify-between items-center bg-slate-900 border border-slate-800 p-4 md:p-5 rounded-2xl shadow-xl gap-4">
-      <div class="flex items-center gap-3 w-full sm:w-auto">
+      <div class="flex items-center gap-3.5 w-full sm:w-auto">
         <div class="h-10 w-10 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-center text-blue-400 font-bold text-lg">🛡️</div>
         <div>
           <h1 class="font-bold text-base md:text-lg tracking-wide text-white">CTS Sentinel <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/50 ml-2">PROCTOR ACTIVE</span></h1>
-          <p class="text-xs text-slate-400">Identity-Verified Cognitive Assessment Engine</p>
+          <p class="text-xs text-slate-400">Lab Biometric Authentication & Dual-Perspective Phone Guard</p>
         </div>
       </div>
       <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
@@ -72,17 +69,19 @@
       </div>
     </header>
 
-    <!-- STAGE 1: CANDIDATE BIOMETRIC VERIFICATION & AUTH -->
-    <div id="stage-candidate-auth" class="space-y-6">
+    <!-- STEP 1: CANDIDATE LOGIN & PHONE PROCTOR PAIRING -->
+    <div id="stage-login-pairing" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- Candidate Registration Form -->
-        <div class="lg:col-span-5 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl space-y-5">
+        <!-- Login Details -->
+        <div class="lg:col-span-6 bg-slate-900/90 border border-slate-800 p-6 md:p-7 rounded-3xl shadow-xl space-y-5">
           <div class="border-b border-slate-800 pb-4">
-            <h2 class="text-base font-bold text-white flex items-center gap-2"><span>👤</span> Step 1: Candidate Verification</h2>
-            <p class="text-xs text-slate-400 mt-1">Enter your Cognizant credentials and verify your biometric face identity.</p>
+            <div class="inline-flex px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-bold border border-blue-500/20 mb-2">STEP 1 OF 2</div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>👤</span> Candidate Credential Verification</h2>
+            <p class="text-xs text-slate-400 mt-1">Enter your Cognizant candidate information before connecting the proctoring scanner.</p>
           </div>
-          <div class="space-y-3.5">
+
+          <div class="space-y-4">
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">Full Candidate Name</label>
               <input type="text" id="candidate-name" value="Alex Mercer" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
@@ -97,117 +96,166 @@
                 <input type="text" id="candidate-role" value="Fullstack Engineer (Java/React)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
               </div>
             </div>
-          </div>
-
-          <!-- Official Photo Upload -->
-          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-3">
-            <div class="flex justify-between items-center">
-              <label class="text-xs font-semibold text-slate-200">Official Passport / ID Photo</label>
-              <button onclick="useSamplePassportPhoto()" class="text-[11px] text-blue-400 hover:text-blue-300 underline font-medium">Use Sample Passport Photo</button>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Cognizant Email / LDAP</label>
+              <input type="email" id="candidate-email" value="alex.mercer@cognizant.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
             </div>
-            <label class="border-2 border-dashed border-slate-800 hover:border-blue-500/50 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition bg-slate-900/30">
-              <span class="text-2xl mb-1">🪪</span>
-              <span id="passport-upload-label" class="text-xs font-medium text-slate-300">Click to upload Passport photo (.jpg, .png)</span>
-              <span class="text-[10px] text-slate-400 mt-0.5">High-resolution portrait required for biometric matching</span>
-              <input type="file" id="passport-file-input" accept="image/*" onchange="handlePassportUpload(event)" class="hidden">
-            </label>
           </div>
 
-          <!-- Mobile Scanner QR Option Box -->
-          <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-950/40 to-slate-950 border border-blue-900/50 space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-xl">📱</span>
-                <div>
-                  <h4 class="text-xs font-bold text-white">Webcam Dark or Not Working?</h4>
-                  <p class="text-[11px] text-slate-400">Use your smartphone as an HD biometric scanner</p>
+          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
+            <h4 class="text-xs font-bold text-slate-300">Proctoring Rules & Requirements:</h4>
+            <ul class="text-[11px] text-slate-400 space-y-1.5 list-disc pl-4">
+              <li>Your smartphone will be paired as a secondary desk & anti-browser proctor.</li>
+              <li>Biometric facial verification must be confirmed via your <strong>Lab Webcam</strong>.</li>
+              <li>Unified 3-strike pool applies across tab switches, speech, phone tampering, and intruder faces.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Phone Proctor Pairing Station (QR Code) -->
+        <div class="lg:col-span-6 bg-slate-900/90 border border-slate-800 p-6 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between space-y-5">
+          <div class="border-b border-slate-800 pb-4">
+            <div class="inline-flex px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20 mb-2">MOBILE SECURITY GUARD</div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>📱</span> Pair Mobile Phone Proctor</h2>
+            <p class="text-xs text-slate-400 mt-1">Scan the QR code with your phone. The phone locks onto the desk proctor screen to prevent browsing answers.</p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl bg-slate-950 border border-slate-800">
+            <!-- QR Code -->
+            <div class="p-3 bg-white rounded-2xl w-40 h-40 shrink-0 flex items-center justify-center shadow-lg">
+              <img id="pairing-qr-img" src="" alt="Pairing QR Code" class="w-full h-full object-contain">
+            </div>
+
+            <div class="space-y-2.5 text-left w-full">
+              <div class="text-xs font-bold text-white">How to position your phone:</div>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Scan this code on your phone, then prop your phone on your desk pointing at your keyboard and hands.
+              </p>
+              <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1">
+                <div>Session: <span id="pairing-session-id" class="text-indigo-400 font-bold">CTS-SESSION</span></div>
+                <div id="phone-pairing-indicator" class="text-amber-400 font-semibold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-amber-400 pulse-dot"></span> Waiting for phone to scan...
                 </div>
               </div>
-              <button onclick="openMobileScannerModal()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-[11px] font-bold text-white shadow">
-                Open QR Scanner
-              </button>
             </div>
-            <button onclick="bypassWithMobileToken()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl text-[11px] font-semibold transition flex items-center justify-center gap-1.5">
-              <span>⚡ Auto-Verify with Mobile Token (Instant Pass)</span>
+          </div>
+
+          <div class="flex gap-3">
+            <button onclick="simulatePhonePairing()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
+              <span>⚡ Test / Simulate Phone Connection</span>
+            </button>
+            <button id="btn-proceed-to-biometrics" onclick="proceedToBiometricStage()" disabled class="flex-1 py-3.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed transition flex items-center justify-center gap-1.5 shadow-lg">
+              <span>Continue to Lab Biometrics →</span>
             </button>
           </div>
         </div>
 
-        <!-- Biometric Comparison Station -->
-        <div class="lg:col-span-7 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl flex flex-col justify-between space-y-5">
-          <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
-            <div>
-              <h2 class="text-base font-bold text-white flex items-center gap-2"><span>👁️</span> Step 2: 1:1 Biometric Facial Match</h2>
-              <p class="text-xs text-slate-400">Match your live face with the passport photo. 75%+ score required to unlock.</p>
-            </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: LAB CAMERA BIOMETRIC VERIFICATION (1:1 PROPER MATCH) -->
+    <div id="stage-biometrics" class="hidden space-y-6">
+      <div class="bg-slate-900/90 border border-slate-800 p-6 md:p-8 rounded-3xl shadow-xl space-y-6">
+
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-800 pb-4 gap-2">
+          <div>
+            <div class="inline-flex px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20 mb-2">STEP 2 OF 2: LAB CAMERA ONLY</div>
+            <h2 class="text-lg md:text-xl font-bold text-white flex items-center gap-2"><span>👁️</span> 1:1 Biometric Facial Identity Verification</h2>
+            <p class="text-xs text-slate-400 mt-1">Upload your official ID portrait, then activate your <strong>Lab Webcam</strong> to verify facial geometry.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-slate-400 font-mono">📱 Phone Guard: <strong class="text-emerald-400">LOCKED</strong></span>
             <div id="ai-model-badge" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-amber-400 flex items-center gap-1.5">
               <span class="h-1.5 w-1.5 rounded-full bg-amber-400 pulse-dot"></span> Loading BlazeFace AI...
             </div>
           </div>
-
-          <!-- Side-by-Side Photo & Webcam Boxes -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- Passport Photo Display -->
-            <div class="flex flex-col items-center space-y-2">
-              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Passport Record</div>
-              <div class="w-full aspect-[4/5] rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden relative flex items-center justify-center">
-                <img id="passport-preview" src="" alt="Passport Preview" class="w-full h-full object-cover hidden">
-                <div id="passport-placeholder" class="text-center p-4">
-                  <div class="text-3xl mb-2 text-slate-700">🖼️</div>
-                  <p class="text-xs text-slate-400 font-medium">No passport photo loaded yet</p>
-                </div>
-                <div id="passport-detected-tag" class="absolute bottom-2 left-2 bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 text-[10px] px-2 py-0.5 rounded font-mono hidden">
-                  ✓ Face Landmarks Extracted
-                </div>
-              </div>
-            </div>
-
-            <!-- Live Webcam Matcher -->
-            <div class="flex flex-col items-center space-y-2">
-              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Live Webcam Scan</div>
-              <div class="w-full aspect-[4/5] rounded-2xl bg-black border border-slate-800 overflow-hidden relative flex items-center justify-center">
-                <video id="auth-webcam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
-                <div class="scan-laser"></div>
-                <div id="auth-cam-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950">
-                  <button onclick="startAuthWebcam()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg flex items-center gap-2">
-                    <span>📹 Activate Live Camera</span>
-                  </button>
-                </div>
-                <div id="auth-face-status" class="absolute bottom-2 left-2 bg-slate-900/80 border border-slate-700 text-slate-300 text-[10px] px-2 py-0.5 rounded font-mono">
-                  Camera Standby
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biometric Verification Result Panel -->
-          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-            <div class="flex justify-between items-center text-xs">
-              <span class="font-semibold text-slate-300">Facial Feature & Landmark Match:</span>
-              <span id="biometric-match-pct" class="font-bold text-sm text-slate-400">0.0%</span>
-            </div>
-            <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
-              <div id="biometric-match-bar" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
-            </div>
-            <div class="flex items-center justify-between text-[11px]">
-              <div id="biometric-status-msg" class="text-slate-400 flex items-center gap-1.5">
-                <span>Waiting for passport upload and webcam initialization...</span>
-              </div>
-              <button onclick="performManualBiometricVerification()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-semibold text-[11px] transition">
-                ⚡ Force Re-scan
-              </button>
-            </div>
-          </div>
-
-          <!-- Exam Launch Action -->
-          <button id="btn-enter-exam" onclick="startAssessment()" disabled class="w-full py-4 rounded-2xl bg-slate-800 text-slate-400 font-bold text-sm tracking-wide cursor-not-allowed transition flex items-center justify-center gap-2 shadow-xl">
-            <span>🔒 Locked: Complete 1:1 Biometric Verification to Start Exam</span>
-          </button>
         </div>
+
+        <!-- Biometric Comparison Station -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- 1. Registered Official ID Photo -->
+          <div class="bg-slate-950 border border-slate-800 p-5 rounded-3xl space-y-3.5">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">1. Registered ID Photo</span>
+              <button onclick="useSamplePassportPhoto()" class="text-[11px] text-blue-400 hover:text-blue-300 underline font-medium">Use Verified Sample Portrait</button>
+            </div>
+
+            <div class="w-full aspect-[4/5] rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden relative flex items-center justify-center">
+              <img id="passport-preview" src="" alt="Passport Preview" class="w-full h-full object-cover hidden">
+              <div id="passport-placeholder" class="text-center p-6 space-y-2">
+                <div class="text-4xl text-slate-700">🪪</div>
+                <p class="text-xs text-slate-400 font-medium">Upload candidate passport or official ID photo</p>
+                <p class="text-[10px] text-slate-400">Non-face images (screenshots, text, objects) will be rejected.</p>
+              </div>
+              <div id="passport-detected-tag" class="absolute bottom-3 left-3 bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 text-[10px] px-2.5 py-1 rounded-lg font-mono hidden">
+                ✓ Face Landmarks Verified
+              </div>
+            </div>
+
+            <label class="block w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-center text-xs font-semibold text-slate-300 cursor-pointer transition">
+              📁 Upload Official ID / Passport Image
+              <input type="file" id="passport-file-input" accept="image/*" onchange="handlePassportUpload(event)" class="hidden">
+            </label>
+            <div id="passport-error-msg" class="text-[11px] text-red-400 font-semibold text-center hidden"></div>
+          </div>
+
+          <!-- 2. Live Lab Webcam Stream -->
+          <div class="bg-slate-950 border border-slate-800 p-5 rounded-3xl space-y-3.5">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">2. Live Lab Webcam Stream</span>
+              <span id="lab-cam-status-pill" class="text-[11px] text-slate-500 font-mono">Camera Standby</span>
+            </div>
+
+            <div class="w-full aspect-[4/5] rounded-2xl bg-black border border-slate-800 overflow-hidden relative flex items-center justify-center">
+              <video id="lab-webcam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+              <div class="scan-laser"></div>
+              <div id="lab-cam-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 p-6 space-y-3">
+                <div class="text-4xl text-slate-700">📹</div>
+                <p class="text-xs text-slate-400 text-center">Activate your lab camera to match facial landmarks against your ID photo.</p>
+                <button onclick="startLabWebcam()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30 flex items-center gap-2">
+                  <span>📹 Activate Lab Webcam</span>
+                </button>
+              </div>
+              <div id="lab-face-tag" class="absolute bottom-3 left-3 bg-slate-900/80 border border-slate-700 text-slate-300 text-[10px] px-2.5 py-1 rounded-lg font-mono">
+                Lab Camera Standby
+              </div>
+            </div>
+
+            <button onclick="forceBiometricScan()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-center text-xs font-semibold text-slate-300 transition">
+              ⚡ Recalibrate & Match Landmarks
+            </button>
+            <div class="text-[11px] text-slate-400 text-center">Look directly into the lab camera in good lighting.</div>
+          </div>
+
+        </div>
+
+        <!-- Biometric Verification Result & Confidence Meter -->
+        <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-semibold text-slate-300">1:1 Landmark Distance & Facial Similarity:</span>
+            <span id="biometric-match-pct" class="font-bold text-sm text-slate-400 font-mono">0.0% Match</span>
+          </div>
+          <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-800">
+            <div id="biometric-match-bar" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
+          </div>
+          <div class="flex items-center justify-between text-[11px]">
+            <div id="biometric-status-msg" class="text-slate-400 font-medium">
+              Upload passport photo and activate lab camera to begin real-time verification.
+            </div>
+            <span class="text-slate-400 text-[10px] font-mono">Required: ≥ 75.0%</span>
+          </div>
+        </div>
+
+        <!-- Launch Button -->
+        <button id="btn-enter-exam" onclick="startAssessment()" disabled class="w-full py-4 rounded-2xl bg-slate-800 text-slate-500 font-bold text-sm tracking-wide cursor-not-allowed transition flex items-center justify-center gap-2 shadow-xl">
+          <span>🔒 Locked: Biometric Verification Required to Enter Exam</span>
+        </button>
+
       </div>
     </div>
 
-    <!-- STAGE 2: LIVE PROCTORED EXAM PLATFORM -->
+    <!-- STEP 3: ACTIVE EXAM PLATFORM (DUAL-PERSPECTIVE PROCTORING) -->
     <div id="stage-exam-active" class="hidden space-y-6">
 
       <!-- Exam Sub-Header Status Bar -->
@@ -222,11 +270,11 @@
         </div>
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400">Malpractice Strike Pool:</span>
+            <span class="text-xs text-slate-400">Unified 3-Strike Pool:</span>
             <div class="flex gap-1.5" id="strike-indicators">
-              <span id="strike-dot-1" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400" title="Strike 1 Safe"></span>
-              <span id="strike-dot-2" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400" title="Strike 2 Safe"></span>
-              <span id="strike-dot-3" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400" title="Strike 3 Safe"></span>
+              <span id="strike-dot-1" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400"></span>
+              <span id="strike-dot-2" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400"></span>
+              <span id="strike-dot-3" class="h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400"></span>
             </div>
             <span id="strike-count-text" class="text-xs font-mono font-bold text-emerald-400 ml-1">0/3 Strikes</span>
           </div>
@@ -237,7 +285,7 @@
         </div>
       </div>
 
-      <!-- Main Exam Layout: Questions + Sticky Proctor HUD -->
+      <!-- Main Exam Layout: Questions + Dual-Perspective Proctor HUD -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <!-- Question Paper Container -->
@@ -245,7 +293,7 @@
           <div class="space-y-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
               <span id="question-number-badge" class="text-xs font-bold px-3 py-1 bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-lg">Question 1 of 5</span>
-              <span class="text-xs text-slate-400">Category: System Architecture & Algorithms</span>
+              <span class="text-xs text-slate-400">Category: Cognitive & Engineering Architecture</span>
             </div>
             <div id="question-text" class="text-base md:text-lg font-semibold text-white leading-relaxed">
               Loading question...
@@ -263,31 +311,43 @@
           </div>
         </div>
 
-        <!-- Sticky Proctoring Telemetry HUD (Live Camera + Audio + Contours) -->
+        <!-- Sticky Proctoring Telemetry HUD (Lab Cam + Mobile Desk Guard + Audio) -->
         <div class="lg:col-span-4 space-y-4">
           <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-3xl shadow-xl space-y-4 sticky top-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
               <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-red-500 pulse-dot"></span> Live AI Proctor HUD
+                <span class="h-2 w-2 rounded-full bg-red-500 pulse-dot"></span> Dual-Camera Proctor HUD
               </h3>
               <span class="text-[10px] font-mono bg-blue-950 text-blue-400 border border-blue-800 px-2 py-0.5 rounded">● BIOMETRIC LOCK</span>
             </div>
 
-            <!-- Proctor Video Stream -->
-            <div class="relative rounded-2xl overflow-hidden bg-black aspect-video border border-slate-800 shadow-inner">
-              <video id="proctor-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
-              <div class="absolute top-2 left-2 bg-slate-950/80 px-2 py-0.5 rounded text-[10px] text-emerald-400 font-mono flex items-center gap-1 border border-emerald-500/30">
-                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 pulse-dot"></span> IDENTITY VERIFIED
+            <!-- Primary: Lab Webcam Stream -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                <span>1. LAB WEBCAM (FRONTAL)</span>
+                <span class="text-emerald-400">IDENTITY VERIFIED</span>
               </div>
-              <div id="hud-face-warning" class="absolute bottom-2 inset-x-2 bg-red-600/90 text-white text-[10px] py-1 px-2 rounded text-center font-bold hidden border border-red-400">
-                ⚠️ MULTI-PERSON DETECTED!
+              <div class="relative rounded-2xl overflow-hidden bg-black aspect-video border border-slate-800 shadow-inner">
+                <video id="proctor-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                <div id="hud-face-warning" class="absolute bottom-2 inset-x-2 bg-red-600/90 text-white text-[10px] py-1 px-2 rounded text-center font-bold hidden border border-red-400">
+                  ⚠️ INTRUDER / MULTI-PERSON DETECTED!
+                </div>
               </div>
+            </div>
+
+            <!-- Secondary: Mobile Phone Desk Guard Status -->
+            <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-2">
+              <div class="flex justify-between items-center text-[11px]">
+                <span class="text-slate-300 font-semibold flex items-center gap-1.5">📱 Phone Guard Status:</span>
+                <span id="phone-proctor-live-status" class="font-mono text-emerald-400 font-bold">LOCKED & GUARDING</span>
+              </div>
+              <p class="text-[10px] text-slate-400">If the phone is unlocked or tabs are switched to check answers, a strike is consumed instantly.</p>
             </div>
 
             <!-- Audio Voice Activity Meter -->
             <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-2">
               <div class="flex justify-between text-[11px]">
-                <span class="text-slate-400 font-medium flex items-center gap-1.5">🎙️ Microphone Decibel Activity:</span>
+                <span class="text-slate-400 font-medium flex items-center gap-1.5">🎙️ Microphone Decibel Meter:</span>
                 <span id="audio-db-label" class="font-mono text-emerald-400 font-bold">Silent</span>
               </div>
               <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
@@ -296,20 +356,11 @@
               <p class="text-[10px] text-slate-400">Speech or voice discussion exceeding 3.5s consumes 1 strike.</p>
             </div>
 
-            <!-- Optical Mobile Phone Contour Guard -->
-            <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-1.5">
-              <div class="flex justify-between text-[11px]">
-                <span class="text-slate-400 font-medium flex items-center gap-1.5">📱 Mobile Phone Detection:</span>
-                <span id="mobile-detect-status" class="font-mono text-emerald-400 font-bold">No Device in View</span>
-              </div>
-              <p class="text-[10px] text-slate-400">Optical aspect scanner detects cell phone rectangular contours in camera feed.</p>
-            </div>
-
             <!-- Live Proctor Event Log -->
             <div class="space-y-1.5">
               <div class="text-[11px] font-semibold text-slate-400">Live Telemetry Feed:</div>
               <div id="live-audit-log" class="h-28 overflow-y-auto bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[10px] font-mono text-slate-300 space-y-1">
-                <div class="text-slate-400">[SYSTEM] Biometric authentication confirmed. Exam session initialized.</div>
+                <div class="text-slate-400">[SYSTEM] Lab biometric match verified. Mobile guard active. Exam initialized.</div>
               </div>
             </div>
 
@@ -321,13 +372,13 @@
       </div>
     </div>
 
-    <!-- STAGE 3: ADMIN & TELEMETRY DASHBOARD -->
+    <!-- ADMIN TELEMETRY DASHBOARD -->
     <div id="stage-admin-view" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl space-y-5">
         <div class="flex justify-between items-center border-b border-slate-800 pb-4">
           <div>
             <h2 class="text-base font-bold text-white flex items-center gap-2">📊 Proctor Audit Log & Candidate Telemetry</h2>
-            <p class="text-xs text-slate-400">All live events, tab switches, speech triggers, and face anomalies are captured here.</p>
+            <p class="text-xs text-slate-400">Chronological telemetry of tab switches, speech, phone tampering, and face events.</p>
           </div>
           <button onclick="exportAuditLogJSON()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold">📥 Export JSON</button>
         </div>
@@ -340,7 +391,7 @@
                 <th class="p-3">Violation / Event</th>
                 <th class="p-3">Strike Penalty</th>
                 <th class="p-3">Remaining Pool</th>
-                <th class="p-3">Action Taken</th>
+                <th class="p-3">Status</th>
               </tr>
             </thead>
             <tbody id="telemetry-table-body" class="divide-y divide-slate-800 font-mono text-[11px]">
@@ -355,48 +406,8 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- Modal 1: Mobile Scanner QR Companion Modal -->
-  <div id="modal-mobile-qr" class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-center">
-      <div class="space-y-1">
-        <h3 class="text-base font-bold text-white flex items-center justify-center gap-2"><span>📱</span> Mobile Biometric Scanner</h3>
-        <p class="text-xs text-slate-400">Scan this QR code with your smartphone camera to verify your identity</p>
-      </div>
-      <div class="p-4 bg-white rounded-2xl w-56 h-56 mx-auto flex items-center justify-center shadow-lg">
-        <img id="qr-code-img" src="" alt="Mobile QR Code" class="w-full h-full object-contain">
-      </div>
-      <div class="text-[11px] text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800 text-left space-y-1 font-mono">
-        <div>Session ID: <span id="modal-session-id" class="text-blue-400 font-bold">CTS-SESSION</span></div>
-        <div class="text-[10px] text-slate-400">Status: <span id="modal-sync-indicator" class="text-amber-400 font-bold">Waiting for phone connection...</span></div>
-      </div>
-      <div class="space-y-2">
-        <button onclick="bypassWithMobileToken()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition">
-          ⚡ Simulate Phone Match (Instant Verify)
-        </button>
-        <button onclick="closeMobileScannerModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition">
-          Cancel & Close
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 2: Webcam Snapshot Modal -->
-  <div id="modal-snapshot" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
-      <h3 class="text-sm font-bold text-white">📸 Capture Verification Snapshot</h3>
-      <div class="relative rounded-2xl overflow-hidden bg-black aspect-[4/5] border border-slate-800">
-        <video id="snapshot-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
-        <div class="scan-laser"></div>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="takeSnapshotAndVerify()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 font-bold rounded-xl text-xs text-white">Capture Face</button>
-        <button onclick="closeSnapshotModal()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 font-semibold rounded-xl text-xs text-slate-300">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 3: Malpractice Strike Warning Modal -->
-  <div id="modal-warning" class="fixed inset-0 bg-red-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+  <!-- Malpractice Strike Warning Modal -->
+  <div id="modal-warning" class="fixed inset-0 bg-red-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-slate-900 border-2 border-red-600 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-center">
       <div class="h-14 w-14 rounded-2xl bg-red-600/20 border border-red-500/40 text-red-500 flex items-center justify-center text-3xl mx-auto">⚠️</div>
       <div class="space-y-1.5">
@@ -406,14 +417,14 @@
       <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300">
         Remaining Strikes: <span id="warning-strikes-left" class="text-red-400 font-bold">2 of 3</span>
       </div>
-      <p class="text-[11px] text-slate-400">Please refocus on the exam window. Reaching 3 strikes will cause immediate disqualification.</p>
+      <p class="text-[11px] text-slate-400">Refocus on the exam window. Reaching 3 strikes results in immediate disqualification.</p>
       <button onclick="dismissWarningModal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 font-bold rounded-xl text-xs text-white shadow-lg shadow-red-600/30">
         I Acknowledge & Return to Exam
       </button>
     </div>
   </div>
 
-  <!-- Modal 4: Disqualified Modal -->
+  <!-- Disqualified Modal -->
   <div id="modal-disqualified" class="fixed inset-0 bg-black/95 backdrop-blur-lg flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-slate-900 border-2 border-red-600 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-5 text-center">
       <div class="h-16 w-16 rounded-2xl bg-red-600/20 border border-red-500 text-red-500 flex items-center justify-center text-4xl mx-auto">🚫</div>
@@ -430,12 +441,13 @@
     <span>🔒 Copying, pasting, and shortcuts are completely disabled!</span>
   </div>
 
-  <canvas id="cv-canvas" width="160" height="120" class="hidden"></canvas>
-  <canvas id="photo-cv-canvas" width="160" height="120" class="hidden"></canvas>
-    <!-- ==================== JAVASCRIPT PROCTORING ENGINE ==================== -->
+  <canvas id="photo-cv-canvas" width="160" height="160" class="hidden"></canvas>
+  <canvas id="webcam-cv-canvas" width="160" height="160" class="hidden"></canvas>
+
+  <!-- ==================== JAVASCRIPT PROCTORING ENGINE ==================== -->
   <script>
-    const GAS_WEBAPP_URL = "https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQsWYcLFsT1xOi88ARYE2TWtJhVqiat5X1dR-bgqDrX0c9X5cDYxe_pFgNd3/exec";
-    const SAMPLE_PASSPORT_B64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAEEAKADASEAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD1qiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/Z";
+    const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyc9e2Z3kHl4v8P0jGvKxK8q7o0_example/exec";
+    const SAMPLE_PASSPORT_B64 = "data:image/jpeg;base64,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";
 
     let currentSessionId = localStorage.getItem('cts_active_session_id');
     if (!currentSessionId) {
@@ -444,20 +456,19 @@
     }
 
     const urlParams = new URLSearchParams(window.location.search);
-    const isMobileMode = urlParams.get('mode') === 'mobile';
+    const isMobileGuardMode = urlParams.get('mode') === 'phone_guard';
     const remoteSessionId = urlParams.get('session') || currentSessionId;
 
     let blazefaceModel = null;
-    let authCamStream = null;
+    let labCamStream = null;
     let proctorCamStream = null;
     let audioContext = null;
     let audioAnalyser = null;
     let audioDataArray = null;
-    let audioStreamSource = null;
 
-    let passportBiometricDescriptor = null;
-    let liveBiometricDescriptor = null;
+    let passportDescriptor = null;
     let isBiometricallyVerified = false;
+    let isPhonePaired = false;
     let isExamActive = false;
 
     let strikesRemaining = 3;
@@ -467,7 +478,6 @@
     let faceMissingStart = null;
     let multiPersonStart = null;
     let sustainedSpeechStart = null;
-    let mobilePhoneDetectedStart = null;
 
     let examTimerInterval = null;
     let examTimeRemaining = 45 * 60;
@@ -475,450 +485,372 @@
 
     let broadcastChannel = null;
     try {
-      broadcastChannel = new BroadcastChannel('cts_biometric_sync_bus');
-    } catch(e) {
-      console.warn("BroadcastChannel not supported in this browser context:", e);
+      broadcastChannel = new BroadcastChannel('cts_sentinel_bus');
+    } catch (e) {
+      console.warn("BroadcastChannel unsupported:", e);
     }
 
-    // ==================== MOBILE SCANNER COMPANION LOGIC ====================
-    if (isMobileMode) {
+    // ==================== PHONE PROCTOR GUARD MODE (?mode=phone_guard) ====================
+    if (isMobileGuardMode) {
       document.getElementById('desktop-app').classList.add('hidden');
-      document.getElementById('mobile-scanner-view').classList.remove('hidden');
-      document.getElementById('mobile-session-display').innerText = remoteSessionId;
-      initMobileScannerApp();
+      document.getElementById('mobile-guard-view').classList.remove('hidden');
+      document.getElementById('mobile-session-label').innerText = remoteSessionId;
+      initPhoneGuardMode();
     } else {
-      setupDesktopMobileSyncListeners();
+      setupDesktopProctorSync();
+      initDesktopPairingUI();
     }
 
-    async function initMobileScannerApp() {
-      const statusEl = document.getElementById('mobile-sync-status');
+    async function initPhoneGuardMode() {
+      const statusEl = document.getElementById('phone-guard-status');
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: { ideal: 640 } }
+          video: { facingMode: 'environment', width: { ideal: 640 } }
         });
-        document.getElementById('mobile-cam-video').srcObject = stream;
-        statusEl.innerText = "Camera streaming live. Position face and capture.";
+        document.getElementById('phone-cam-video').srcObject = stream;
+        statusEl.innerText = "Phone Guard Active: Streaming desk & monitoring screen.";
       } catch (err) {
-        statusEl.innerHTML = "<span class='text-amber-400'>Camera access blocked. Please use the 'Select Photo from Phone Gallery' button below.</span>";
+        statusEl.innerText = "Phone Guard Active: Camera restricted, monitoring screen.";
       }
+
+      // Announce connection to desktop
+      sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId });
+
+      // Strict Anti-Cheating: Detect if candidate switches apps or minimizes phone browser
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          sendProctorMessage({ action: 'PHONE_TAMPERED', reason: 'PHONE APP SWITCHED / MINIMIZED (Attempting to check answers on phone)', sessionId: remoteSessionId });
+        }
+      });
+      window.addEventListener('blur', () => {
+        sendProctorMessage({ action: 'PHONE_TAMPERED', reason: 'PHONE LOST FOCUS (Screen touched or secondary app accessed)', sessionId: remoteSessionId });
+      });
     }
 
-    function captureMobilePhotoAndSync() {
-      const video = document.getElementById('mobile-cam-video');
-      const flash = document.getElementById('mobile-snap-flash');
-      flash.classList.remove('hidden');
-      setTimeout(() => flash.classList.add('hidden'), 200);
-
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 480;
-      canvas.height = video.videoHeight || 640;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-      dispatchMobilePhotoToDesktop(dataUrl);
+    function sendProctorMessage(msg) {
+      if (broadcastChannel) broadcastChannel.postMessage(msg);
+      localStorage.setItem('cts_event_' + remoteSessionId, JSON.stringify({ ...msg, time: Date.now() }));
     }
 
-    function handleMobileGalleryUpload(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => dispatchMobilePhotoToDesktop(e.target.result);
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-
-    function dispatchMobilePhotoToDesktop(dataUrl) {
-      const statusEl = document.getElementById('mobile-sync-status');
-      statusEl.innerHTML = "<span class='text-emerald-400 font-bold'>✓ Photo synced! Verifying on desktop...</span>";
-
-      const payload = {
-        action: 'PHOTO_SYNC',
-        sessionId: remoteSessionId,
-        timestamp: Date.now(),
-        dataUrl: dataUrl
+    function setupDesktopProctorSync() {
+      const handleMsg = (data) => {
+        if (!data || data.sessionId !== currentSessionId) return;
+        if (data.action === 'PHONE_CONNECTED') {
+          markPhoneAsPaired();
+        }
+        if (data.action === 'PHONE_TAMPERED' && isExamActive) {
+          deductMalpracticeStrike(data.reason || 'PHONE UNLOCKED / APP SWITCHED ON MOBILE DEVICE');
+        }
       };
 
       if (broadcastChannel) {
-        broadcastChannel.postMessage(payload);
-      }
-      localStorage.setItem('cts_mobile_photo_' + remoteSessionId, JSON.stringify(payload));
-      setTimeout(() => {
-        alert("Photo transmitted successfully! Please check your desktop screen.");
-      }, 350);
-    }
-
-    function setupDesktopMobileSyncListeners() {
-      if (broadcastChannel) {
-        broadcastChannel.onmessage = (event) => {
-          if (event.data && event.data.action === 'PHOTO_SYNC' && event.data.sessionId === currentSessionId) {
-            onMobilePhotoReceived(event.data.dataUrl);
-          }
-        };
+        broadcastChannel.onmessage = (e) => handleMsg(e.data);
       }
       window.addEventListener('storage', (e) => {
-        if (e.key === 'cts_mobile_photo_' + currentSessionId && e.newValue) {
-          try {
-            const data = JSON.parse(e.newValue);
-            onMobilePhotoReceived(data.dataUrl);
-          } catch(err){}
+        if (e.key === 'cts_event_' + currentSessionId && e.newValue) {
+          try { handleMsg(JSON.parse(e.newValue)); } catch(err){}
         }
       });
     }
 
-    function onMobilePhotoReceived(dataUrl) {
-      closeMobileScannerModal();
-      setAndValidatePassportImage(dataUrl, "Mobile_Device_Capture.jpg");
+    function initDesktopPairingUI() {
+      const mobileUrl = `${window.location.origin}${window.location.pathname}?mode=phone_guard&session=${currentSessionId}`;
+      document.getElementById('pairing-session-id').innerText = currentSessionId;
+      document.getElementById('pairing-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mobileUrl)}`;
     }
 
-    function getMobileScannerUrl() {
-      const origin = window.location.origin;
-      const pathname = window.location.pathname;
-      return `${origin}${pathname}?mode=mobile&session=${currentSessionId}`;
+    function markPhoneAsPaired() {
+      isPhonePaired = true;
+      const ind = document.getElementById('phone-pairing-indicator');
+      ind.innerHTML = "<span class='text-emerald-400 font-bold'>✓ Smartphone Guard Connected & Locked!</span>";
+      const btn = document.getElementById('btn-proceed-to-biometrics');
+      btn.disabled = false;
+      btn.className = "flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30";
     }
 
-    function openMobileScannerModal() {
-      const modal = document.getElementById('modal-mobile-qr');
-      const modalSession = document.getElementById('modal-session-id');
-      const qrImg = document.getElementById('qr-code-img');
-      const mobileUrl = getMobileScannerUrl();
-
-      modalSession.innerText = currentSessionId;
-      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mobileUrl)}`;
-      modal.classList.remove('hidden');
+    function simulatePhonePairing() {
+      markPhoneAsPaired();
+      alert("✓ Simulated Phone Handshake Successful: Smartphone is now locked in Desk Proctor mode.");
     }
 
-    function closeMobileScannerModal() {
-      document.getElementById('modal-mobile-qr').classList.add('hidden');
+    function proceedToBiometricStage() {
+      if (!isPhonePaired) return;
+      document.getElementById('stage-login-pairing').classList.add('hidden');
+      document.getElementById('stage-biometrics').classList.remove('hidden');
     }
 
-    function bypassWithMobileToken() {
-      closeMobileScannerModal();
-      setAndValidatePassportImage(SAMPLE_PASSPORT_B64, "Mobile_Token_Authorized_Portrait.jpg");
-      setTimeout(() => {
-        isBiometricallyVerified = true;
-        updateBiometricMatchUI(97.6, true, "✓ Biometric identity verified via authorized Mobile Token!");
-        unlockExamButton();
-      }, 400);
-    }
-
-    // ==================== PASSPORT PHOTO & AI MODEL INITIALIZATION ====================
+    // ==================== BLAZEFACE AI & PASSPORT UPLOAD ====================
     async function loadBlazeFaceModel() {
       try {
         blazefaceModel = await blazeface.load();
         const badge = document.getElementById('ai-model-badge');
         badge.className = "px-2.5 py-1 rounded-lg bg-emerald-950/70 border border-emerald-500/50 text-[11px] text-emerald-400 flex items-center gap-1.5";
-        badge.innerHTML = "<span class='h-1.5 w-1.5 rounded-full bg-emerald-400'></span> BlazeFace AI Ready";
+        badge.innerHTML = "<span class='h-1.5 w-1.5 rounded-full bg-emerald-400'></span> BlazeFace AI Active";
       } catch (err) {
-        console.error("BlazeFace load error:", err);
-        const badge = document.getElementById('ai-model-badge');
-        badge.className = "px-2.5 py-1 rounded-lg bg-amber-950/70 border border-amber-500/50 text-[11px] text-amber-400 flex items-center gap-1.5";
-        badge.innerHTML = "<span class='h-1.5 w-1.5 rounded-full bg-amber-400'></span> Fallback CV Active";
+        console.warn("BlazeFace load error:", err);
       }
     }
     window.addEventListener('load', loadBlazeFaceModel);
+
+    function useSamplePassportPhoto() {
+      setPassportImageAndExtract(SAMPLE_PASSPORT_B64, "Cognizant_Registered_Sample.jpg");
+    }
 
     function handlePassportUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = (e) => setAndValidatePassportImage(e.target.result, file.name);
+      reader.onload = (e) => setPassportImageAndExtract(e.target.result, file.name);
       reader.readAsDataURL(file);
     }
 
-    function useSamplePassportPhoto() {
-      setAndValidatePassportImage(SAMPLE_PASSPORT_B64, "Cognizant_Registered_Passport.jpg");
-    }
-
-    function setAndValidatePassportImage(dataUrl, fileName) {
+    async function setPassportImageAndExtract(dataUrl, fileName) {
       const previewImg = document.getElementById('passport-preview');
       const placeholder = document.getElementById('passport-placeholder');
-      const label = document.getElementById('passport-upload-label');
-      const detectedTag = document.getElementById('passport-detected-tag');
+      const tag = document.getElementById('passport-detected-tag');
+      const errBox = document.getElementById('passport-error-msg');
 
+      errBox.classList.add('hidden');
       previewImg.src = dataUrl;
       previewImg.classList.remove('hidden');
       placeholder.classList.add('hidden');
-      label.innerText = `Loaded: ${fileName}`;
 
       previewImg.onload = async () => {
-        const descriptor = await extractBiometricDescriptorFromImage(previewImg);
-        if (descriptor) {
-          passportBiometricDescriptor = descriptor;
-          detectedTag.classList.remove('hidden');
-          detectedTag.innerText = `✓ Face Landmarks Extracted (${(descriptor.confidence * 100).toFixed(0)}%)`;
-          if (authCamStream) {
-            triggerBiometricComparison();
-          } else {
-            updateBiometricMatchUI(0, false, "Passport loaded. Now click 'Activate Live Camera' to match.");
-          }
+        const desc = await extractDescriptorFromElement(previewImg, 'photo-cv-canvas');
+        if (!desc || !desc.hasFace) {
+          passportDescriptor = null;
+          tag.classList.add('hidden');
+          errBox.classList.remove('hidden');
+          errBox.innerText = `❌ Invalid ID Photo: No human face detected in "${fileName}" (e.g. text/document/screenshot). Please upload a valid front-facing portrait!`;
+          updateBiometricScoreUI(0, false, "Invalid ID Photo: No face detected. Verification locked.");
+          return;
+        }
+
+        passportDescriptor = desc;
+        tag.classList.remove('hidden');
+        tag.innerText = `✓ Face Landmarks Detected (${Math.round(desc.confidence * 100)}%)`;
+        if (labCamStream) {
+          forceBiometricScan();
         } else {
-          passportBiometricDescriptor = null;
-          detectedTag.classList.add('hidden');
-          updateBiometricMatchUI(0, false, "⚠️ No clear face detected in uploaded image. Please provide a standard portrait.");
+          updateBiometricScoreUI(0, false, "ID Photo loaded. Now activate Lab Webcam to perform 1:1 match.");
         }
       };
     }
 
-    // ==================== MATHEMATICAL BIOMETRIC DESCRIPTOR ENGINE ====================
-    async function extractBiometricDescriptorFromImage(imageEl) {
-      if (!imageEl) return null;
+    // ==================== LAB WEBCAM ACTIVATION & BIOMETRIC VERIFICATION ====================
+    async function startLabWebcam() {
       try {
-        if (blazefaceModel) {
-          const predictions = await blazefaceModel.estimateFaces(imageEl, false);
-          if (predictions && predictions.length > 0) {
-            const face = predictions[0];
-            const landmarks = face.landmarks;
-            const rightEye = landmarks[0];
-            const leftEye = landmarks[1];
-            const nose = landmarks[2];
-            const mouth = landmarks[3];
+        labCamStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, facingMode: 'user' },
+          audio: true
+        });
+        const video = document.getElementById('lab-webcam-video');
+        video.srcObject = labCamStream;
+        document.getElementById('lab-cam-placeholder').classList.add('hidden');
+        document.getElementById('lab-cam-status-pill').innerText = "Streaming";
+        document.getElementById('lab-cam-status-pill').className = "text-[11px] text-emerald-400 font-mono font-bold";
+        document.getElementById('lab-face-tag').innerText = "Lab Camera Active";
 
-            const eyeDist = Math.hypot(leftEye[0] - rightEye[0], leftEye[1] - rightEye[1]) || 1;
-            const eyeMidX = (leftEye[0] + rightEye[0]) / 2;
-            const eyeMidY = (leftEye[1] + rightEye[1]) / 2;
+        startContinuousLabMatchingLoop();
+      } catch (err) {
+        alert("Camera permission denied. Please allow access to your Lab Webcam.");
+      }
+    }
+
+    function startContinuousLabMatchingLoop() {
+      const video = document.getElementById('lab-webcam-video');
+      setInterval(async () => {
+        if (!labCamStream || isExamActive || !video.videoWidth) return;
+        if (!passportDescriptor) return;
+
+        const liveDesc = await extractDescriptorFromElement(video, 'webcam-cv-canvas');
+        if (!liveDesc || !liveDesc.hasFace) {
+          document.getElementById('lab-face-tag').innerText = "⚠️ No Face in Lab Camera";
+          updateBiometricScoreUI(0, false, "Center your face in the lab camera.");
+          return;
+        }
+
+        document.getElementById('lab-face-tag').innerText = "✓ Live Face Detected";
+        const result = compareBiometricFeatures(passportDescriptor, liveDesc);
+        updateBiometricScoreUI(result.similarity, result.isMatch, result.msg);
+
+        if (result.isMatch) {
+          isBiometricallyVerified = true;
+          const enterBtn = document.getElementById('btn-enter-exam');
+          enterBtn.disabled = false;
+          enterBtn.className = "w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tracking-wide transition flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/30 cursor-pointer";
+          enterBtn.innerHTML = "<span>✓ Identity Confirmed: Enter Assessment Platform →</span>";
+        } else {
+          isBiometricallyVerified = false;
+          const enterBtn = document.getElementById('btn-enter-exam');
+          enterBtn.disabled = true;
+          enterBtn.className = "w-full py-4 rounded-2xl bg-slate-800 text-slate-500 font-bold text-sm tracking-wide cursor-not-allowed transition flex items-center justify-center gap-2 shadow-xl";
+          enterBtn.innerHTML = "<span>🔒 Biometric Mismatch: Live Face Does Not Match ID</span>";
+        }
+      }, 1200);
+    }
+
+    function forceBiometricScan() {
+      const video = document.getElementById('lab-webcam-video');
+      if (!video.srcObject) {
+        startLabWebcam();
+      }
+    }
+
+    // ==================== MATHEMATICAL BIOMETRIC MATCHING ENGINE ====================
+    async function extractDescriptorFromElement(el, canvasId) {
+      // 1. Try BlazeFace AI Detection
+      if (blazefaceModel) {
+        try {
+          const preds = await blazefaceModel.estimateFaces(el, false);
+          if (preds && preds.length > 0) {
+            const face = preds[0];
+            const lm = face.landmarks;
+            const re = lm[0], le = lm[1], nose = lm[2], mouth = lm[3];
+            const eyeDist = Math.hypot(le[0] - re[0], le[1] - re[1]) || 1;
+            const eyeMidX = (le[0] + re[0]) / 2, eyeMidY = (le[1] + re[1]) / 2;
             const noseEyeDist = Math.hypot(nose[0] - eyeMidX, nose[1] - eyeMidY);
             const mouthNoseDist = Math.hypot(mouth[0] - nose[0], mouth[1] - nose[1]);
             const mouthEyeDist = Math.hypot(mouth[0] - eyeMidX, mouth[1] - eyeMidY);
 
-            const ratios = [
-              noseEyeDist / eyeDist,
-              mouthNoseDist / eyeDist,
-              mouthEyeDist / eyeDist,
-              (nose[0] - eyeMidX) / eyeDist
-            ];
+            const r1 = noseEyeDist / eyeDist;
+            const r2 = mouthNoseDist / eyeDist;
+            const r3 = mouthEyeDist / eyeDist;
+            const r4 = (mouth[1] - eyeMidY) / eyeDist;
 
-            const zones = computeFacialZoneHistogram(imageEl, face.topLeft, face.bottomRight);
             return {
-              type: 'blazeface',
+              hasFace: true,
               confidence: face.probability ? face.probability[0] : 0.95,
-              ratios: ratios,
-              zones: zones
+              ratios: [r1, r2, r3, r4]
             };
+          } else {
+            // BlazeFace ran and found 0 faces -> Definitive NO_FACE
+            return { hasFace: false };
           }
+        } catch (err) {
+          console.warn("BlazeFace error, checking optical CV:", err);
         }
-      } catch (err) {
-        console.warn("BlazeFace extraction error:", err);
       }
-      return extractOpticalFallbackDescriptor(imageEl);
-    }
 
-    function extractOpticalFallbackDescriptor(sourceEl) {
-      try {
-        const canvas = document.getElementById('photo-cv-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(sourceEl, 0, 0, canvas.width, canvas.height);
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const d = imgData.data;
-
-        let skinPixels = 0;
-        let total = canvas.width * canvas.height;
-        let meanR = 0, meanG = 0, meanB = 0;
-
-        for (let i = 0; i < d.length; i += 4) {
-          const r = d[i], g = d[i+1], b = d[i+2];
-          meanR += r; meanG += g; meanB += b;
-          if (r > 60 && g > 40 && b > 20 && r > g && r > b && (Math.max(r,g,b) - Math.min(r,g,b) > 15)) {
-            skinPixels++;
-          }
-        }
-        const skinRatio = skinPixels / total;
-        if (skinRatio < 0.08) return null;
-
-        return {
-          type: 'optical_cv',
-          confidence: 0.85,
-          ratios: [skinRatio, (meanR/total)/255, (meanG/total)/255, (meanB/total)/255],
-          zones: [meanR/total, meanG/total, meanB/total]
-        };
-      } catch(e) {
-        return null;
-      }
-    }
-
-    function computeFacialZoneHistogram(imgEl, topLeft, bottomRight) {
-      const canvas = document.getElementById('photo-cv-canvas');
+      // 2. Fallback: Optical Skin-Tone Geometry
+      const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext('2d');
-      const x = Math.max(0, topLeft[0]);
-      const y = Math.max(0, topLeft[1]);
-      const w = Math.min(canvas.width, bottomRight[0] - x);
-      const h = Math.min(canvas.height, bottomRight[1] - y);
-      if (w <= 5 || h <= 5) return [0.5, 0.5, 0.5];
+      ctx.drawImage(el, 0, 0, 160, 160);
+      const imgData = ctx.getImageData(0, 0, 160, 160).data;
 
-      ctx.drawImage(imgEl, x, y, w, h, 0, 0, 30, 30);
-      const data = ctx.getImageData(0, 0, 30, 30).data;
-      let topSum = 0, midSum = 0, botSum = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        const row = Math.floor((i / 4) / 30);
-        const gray = (data[i] + data[i+1] + data[i+2]) / 3;
-        if (row < 10) topSum += gray;
-        else if (row < 20) midSum += gray;
-        else botSum += gray;
-      }
-      return [topSum / 300, midSum / 300, botSum / 300];
-    }
-
-    function compareBiometricDescriptors(refDesc, liveDesc) {
-      if (!refDesc || !liveDesc) return { isMatch: false, similarity: 0 };
-
-      let geoSum = 0;
-      const weights = [0.35, 0.35, 0.20, 0.10];
-      for (let i = 0; i < refDesc.ratios.length; i++) {
-        const diff = (refDesc.ratios[i] - liveDesc.ratios[i]) * (weights[i] || 0.25);
-        geoSum += diff * diff;
-      }
-      const geoDist = Math.sqrt(geoSum);
-
-      let zoneSum = 0;
-      if (refDesc.zones && liveDesc.zones) {
-        for (let i = 0; i < refDesc.zones.length; i++) {
-          zoneSum += Math.abs((refDesc.zones[i] || 0) - (liveDesc.zones[i] || 0)) / 255;
+      let skinCount = 0;
+      let minX = 160, maxX = 0, minY = 160, maxY = 0;
+      for (let i = 0; i < imgData.length; i += 4) {
+        const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
+        const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
+        if (r > 60 && g > 35 && b > 20 && (maxC - minC > 12) && r > g && r > b) {
+          skinCount++;
+          const pixelIdx = i / 4;
+          const x = pixelIdx % 160, y = Math.floor(pixelIdx / 160);
+          if (x < minX) minX = x; if (x > maxX) maxX = x;
+          if (y < minY) minY = y; if (y > maxY) maxY = y;
         }
       }
-      const totalDistance = geoDist * 0.65 + (zoneSum / (refDesc.zones ? refDesc.zones.length : 1)) * 0.35;
-      const similarity = Math.max(12, Math.min(99, Math.round((1.0 - (totalDistance * 1.5)) * 100)));
-      return { isMatch: similarity >= 75, similarity, distance: totalDistance.toFixed(3) };
-    }
-        // ==================== WEBCAM SNAPSHOT & BIOMETRIC VERIFICATION ====================
-    async function openSnapshotModal() {
-      document.getElementById('snapshot-modal').classList.remove('hidden');
-      try {
-        snapshotStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, facingMode: "user" } });
-        const video = document.getElementById('snapshot-video');
-        video.srcObject = snapshotStream; video.play().catch(e=>console.log(e));
-      } catch (e) { alert("Camera permission denied."); closeSnapshotModal(); }
-    }
 
-    function closeSnapshotModal() {
-      document.getElementById('snapshot-modal').classList.add('hidden');
-      if (snapshotStream) { snapshotStream.getTracks().forEach(t=>t.stop()); snapshotStream = null; }
-    }
-
-    function captureWebcamFrame() {
-      const video = document.getElementById('snapshot-video');
-      const countEl = document.getElementById('snapshot-countdown');
-      document.getElementById('btn-do-capture').disabled = true;
-      countEl.classList.remove('hidden');
-      let count = 3; countEl.innerText = count;
-      const ci = setInterval(() => {
-        count--;
-        if (count > 0) countEl.innerText = count;
-        else {
-          clearInterval(ci);
-          countEl.classList.add('hidden');
-          const canvas = document.getElementById('snapshot-canvas');
-          canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-          document.getElementById('img-webcam-snapshot').src = dataUrl;
-          document.getElementById('img-webcam-snapshot').classList.remove('hidden');
-          document.getElementById('box-webcam-placeholder').classList.add('hidden');
-          document.getElementById('btn-do-capture').disabled = false;
-          closeSnapshotModal();
-          startBiometricVerification();
-        }
-      }, 1000);
-    }
-
-    async function startBiometricVerification() {
-      const webImg = document.getElementById('img-webcam-snapshot');
-      if (!passportBiometricDescriptor) {
-        alert("Please select or upload your Passport Photo first!");
-        return;
-      }
-      if (webImg.classList.contains('hidden') || !webImg.src) {
-        alert("Please capture your live webcam snapshot first!");
-        return;
+      const skinRatio = skinCount / (160 * 160);
+      if (skinRatio < 0.12 || skinCount < 200) {
+        return { hasFace: false };
       }
 
-      document.getElementById('match-status-bar').style.width = '20%';
-      document.getElementById('match-score-text').innerText = 'Extracting facial landmarks...';
+      const faceW = Math.max(20, maxX - minX);
+      const faceH = Math.max(20, maxY - minY);
+      return {
+        hasFace: true,
+        confidence: 0.82,
+        ratios: [faceW / faceH, skinRatio * 2.0, (maxX - minX) / 160, (maxY - minY) / 160]
+      };
+    }
 
-      const liveDesc = await extractBiometricDescriptorFromImage(webImg);
-      if (!liveDesc) {
-        document.getElementById('match-status-bar').style.width = '10%';
-        document.getElementById('match-status-bar').className = 'h-full bg-red-500 transition-all duration-300';
-        document.getElementById('match-score-text').innerText = '0% Match: No human face detected in camera snapshot!';
-        document.getElementById('match-feedback-sub').innerText = 'Verification Failed: Please ensure your face is well-lit and centered.';
-        return;
+    function compareBiometricFeatures(ref, live) {
+      if (!ref || !ref.hasFace || !live || !live.hasFace) {
+        return { isMatch: false, similarity: 0, msg: "No face detected in one or both feeds." };
       }
 
-      const match = compareBiometricDescriptors(passportBiometricDescriptor, liveDesc);
-      const score = match.similarity;
-      document.getElementById('match-status-bar').style.width = score + '%';
+      const weights = [2.2, 1.8, 1.5, 1.2];
+      let sumSq = 0;
+      for (let i = 0; i < ref.ratios.length; i++) {
+        const diff = (ref.ratios[i] - live.ratios[i]) * weights[i];
+        sumSq += diff * diff;
+      }
+      const dist = Math.sqrt(sumSq);
+      const similarity = Math.max(12, Math.min(99, Math.round((1.0 - (dist * 1.55)) * 100)));
 
-      if (match.isMatch) {
-        isBiometricallyVerified = true;
-        document.getElementById('match-status-bar').className = 'h-full bg-emerald-500 transition-all duration-300';
-        document.getElementById('match-score-text').innerText = `${score}% Biometric Landmark Match (Verified)`;
-        document.getElementById('match-feedback-sub').innerText = `Identity Confirmed. Geodesic distance: ${match.distance}. Assessment unlocked.`;
-        document.getElementById('btn-start-exam').disabled = false;
-        document.getElementById('btn-start-exam').classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
-        document.getElementById('btn-start-exam').classList.add('bg-blue-600', 'hover:bg-blue-500', 'text-white', 'shadow-lg');
+      if (similarity >= 75) {
+        return { isMatch: true, similarity, msg: `✓ Biometric Match: ${similarity}% Verified! Facial geometry matches registered ID.` };
       } else {
-        isBiometricallyVerified = false;
-        document.getElementById('match-status-bar').className = 'h-full bg-red-500 transition-all duration-300';
-        document.getElementById('match-score-text').innerText = `${score}% Match - Discrepancy Detected`;
-        document.getElementById('match-feedback-sub').innerText = `Rejected: Facial landmarks do not match official passport photo (${score}% < 75% threshold).`;
+        return { isMatch: false, similarity, msg: `❌ Biometric Mismatch: ${similarity}% (< 75% required). Live face does not match ID record.` };
       }
     }
 
-    // ==================== STAGE 2: LIVE PROCTORED EXAM ====================
-    async function launchExamAfterBiometrics() {
+    function updateBiometricScoreUI(pct, isMatch, msg) {
+      const pctLabel = document.getElementById('biometric-match-pct');
+      const bar = document.getElementById('biometric-match-bar');
+      const msgBox = document.getElementById('biometric-status-msg');
+
+      pctLabel.innerText = `${pct}% Match`;
+      bar.style.width = `${pct}%`;
+
+      if (isMatch) {
+        pctLabel.className = "font-bold text-sm text-emerald-400 font-mono";
+        bar.className = "bg-emerald-500 h-full transition-all duration-500";
+        msgBox.innerHTML = `<span class="text-emerald-400 font-bold">${msg}</span>`;
+      } else if (pct > 0) {
+        pctLabel.className = "font-bold text-sm text-red-400 font-mono";
+        bar.className = "bg-red-500 h-full transition-all duration-500";
+        msgBox.innerHTML = `<span class="text-red-400 font-semibold">${msg}</span>`;
+      } else {
+        pctLabel.className = "font-bold text-sm text-slate-400 font-mono";
+        bar.className = "bg-blue-600 h-full transition-all duration-500";
+        msgBox.innerHTML = `<span class="text-slate-400">${msg}</span>`;
+      }
+    }
+
+    // ==================== STEP 3: EXAM PLATFORM LAUNCH & PROCTORING ====================
+    async function startAssessment() {
       if (!isBiometricallyVerified) return;
-      document.getElementById('stage-candidate-auth').classList.add('hidden');
-      document.getElementById('stage-exam').classList.remove('hidden');
+      document.getElementById('stage-biometrics').classList.add('hidden');
+      document.getElementById('stage-exam-active').classList.remove('hidden');
       isExamActive = true;
 
-      try {
-        proctorStream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 640 }, facingMode: "user" },
-          audio: true
-        });
-        document.getElementById('exam-proctor-video').srcObject = proctorStream;
-        setupAudioAnalysis(proctorStream);
-      } catch (err) {
-        console.warn("Proctor stream fallback to video-only:", err);
-        try {
-          proctorStream = await navigator.mediaDevices.getUserMedia({ video: true });
-          document.getElementById('exam-proctor-video').srcObject = proctorStream;
-        } catch(e) {}
+      const proctorVideo = document.getElementById('proctor-cam-video');
+      if (labCamStream) {
+        proctorVideo.srcObject = labCamStream;
+        setupAudioAnalysis(labCamStream);
       }
 
-      startContinuousAIGuard();
-      setupStrictSecurityLocks();
-      startTimer();
+      startContinuousExamProctorGuard();
+      setupStrictExamSecurityLocks();
+      startExamTimer();
       renderQuestion();
-      renderPalette();
     }
 
-    // ==================== CONTINUOUS AI PROCTOR GUARD ====================
-    function startContinuousAIGuard() {
-      const video = document.getElementById('exam-proctor-video');
+    function startContinuousExamProctorGuard() {
+      const video = document.getElementById('proctor-cam-video');
       const hudAlert = document.getElementById('hud-face-warning');
 
       setInterval(async () => {
-        if (!isExamActive || strikeCooldownActive) return;
-        if (!video.videoWidth || !video.videoHeight) return;
+        if (!isExamActive || strikeCooldownActive || !video.videoWidth) return;
 
-        let faceCount = 0;
-        try {
-          if (blazefaceModel) {
+        let faceCount = 1;
+        if (blazefaceModel) {
+          try {
             const preds = await blazefaceModel.estimateFaces(video, false);
             faceCount = preds ? preds.length : 0;
-          } else {
-            faceCount = detectFacesViaCanvas(video);
-          }
-        } catch (e) {
-          faceCount = 1;
+          } catch (e) {}
         }
 
-        // 1. Intruder / Multi-person detection
+        // Intruder / Multi-person
         if (faceCount > 1) {
           if (!multiPersonStart) multiPersonStart = Date.now();
           hudAlert.classList.remove('hidden');
-          hudAlert.innerText = `⚠️ MULTI-PERSON DETECTED (${faceCount} FACES)`;
+          hudAlert.innerText = `⚠️ INTRUDER DETECTED (${faceCount} FACES IN LAB CAM)`;
           if (Date.now() - multiPersonStart > 1800) {
-            deductMalpracticeStrike(`SECONDARY PERSON DETECTED IN CAMERA FEED (${faceCount} faces visible)`);
+            deductMalpracticeStrike(`SECONDARY PERSON DETECTED IN LAB CAMERA (${faceCount} faces visible)`);
             multiPersonStart = null;
           }
         } else {
@@ -926,96 +858,35 @@
           hudAlert.classList.add('hidden');
         }
 
-        // 2. Candidate absence detection
+        // Candidate absence
         if (faceCount === 0) {
           if (!faceMissingStart) faceMissingStart = Date.now();
           if (Date.now() - faceMissingStart > 4500) {
-            deductMalpracticeStrike("CANDIDATE ABSENT FROM CAMERA FEED (>4.5s)");
+            deductMalpracticeStrike("CANDIDATE ABSENT FROM LAB CAMERA (>4.5s)");
             faceMissingStart = null;
           }
         } else {
           faceMissingStart = null;
         }
-
-        // 3. Optical Mobile Phone Contour Guard
-        const phoneDetected = detectMobilePhoneInFrame(video);
-        const phoneStatusEl = document.getElementById('mobile-detect-status');
-        if (phoneDetected) {
-          if (phoneStatusEl) {
-            phoneStatusEl.innerText = "⚠️ CELL PHONE IN VIEW!";
-            phoneStatusEl.className = "font-mono text-red-400 font-bold animate-pulse";
-          }
-          if (!mobilePhoneDetectedStart) mobilePhoneDetectedStart = Date.now();
-          if (Date.now() - mobilePhoneDetectedStart > 2200) {
-            deductMalpracticeStrike("UNAUTHORIZED MOBILE PHONE / HANDHELD DEVICE DETECTED");
-            mobilePhoneDetectedStart = null;
-          }
-        } else {
-          mobilePhoneDetectedStart = null;
-          if (phoneStatusEl) {
-            phoneStatusEl.innerText = "No Device in View";
-            phoneStatusEl.className = "font-mono text-emerald-400 font-bold";
-          }
-        }
       }, 1000);
-    }
-
-    function detectFacesViaCanvas(videoEl) {
-      try {
-        const canvas = document.getElementById('cv-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-        const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        let skin = 0;
-        for (let i = 0; i < d.length; i += 4) {
-          if (d[i] > 60 && d[i+1] > 40 && d[i+2] > 20 && d[i] > d[i+1] && d[i] > d[i+2]) skin++;
-        }
-        const ratio = skin / (canvas.width * canvas.height);
-        if (ratio > 0.42) return 2;
-        if (ratio > 0.08) return 1;
-        return 0;
-      } catch(e) { return 1; }
-    }
-
-    function detectMobilePhoneInFrame(videoEl) {
-      try {
-        const canvas = document.getElementById('cv-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const d = imgData.data;
-
-        let darkRectangularPixels = 0;
-        for (let i = 0; i < d.length; i += 8) {
-          const r = d[i], g = d[i+1], b = d[i+2];
-          const brightness = (r + g + b) / 3;
-          if (brightness < 35 && Math.abs(r - g) < 8 && Math.abs(g - b) < 8) {
-            darkRectangularPixels++;
-          }
-        }
-        const darkRatio = darkRectangularPixels / ((canvas.width * canvas.height) / 2);
-        return darkRatio > 0.22 && darkRatio < 0.70;
-      } catch (e) {
-        return false;
-      }
     }
 
     // ==================== AUDIO VOICE ACTIVITY DETECTION ====================
     function setupAudioAnalysis(stream) {
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        audioStreamSource = audioContext.createMediaStreamSource(stream);
+        const source = audioContext.createMediaStreamSource(stream);
         audioAnalyser = audioContext.createAnalyser();
         audioAnalyser.fftSize = 512;
         audioDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
-        audioStreamSource.connect(audioAnalyser);
-        setInterval(checkAudio, 250);
+        source.connect(audioAnalyser);
+        setInterval(checkMicrophoneActivity, 250);
       } catch (err) {
-        console.warn("Audio Context init error:", err);
+        console.warn("Audio Context error:", err);
       }
     }
 
-    function checkAudio() {
+    function checkMicrophoneActivity() {
       if (!isExamActive || strikeCooldownActive || !audioAnalyser) return;
       audioAnalyser.getByteFrequencyData(audioDataArray);
       let sum = 0;
@@ -1027,7 +898,7 @@
       if (vuBar) vuBar.style.width = Math.min(100, avg * 2.8) + '%';
 
       if (avg > 38) {
-        if (dbLabel) { dbLabel.innerText = "Speaking / Voice Detected"; dbLabel.className = "font-mono text-amber-400 font-bold"; }
+        if (dbLabel) { dbLabel.innerText = "Voice / Speech Detected"; dbLabel.className = "font-mono text-amber-400 font-bold"; }
         if (!sustainedSpeechStart) sustainedSpeechStart = Date.now();
         if (Date.now() - sustainedSpeechStart > 3500) {
           deductMalpracticeStrike("SUSTAINED BACKGROUND SPEECH / ANSWER DISCUSSION (>3.5s)");
@@ -1047,12 +918,11 @@
       strikesRemaining--;
       strikesConsumed++;
 
-      logViolationToSheet({
-        type: 'MALPRACTICE_STRIKE',
+      logViolationAudit({
         reason: reason,
         strikeNumber: strikesConsumed,
         strikesRemaining: strikesRemaining,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toLocaleTimeString()
       });
 
       updateStrikeHUD();
@@ -1060,7 +930,7 @@
       if (strikesRemaining <= 0) {
         isExamActive = false;
         document.getElementById('modal-disqualified').classList.remove('hidden');
-        submitFinal(true);
+        submitFinalExam(true);
       } else {
         document.getElementById('warning-reason').innerText = reason;
         document.getElementById('warning-strikes-left').innerText = `${strikesRemaining} of 3`;
@@ -1072,11 +942,7 @@
       for (let i = 1; i <= 3; i++) {
         const dot = document.getElementById(`strike-dot-${i}`);
         if (dot) {
-          if (i <= strikesConsumed) {
-            dot.className = "h-3 w-3 rounded-full bg-red-600 border border-red-400";
-          } else {
-            dot.className = "h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400";
-          }
+          dot.className = i <= strikesConsumed ? "h-3 w-3 rounded-full bg-red-600 border border-red-400" : "h-3 w-3 rounded-full bg-emerald-500 border border-emerald-400";
         }
       }
       const label = document.getElementById('strike-count-text');
@@ -1092,41 +958,41 @@
     }
 
     // ==================== STRICT INPUT & WINDOW LOCKS ====================
-    function setupStrictSecurityLocks() {
+    function setupStrictExamSecurityLocks() {
       document.addEventListener('visibilitychange', () => {
         if (document.hidden && isExamActive && !strikeCooldownActive) {
-          deductMalpracticeStrike("TAB SWITCH OR WINDOW MINIMIZED");
+          deductMalpracticeStrike("DESKTOP TAB SWITCHED OR WINDOW MINIMIZED");
         }
       });
       window.addEventListener('blur', () => {
         if (isExamActive && !strikeCooldownActive) {
-          deductMalpracticeStrike("WINDOW FOCUS LOST / SECONDARY SCREEN ACCESSED");
+          deductMalpracticeStrike("DESKTOP WINDOW FOCUS LOST (Secondary Screen or Browser Tab Clicked)");
         }
       });
-      document.addEventListener('contextmenu', (e) => { e.preventDefault(); showToast(); });
-      document.addEventListener('copy', (e) => { e.preventDefault(); showToast(); });
-      document.addEventListener('paste', (e) => { e.preventDefault(); showToast(); });
+      document.addEventListener('contextmenu', (e) => { e.preventDefault(); showCopyToast(); });
+      document.addEventListener('copy', (e) => { e.preventDefault(); showCopyToast(); });
+      document.addEventListener('paste', (e) => { e.preventDefault(); showCopyToast(); });
       document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && ['c','v','x','a','p','s','u'].includes(e.key.toLowerCase())) {
-          e.preventDefault(); showToast();
+          e.preventDefault(); showCopyToast();
         }
-        if (['F12', 'F5'].includes(e.key)) { e.preventDefault(); showToast(); }
+        if (['F12', 'F5'].includes(e.key)) { e.preventDefault(); showCopyToast(); }
       });
     }
 
-    function showToast() {
+    function showCopyToast() {
       const toast = document.getElementById('clipboard-toast');
       toast.classList.remove('hidden');
       setTimeout(() => toast.classList.add('hidden'), 2200);
     }
 
-    // ==================== ASSESSMENT ENGINE & TIMER ====================
+    // ==================== ASSESSMENT ENGINE & QUESTIONS ====================
     const questions = [
-      { id: 1, q: "Which data structure provides constant-time O(1) amortized insertion, search, and deletion?", opts: ["Binary Search Tree", "Hash Map with Chaining", "Sorted Array", "Doubly Linked List"], ans: 1 },
-      { id: 2, q: "In distributed microservices, which pattern prevents cascading failures across cascading network requests?", opts: ["CQRS", "Circuit Breaker", "Event Sourcing", "Saga Orchestrator"], ans: 1 },
-      { id: 3, q: "What is the primary trade-off highlighted in the CAP theorem for distributed databases?", opts: ["Consistency vs Cost", "Consistency vs Availability under Partitions", "Latency vs Throughput", "Scalability vs Storage"], ans: 1 },
-      { id: 4, q: "Which HTTP status code is most appropriate when a rate limiter throttles excessive candidate requests?", opts: ["403 Forbidden", "401 Unauthorized", "429 Too Many Requests", "503 Service Unavailable"], ans: 2 },
-      { id: 5, q: "In secure biometric matching systems, what does Euclidean distance between normalized facial vectors measure?", opts: ["Facial geometric similarity", "Camera frame resolution", "Decibel frequency", "Network latency"], ans: 0 }
+      { id: 1, q: "Which data structure guarantees O(1) average-time complexity for key lookup and insertion?", opts: ["Binary Search Tree", "Hash Table with Closed Addressing", "Skip List", "Sorted Dynamic Array"], ans: 1 },
+      { id: 2, q: "In distributed microservices, what architectural pattern prevents cascading failures across dependent RPCs?", opts: ["CQRS", "Circuit Breaker", "Event Sourcing", "Saga Coordinator"], ans: 1 },
+      { id: 3, q: "In computer vision biometric verification, what does normalized Euclidean distance between landmark points measure?", opts: ["Geometric facial invariant similarity", "Camera megapixel resolution", "Microphone frequency response", "Network packet latency"], ans: 0 },
+      { id: 4, q: "Which HTTP response header is required to prevent clickjacking attacks by disallowing frame embedding?", opts: ["Content-Security-Policy: frame-ancestors 'none'", "X-Content-Type-Options: nosniff", "Strict-Transport-Security", "Access-Control-Allow-Origin: *"], ans: 0 },
+      { id: 5, q: "Under the CAP theorem, what does a distributed cluster sacrifice during network partition if it guarantees immediate consistency?", opts: ["Partition Tolerance", "Availability for all queries", "Data Persistence", "Latency optimization"], ans: 1 }
     ];
 
     let userAnswers = {};
@@ -1161,7 +1027,7 @@
       alert(flaggedQuestions[currentQuestionIdx] ? "Question flagged for review." : "Flag removed.");
     }
 
-    function startTimer() {
+    function startExamTimer() {
       examTimerInterval = setInterval(() => {
         examTimeRemaining--;
         const m = Math.floor(examTimeRemaining / 60).toString().padStart(2, '0');
@@ -1169,47 +1035,50 @@
         document.getElementById('timer-display').innerText = `${m}:${s}`;
         if (examTimeRemaining <= 0) {
           clearInterval(examTimerInterval);
-          submitExamEarly();
+          submitFinalExam(false);
         }
       }, 1000);
     }
 
-    function logViolationToSheet(event) {
+    function logViolationAudit(event) {
       const logBox = document.getElementById('live-audit-log');
       if (logBox) {
         const entry = document.createElement('div');
         entry.className = "text-red-400";
-        entry.innerText = `[${new Date().toLocaleTimeString()}] STRIKE: ${event.reason}`;
+        entry.innerText = `[${event.timestamp}] STRIKE: ${event.reason}`;
         logBox.appendChild(entry);
         logBox.scrollTop = logBox.scrollHeight;
       }
       const tbody = document.getElementById('telemetry-table-body');
       if (tbody) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="p-3 text-slate-400">${new Date().toLocaleTimeString()}</td><td class="p-3 text-white">CTS-884920</td><td class="p-3 text-red-400 font-bold">${event.reason}</td><td class="p-3 text-red-400">-1</td><td class="p-3 text-slate-300">${event.strikesRemaining}/3</td><td class="p-3 text-amber-400 font-semibold">Strike Recorded</td>`;
+        tr.innerHTML = `<td class="p-3 text-slate-400">${event.timestamp}</td><td class="p-3 text-white">CTS-884920</td><td class="p-3 text-red-400 font-bold">${event.reason}</td><td class="p-3 text-red-400">-1</td><td class="p-3 text-slate-300">${event.strikesRemaining}/3</td><td class="p-3 text-amber-400 font-semibold">Strike Applied</td>`;
         tbody.prepend(tr);
       }
     }
 
     function submitExamEarly() {
-      if (confirm("Are you sure you want to finish and submit your assessment?")) {
-        submitFinal(false);
+      if (confirm("Are you sure you want to finish and submit your proctored assessment?")) {
+        submitFinalExam(false);
       }
     }
 
-    function submitFinal(isForced) {
+    function submitFinalExam(isForced) {
       clearInterval(examTimerInterval);
       isExamActive = false;
-      if (proctorStream) proctorStream.getTracks().forEach(t => t.stop());
-      alert(isForced ? "Assessment terminated due to malpractice violations." : "Assessment submitted successfully! Verification report transmitted.");
+      if (labCamStream) labCamStream.getTracks().forEach(t => t.stop());
+      alert(isForced ? "Assessment locked: Terminated due to 3 malpractice strikes." : "Assessment completed! Telemetry and responses transmitted successfully.");
       showTab('admin');
     }
 
     function showTab(tab) {
       document.getElementById('tab-btn-candidate').className = tab === 'candidate' ? 'px-4 py-2 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow-sm' : 'px-4 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
       document.getElementById('tab-btn-admin').className = tab === 'admin' ? 'px-4 py-2 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow-sm' : 'px-4 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
-      document.getElementById('stage-candidate-auth').classList.toggle('hidden', tab !== 'candidate' || isExamActive);
-      document.getElementById('stage-exam-active').classList.toggle('hidden', tab !== 'candidate' || !isExamActive);
+      
+      const isCandidateTab = tab === 'candidate';
+      document.getElementById('stage-login-pairing').classList.toggle('hidden', !isCandidateTab || isPhonePaired || isExamActive);
+      document.getElementById('stage-biometrics').classList.toggle('hidden', !isCandidateTab || !isPhonePaired || isExamActive);
+      document.getElementById('stage-exam-active').classList.toggle('hidden', !isCandidateTab || !isExamActive);
       document.getElementById('stage-admin-view').classList.toggle('hidden', tab !== 'admin');
     }
 
