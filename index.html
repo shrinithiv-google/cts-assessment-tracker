@@ -27,7 +27,7 @@
     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-3">
       <div class="inline-flex p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 text-3xl border border-indigo-500/20">📱 ⇄ 💻</div>
       <h1 class="text-base font-bold text-white">CTS Sentinel Phone Guard</h1>
-      <p class="text-xs text-slate-400">Connected to Exam Session: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">CTS-SESSION</span></p>
+      <p class="text-xs text-slate-400">Connected to Exam Session: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">CTS-SESSION</span> <button onclick="changeMobileSessionPin()" class="ml-2 text-[10px] text-blue-400 underline font-semibold">Change PIN</button></p>
       
       <div class="p-3.5 bg-red-950/50 border border-red-800/60 rounded-2xl text-[11px] text-red-200 text-left space-y-1.5">
         <div class="font-bold flex items-center gap-1.5 text-red-400 text-xs">
@@ -54,20 +54,30 @@
           <p class="font-bold">VIOLATION: PHONE TAB SWITCHED / MINIMIZED</p>
           <p class="text-[11px] text-slate-300">You switched away from the Sentinel screen. A malpractice strike has been transmitted to your main assessment screen.</p>
         </div>
-        <button onclick="dismissPhoneTamper()" class="w-full py-3 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-bold shadow-lg text-white">
+        <button onclick="dismissPhoneTamper()" class="w-full py-3 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-bold shadow-lg text-white cursor-pointer">
           Return to Proctor Screen
         </button>
       </div>
     </div>
 
-    <div class="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300 flex items-center justify-between">
-      <span>Status: <strong id="phone-guard-status" class="text-emerald-400">Connecting...</strong></span>
-      <span id="phone-ping-clock" class="text-[10px] text-slate-400">Active</span>
+    <div class="p-3.5 bg-slate-900 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300 space-y-2">
+      <div class="flex items-center justify-between">
+        <span>Status: <strong id="phone-guard-status" class="text-emerald-400">Connecting...</strong></span>
+        <span id="phone-ping-clock" class="text-[10px] text-slate-400">Active</span>
+      </div>
+      <div class="flex gap-2 pt-1 border-t border-slate-800">
+        <button onclick="forceMobileSyncPing()" class="flex-1 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/60 text-indigo-300 border border-indigo-500/30 rounded-xl text-[11px] font-semibold transition cursor-pointer">
+          ⚡ Force Sync Ping
+        </button>
+        <button onclick="changeMobileSessionPin()" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[11px] font-semibold transition cursor-pointer">
+          ✏️ Edit PIN
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- ==================== MAIN DESKTOP APPLICATION ==================== -->
-  <div id="desktop-app" class="max-w-7xl mx-auto w-full space-y-6">
+  <div id="desktop-app"  class="max-w-7xl mx-auto w-full space-y-6">
 
     <!-- Header Navigation -->
     <header class="flex flex-col sm:flex-row justify-between items-center bg-slate-900 border border-slate-800 p-4 md:p-5 rounded-2xl shadow-xl gap-4">
@@ -88,6 +98,21 @@
 
     <!-- STEP 1: CANDIDATE LOGIN & PHONE PROCTOR PAIRING -->
     <div id="stage-login-pairing" class="space-y-6">
+
+      <!-- Mobile Device Auto-Detection Banner -->
+      <div id="mobile-mode-banner" class="bg-gradient-to-r from-indigo-950/80 to-blue-950/80 border border-indigo-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-xl">
+        <div class="flex items-center gap-3 text-slate-200">
+          <span class="text-2xl p-2 bg-indigo-500/20 rounded-xl border border-indigo-500/30">📱</span>
+          <div>
+            <strong class="text-white text-sm">Opening on your mobile phone?</strong>
+            <p class="text-[11px] text-slate-400 mt-0.5">Switch this device into Mobile Sentinel Desk Guard mode and connect to your desktop session.</p>
+          </div>
+        </div>
+        <button onclick="promptMobileSentinelMode()" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition shrink-0 cursor-pointer flex items-center justify-center gap-1.5">
+          <span>Switch to Mobile Sentinel Mode →</span>
+        </button>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <!-- Login Details -->
@@ -129,29 +154,49 @@
           </div>
         </div>
 
-        <!-- Phone Proctor Pairing Station (QR Code) -->
+        <!-- Phone Proctor Pairing Station (QR Code + PIN) -->
         <div class="lg:col-span-6 bg-slate-900/90 border border-slate-800 p-6 md:p-7 rounded-3xl shadow-xl flex flex-col justify-between space-y-5">
-          <div class="border-b border-slate-800 pb-4">
-            <div class="inline-flex px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20 mb-2">MOBILE SECURITY GUARD</div>
-            <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>📱</span> Pair Mobile Phone Sentinel</h2>
-            <p class="text-xs text-slate-400 mt-1">Scan the QR code with your phone. The phone screen will lock into desk proctor mode.</p>
+          <div class="border-b border-slate-800 pb-4 flex justify-between items-start">
+            <div>
+              <div class="inline-flex px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20 mb-2">MOBILE SECURITY GUARD</div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>📱</span> Pair Mobile Phone Sentinel</h2>
+              <p class="text-xs text-slate-400 mt-1">Scan the QR code with your phone camera or enter the PIN on your phone.</p>
+            </div>
+            <button onclick="regenerateSessionAndQR()" title="Generate New Session PIN & QR Code" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+              <span>🔄</span> <span class="hidden sm:inline font-mono">New PIN</span>
+            </button>
+          </div>
+
+          <!-- Session PIN High-Visibility Box -->
+          <div class="p-3.5 bg-indigo-950/50 border border-indigo-500/40 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-indigo-300 font-bold block">Desktop Session PIN</span>
+              <span id="pairing-session-id-large" class="text-2xl font-mono font-black text-white tracking-widest">CTS-XXXXXX</span>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="copyPairingLink()" class="px-3 py-1.5 bg-indigo-600/40 hover:bg-indigo-600/70 border border-indigo-400/40 text-indigo-200 rounded-xl text-xs font-semibold flex items-center gap-1 transition cursor-pointer">
+                <span>🔗</span> Copy Link
+              </button>
+            </div>
           </div>
 
           <div class="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl bg-slate-950 border border-slate-800">
             <!-- QR Code -->
-            <div class="p-3 bg-white rounded-2xl w-40 h-40 shrink-0 flex items-center justify-center shadow-lg">
+            <div class="p-2.5 bg-white rounded-2xl w-40 h-40 shrink-0 flex items-center justify-center shadow-lg">
               <img id="pairing-qr-img" src="" alt="Pairing QR Code" class="w-full h-full object-contain">
             </div>
 
-            <div class="space-y-2.5 text-left w-full">
+            <div class="space-y-2 text-left w-full">
               <div class="text-xs font-bold text-white">Pairing Instructions:</div>
               <p class="text-[11px] text-slate-400 leading-relaxed">
-                Scan this code with your phone camera, prop the phone on your desk, and do not switch to other apps during the test.
+                1. Scan with phone camera or tap <strong>Switch to Mobile</strong> on your phone.<br>
+                2. Prop the phone beside your keyboard facing your workspace.<br>
+                3. Keep the Sentinel tab active during the assessment.
               </p>
               <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1">
-                <div class="flex justify-between">
-                  <span>Session: <strong id="pairing-session-id" class="text-indigo-400 font-bold">CTS-SESSION</strong></span>
-                  <span id="webrtc-peer-status" class="text-[10px] text-indigo-300">WebRTC Ready</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-400">Relay:</span>
+                  <span id="webrtc-peer-status" class="text-[10px] text-emerald-400 font-bold">Multi-Channel Listening</span>
                 </div>
                 <div id="phone-pairing-indicator" class="text-amber-400 font-semibold flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-amber-400 pulse-dot"></span> Waiting for phone to connect...
@@ -161,8 +206,11 @@
           </div>
 
           <div class="flex flex-col sm:flex-row gap-2.5">
-            <button onclick="openPhoneGuardInTab()" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
-              <span>📱 Open Mobile Guard in Split Tab (Test)</span>
+            <button onclick="openPhoneGuardInTab()" class="py-3 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>📱 Split Tab</span>
+            </button>
+            <button onclick="simulatePhonePairing()" title="Bypass phone pairing for testing/demo" class="py-3 px-3.5 bg-indigo-900/50 hover:bg-indigo-800/80 border border-indigo-500/40 text-indigo-200 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>⚡ Quick Pair (Test Mode)</span>
             </button>
             <button id="btn-proceed-to-biometrics" onclick="proceedToBiometricStage()" disabled class="flex-1 py-3.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed transition flex items-center justify-center gap-1.5 shadow-lg">
               <span>Continue to Lab Biometrics →</span>
@@ -297,6 +345,16 @@
           <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-400 border border-blue-800/60 font-mono">Cognizant CTS-L2</span>
         </div>
         <div class="flex items-center gap-6">
+          <!-- Live Recording HUD Badge -->
+          <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+            <div id="recording-hud-badge" class="flex items-center gap-1.5 text-red-400 font-mono text-xs font-bold">
+              <span id="recording-pulse-dot" class="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></span>
+              <span id="recording-timer-text">REC 00:00</span>
+            </div>
+            <button id="btn-pause-resume-rec" onclick="toggleProctorRecordingPause()" title="Pause / Resume Recording" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer">
+              ⏸️
+            </button>
+          </div>
           <div class="flex items-center gap-2">
             <span class="text-xs text-slate-400">Unified 3-Strike Pool:</span>
             <div class="flex gap-1.5" id="strike-indicators">
@@ -363,6 +421,19 @@
             <div class="flex justify-between items-center text-[11px] text-slate-400 font-mono">
               <span>Face Lock: <strong class="text-emerald-400">Verified ID</strong></span>
               <span>Intruder Scan: <strong class="text-emerald-400">Active</strong></span>
+            </div>
+            <!-- Video Recording Controls Strip -->
+            <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-400 text-[10px]">Record:</span>
+                <select id="recording-source-select" onchange="changeRecordingSource(this.value)" class="bg-slate-900 border border-slate-700 text-white rounded-lg px-2 py-0.5 text-[10px] font-mono focus:outline-none">
+                  <option value="webcam">Lab Webcam + Mic</option>
+                  <option value="screen">Screen Capture</option>
+                </select>
+              </div>
+              <button id="btn-download-recording-active" onclick="downloadSessionRecording()" disabled class="px-2.5 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 bg-slate-800 text-slate-500 cursor-not-allowed transition">
+                <span>⬇️ Save Video</span>
+              </button>
             </div>
           </div>
 
@@ -437,6 +508,40 @@
           <div id="gas-test-result" class="text-xs hidden font-mono"></div>
         </div>
 
+        <!-- Proctor Video Recording Archive & Playback -->
+        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+            <div>
+              <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <span>🎥</span> Session Video Recording & Evidence
+              </h3>
+              <p class="text-[11px] text-slate-400">Review synchronized video & audio proctoring log recorded during assessment.</p>
+            </div>
+            <div id="admin-recording-badge" class="px-2.5 py-1 rounded-lg text-[11px] font-mono flex items-center gap-1.5 bg-slate-900 border border-slate-800 text-slate-400">
+              <span class="w-2 h-2 rounded-full bg-slate-500"></span> Awaiting Recording
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div class="aspect-video max-w-lg mx-auto rounded-2xl overflow-hidden bg-black border border-slate-800 flex items-center justify-center relative shadow-xl">
+              <video id="admin-playback-video" controls class="w-full h-full object-cover hidden"></video>
+              <div id="admin-playback-placeholder" class="text-center p-6 space-y-2 text-slate-500">
+                <div class="text-4xl text-slate-700">📹</div>
+                <p class="text-xs">Recording video will be ready for review here once the assessment finishes or terminates.</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-1">
+              <div id="recording-metadata-label" class="text-[11px] font-mono text-slate-400">
+                Format: WebM (VP8/Opus) • Resolution: 640x480
+              </div>
+              <button id="btn-admin-download-rec" onclick="downloadSessionRecording()" disabled class="px-4 py-2 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-not-allowed shadow-md">
+                <span>⬇️ Download Proctor Video (.webm)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-300">
             <thead class="bg-slate-950 text-slate-400 uppercase font-mono text-[10px] border-b border-slate-800">
@@ -494,6 +599,9 @@
         <p class="text-xs text-slate-300 mt-2 leading-relaxed">All 3 malpractice strikes have been consumed. Your assessment has been <strong>permanently locked and terminated</strong> due to prohibited mobile phone or proctor violations.</p>
       </div>
       <div class="p-3 bg-slate-950 rounded-xl border border-red-900/40 text-[11px] text-red-400 font-mono">Status: DISQUALIFIED_MALPRACTICE (3/3 Strikes Reached)</div>
+      <button onclick="downloadSessionRecording()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 font-bold rounded-xl text-xs text-white shadow-lg flex items-center justify-center gap-1.5 cursor-pointer">
+        <span>⬇️ Download Session Recording Evidence (.webm)</span>
+      </button>
       <button onclick="showTab('admin')" class="w-full py-3 bg-slate-800 hover:bg-slate-700 font-bold rounded-xl text-xs text-slate-300">View Telemetry Submission</button>
     </div>
   </div>
@@ -508,19 +616,27 @@
 
   <!-- ==================== JAVASCRIPT PROCTORING ENGINE ==================== -->
   <script>
-    const GAS_WEBAPP_URL = "const GAS_WEBAPP_URL = "https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQSvWYcLFstT1xOi88ARYE2TWtJhvqiat5X1dR-bgqDrX0c9X5cDYxe_pFGND3/exec";
+    const GAS_WEBAPP_URL = "https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQSvWYcLFstT1xOi88ARYE2TWtJhvqiat5X1dR-bgqDrX0c9X5cDYxe_pFGND3/exec";
     const SAMPLE_PASSPORT_B64 = "data:image/jpeg;base64,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";
 
     const urlParams = new URLSearchParams(window.location.search);
     const isMobileGuardMode = urlParams.get('mode') === 'phone_guard';
 
-    // Session IDs: Unique session on desktop; mobile phone receives it via URL parameter
-    let currentSessionId = isMobileGuardMode 
-      ? (urlParams.get('session') || 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase())
-      : ('CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase());
+    // Session IDs: Unique session on desktop; preserved in sessionStorage across reloads
+    let savedDesktopSession = sessionStorage.getItem('cts_desktop_session');
+    let currentSessionId;
+    if (isMobileGuardMode) {
+      currentSessionId = (urlParams.get('session') || 'CTS-884920').toUpperCase();
+    } else {
+      if (!savedDesktopSession) {
+        savedDesktopSession = 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        sessionStorage.setItem('cts_desktop_session', savedDesktopSession);
+      }
+      currentSessionId = savedDesktopSession;
+    }
 
-    const remoteSessionId = urlParams.get('session') || currentSessionId;
-    const cleanPeerSessionId = 'cts-' + (isMobileGuardMode ? remoteSessionId : currentSessionId).toLowerCase().replace(/[^a-z0-9]/g, '');
+    const remoteSessionId = (urlParams.get('session') || currentSessionId).toUpperCase();
+    let activeDesktopPeerId = null;
 
     let blazefaceModel = null;
     let labCamStream = null;
@@ -549,11 +665,21 @@
     let examTimeRemaining = 45 * 60;
     let currentQuestionIdx = 0;
 
-    // WebRTC PeerJS instances
+    // WebRTC PeerJS instances & ICE Turn Servers
     let desktopPeer = null;
     let desktopDataConn = null;
     let mobilePeer = null;
     let mobileDataConn = null;
+
+    const PEER_ICE_SERVERS = [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:global.stun.twilio.com:3478' },
+      { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+      { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+      { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+    ];
 
     // BroadcastChannel for same-device local testing
     let broadcastChannel = null;
@@ -562,6 +688,11 @@
     } catch (e) {
       console.warn("BroadcastChannel unsupported:", e);
     }
+
+    // Cloud Relay handles & message deduplication
+    let cloudRelayEventSource = null;
+    let handledMessageMap = new Map();
+    let simulatedPhoneHeartbeatInterval = null;
 
     // ==================== APP INITIALIZATION ====================
     if (isMobileGuardMode) {
@@ -575,7 +706,7 @@
       initGoogleSheetSyncUI();
     }
 
-        // ==================== GOOGLE SHEET LIVE SYNCHRONIZATION ====================
+    // ==================== GOOGLE SHEET LIVE SYNCHRONIZATION ====================
     function isValidGasUrl(url) {
       if (!url || typeof url !== 'string') return false;
       const t = url.trim();
@@ -685,9 +816,11 @@
     // ==================== PHONE PROCTOR GUARD MODE (?mode=phone_guard) ====================
     async function initPhoneGuardMode() {
       const statusEl = document.getElementById('phone-guard-status');
-      
-      // 1. Establish WebRTC connection directly to desktop
+      if (statusEl) statusEl.innerText = "Connecting to Desktop Session " + remoteSessionId + "...";
+
+      // 1. Establish Multi-Channel Connections
       initMobilePeer();
+      setupMobileCloudRelay();
 
       // 2. Start Phone Desk Stream
       try {
@@ -697,26 +830,35 @@
         document.getElementById('phone-cam-video').srcObject = stream;
         if (statusEl) statusEl.innerText = "Phone Guard Active: Screen & Desk Monitored";
       } catch (err) {
-        if (statusEl) statusEl.innerText = "Phone Guard Active: Screen Monitored";
+        console.warn("Environment camera unavailable, attempting default camera:", err);
+        try {
+          const selfieStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          document.getElementById('phone-cam-video').srcObject = selfieStream;
+          if (statusEl) statusEl.innerText = "Phone Guard Active: Desk Monitored";
+        } catch(e) {
+          if (statusEl) statusEl.innerText = "Phone Guard Active: Screen Monitored";
+        }
       }
 
-      // 3. Immediately signal connection across all channels
+      // 3. Send initial connect burst across all channels
       sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId, time: Date.now() });
+      setTimeout(() => sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId, time: Date.now() }), 600);
+      setTimeout(() => sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId, time: Date.now() }), 1500);
 
-      // 4. Send periodic heartbeat every 2 seconds
+      // 4. Send periodic heartbeat every 2.5 seconds
       setInterval(() => {
         sendProctorMessage({ action: 'PHONE_HEARTBEAT', sessionId: remoteSessionId, time: Date.now() });
         const clk = document.getElementById('phone-ping-clock');
         if (clk) clk.innerText = new Date().toLocaleTimeString();
-      }, 2000);
+      }, 2500);
 
       // 5. Strict Anti-Cheating: Detect if candidate switches apps, opens a new tab, or minimizes
       const triggerMobileTamper = (reason) => {
         sendProctorMessage({ 
           action: 'PHONE_TAMPERED', 
           reason: reason, 
-          sessionId: remoteSessionId,
-          time: Date.now()
+          sessionId: remoteSessionId, 
+          time: Date.now() 
         });
         const tamperBox = document.getElementById('phone-tamper-warning');
         if (tamperBox) tamperBox.classList.remove('hidden');
@@ -741,33 +883,28 @@
       document.getElementById('phone-tamper-warning').classList.add('hidden');
     }
 
-    // Connect Phone to Desktop via WebRTC PeerJS
+    // Connect Phone to Desktop via WebRTC PeerJS with TURN
     function initMobilePeer() {
       if (typeof Peer === 'undefined') {
-        console.warn("PeerJS library unavailable, using fallback channels.");
+        console.warn("PeerJS library unavailable, using cloud relay.");
         return;
       }
       try {
         mobilePeer = new Peer({
           debug: 1,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' },
-              { urls: 'stun:stun2.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478' }
-            ]
-          }
+          config: { iceServers: PEER_ICE_SERVERS }
         });
+
+        const targetPeerId = urlParams.get('peerId') || ('cts-' + remoteSessionId.toLowerCase().replace(/[^a-z0-9]/g, ''));
 
         mobilePeer.on('open', (id) => {
           console.log('Mobile peer initialized:', id);
-          connectMobileToDesktop(cleanPeerSessionId);
+          connectMobileToDesktop(targetPeerId);
         });
 
         mobilePeer.on('error', (err) => {
           console.warn('Mobile peer error:', err);
-          setTimeout(() => connectMobileToDesktop(cleanPeerSessionId), 2500);
+          setTimeout(() => connectMobileToDesktop(targetPeerId), 3000);
         });
       } catch (err) {
         console.error('Mobile peer exception:', err);
@@ -775,7 +912,7 @@
     }
 
     function connectMobileToDesktop(targetPeerId) {
-      if (!mobilePeer || mobilePeer.destroyed) return;
+      if (!mobilePeer || mobilePeer.destroyed || !targetPeerId) return;
       try {
         mobileDataConn = mobilePeer.connect(targetPeerId, { reliable: true });
 
@@ -783,7 +920,7 @@
           console.log('✓ WebRTC DataChannel connected to Desktop!');
           const guardStatus = document.getElementById('phone-guard-status');
           if (guardStatus) {
-            guardStatus.innerText = "Phone Guard Active (Live Synced to Desktop)";
+            guardStatus.innerText = "✓ Synced & Locked to Desktop Session";
             guardStatus.className = "text-emerald-400 font-bold";
           }
           sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId, time: Date.now() });
@@ -791,20 +928,41 @@
 
         mobileDataConn.on('error', (err) => {
           console.warn('Mobile connection error:', err);
-          setTimeout(() => connectMobileToDesktop(targetPeerId), 3000);
+          setTimeout(() => connectMobileToDesktop(targetPeerId), 3500);
         });
 
         mobileDataConn.on('close', () => {
           console.warn('Connection closed. Re-establishing WebRTC link...');
-          setTimeout(() => connectMobileToDesktop(targetPeerId), 3000);
+          setTimeout(() => connectMobileToDesktop(targetPeerId), 3500);
         });
       } catch (err) {
         console.error('connectMobileToDesktop error:', err);
       }
     }
 
-    // Send proctor message over WebRTC + BroadcastChannel + localStorage
+    function setupMobileCloudRelay() {
+      const cleanSession = remoteSessionId.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const topic = 'cts_proctor_' + cleanSession;
+
+      // Broadcast connect immediately to cloud relay
+      fetch(`https://ntfy.sh/${topic}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId, time: Date.now() })
+      }).then(() => {
+        const guardStatus = document.getElementById('phone-guard-status');
+        if (guardStatus && guardStatus.innerText.includes("Connecting")) {
+          guardStatus.innerText = "✓ Synced to Desktop Session";
+          guardStatus.className = "text-emerald-400 font-bold";
+        }
+      }).catch(() => {});
+    }
+
+    // Send proctor message over WebRTC + Cloud Relay (ntfy.sh) + BroadcastChannel + localStorage
     function sendProctorMessage(msg) {
+      const msgStr = JSON.stringify(msg);
+
+      // Channel 1: WebRTC DataChannel
       if (mobileDataConn && mobileDataConn.open) {
         try {
           mobileDataConn.send(msg);
@@ -813,32 +971,63 @@
           console.warn('WebRTC send failed:', e);
         }
       }
+
+      // Channel 2: Cloud Relay (ntfy.sh)
+      const cleanSession = (msg.sessionId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cleanSession) {
+        fetch(`https://ntfy.sh/cts_proctor_${cleanSession}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: msgStr
+        }).catch(() => {});
+      }
+
+      // Channel 3: Local BroadcastChannel
       if (broadcastChannel) {
         try { broadcastChannel.postMessage(msg); } catch(e){}
       }
+
+      // Channel 4: LocalStorage
       try {
         localStorage.setItem('cts_event_' + msg.sessionId, JSON.stringify({ ...msg, time: Date.now() }));
       } catch(e){}
+
+      // Channel 5: Google Apps Script sync on tamper
+      if (msg.action === 'PHONE_TAMPERED') {
+        syncToGoogleSheet('mobileTamper', {
+          session: msg.sessionId,
+          reason: msg.reason,
+          stage: 'Mobile Sentinel Tamper'
+        }).catch(() => {});
+      }
     }
 
-    // ==================== DESKTOP PROCTOR SYNC & WebRTC SERVER ====================
+    // ==================== DESKTOP PROCTOR SYNC & MULTI-CHANNEL RECEIVER ====================
     function setupDesktopProctorSync() {
+      // Channel 1: WebRTC PeerJS with TURN
       initDesktopPeer();
 
+      // Channel 2: Cloud Relay Listener (ntfy.sh pub-sub)
+      setupDesktopCloudRelay();
+
+      // Channel 3: Same-device BroadcastChannel
       if (broadcastChannel) {
         broadcastChannel.onmessage = (e) => handleIncomingProctorMessage(e.data);
       }
+
+      // Channel 4: LocalStorage cross-tab events
       window.addEventListener('storage', (e) => {
         if (e.key === 'cts_event_' + currentSessionId && e.newValue) {
           try { handleIncomingProctorMessage(JSON.parse(e.newValue)); } catch(err){}
         }
       });
 
-      // Watchdog: detect if phone is silenced/suspended
+      // Watchdog: detect if phone is silenced/suspended (ACTIVE ONLY AFTER STAGE 1 PAIRING)
       setInterval(() => {
-        if (isPhonePaired && lastPhoneHeartbeatTime > 0) {
+        const isBiometricsOrExam = isExamActive || !document.getElementById('stage-biometrics').classList.contains('hidden');
+        if (isPhonePaired && isBiometricsOrExam && lastPhoneHeartbeatTime > 0) {
           const elapsed = Date.now() - lastPhoneHeartbeatTime;
-          if (elapsed > 10000 && !strikeCooldownActive) {
+          if (elapsed > 12000 && !strikeCooldownActive) {
             const liveStatus = document.getElementById('phone-proctor-live-status');
             if (liveStatus) {
               liveStatus.innerText = "⚠️ PHONE UNREACHABLE / APP SUSPENDED";
@@ -853,27 +1042,30 @@
 
     function initDesktopPeer() {
       if (typeof Peer === 'undefined') {
-        console.warn("PeerJS not loaded. Using local storage & broadcast fallback.");
+        console.warn("PeerJS not loaded. Using cloud relay & local storage fallback.");
         return;
       }
+      
+      const cleanSession = currentSessionId.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const dynamicPeerId = 'cts-' + cleanSession + '-' + Math.random().toString(36).substring(2, 6);
+
       try {
-        desktopPeer = new Peer(cleanPeerSessionId, {
+        if (desktopPeer && !desktopPeer.destroyed) {
+          desktopPeer.destroy();
+        }
+
+        desktopPeer = new Peer(dynamicPeerId, {
           debug: 1,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' },
-              { urls: 'stun:stun2.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478' }
-            ]
-          }
+          config: { iceServers: PEER_ICE_SERVERS }
         });
 
         desktopPeer.on('open', (id) => {
           console.log('✓ Desktop Peer ready with ID:', id);
+          activeDesktopPeerId = id;
+          updateDesktopPairingUrl(id);
           const badge = document.getElementById('webrtc-peer-status');
           if (badge) {
-            badge.innerText = "WebRTC Ready";
+            badge.innerText = "WebRTC & Cloud Ready";
             badge.className = "text-[10px] text-emerald-400 font-mono";
           }
         });
@@ -888,13 +1080,13 @@
           });
 
           conn.on('data', (data) => {
-            console.log('Received WebRTC message from phone:', data);
             handleIncomingProctorMessage(data);
           });
 
           conn.on('close', () => {
             console.warn('WebRTC connection closed from mobile');
-            if (isPhonePaired && !strikeCooldownActive) {
+            const isBiometricsOrExam = isExamActive || !document.getElementById('stage-biometrics').classList.contains('hidden');
+            if (isPhonePaired && isBiometricsOrExam && !strikeCooldownActive) {
               deductMalpracticeStrike('MOBILE PHONE DISCONNECTED / PROCTOR SCREEN CLOSED');
             }
           });
@@ -902,14 +1094,73 @@
 
         desktopPeer.on('error', (err) => {
           console.warn('Desktop peer error:', err);
+          if (err.type === 'unavailable-id' || err.type === 'socket-error') {
+            setTimeout(() => initDesktopPeer(), 2000);
+          }
         });
       } catch (err) {
         console.error('Desktop peer exception:', err);
       }
     }
 
+    function setupDesktopCloudRelay() {
+      const cleanSession = currentSessionId.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const topic = 'cts_proctor_' + cleanSession;
+
+      try {
+        if (cloudRelayEventSource) {
+          cloudRelayEventSource.close();
+        }
+
+        cloudRelayEventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        
+        cloudRelayEventSource.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data && data.message) {
+              const msg = JSON.parse(data.message);
+              handleIncomingProctorMessage(msg);
+            }
+          } catch(err){}
+        };
+
+        cloudRelayEventSource.onerror = () => {
+          console.warn('Cloud relay SSE stream reconnecting...');
+        };
+      } catch(e) {
+        console.warn('EventSource initialization error:', e);
+      }
+
+      // High-reliability Polling Fallback on Cloud Relay
+      setInterval(async () => {
+        if (isPhonePaired) return;
+        try {
+          const res = await fetch(`https://ntfy.sh/${topic}/json?poll=1&since=10s`, { cache: 'no-store' });
+          if (!res.ok) return;
+          const text = await res.text();
+          const lines = text.trim().split('
+');
+          for (const line of lines) {
+            if (!line) continue;
+            try {
+              const item = JSON.parse(line);
+              if (item.message) {
+                handleIncomingProctorMessage(JSON.parse(item.message));
+              }
+            } catch(err){}
+          }
+        } catch(err){}
+      }, 2500);
+    }
+
     function handleIncomingProctorMessage(data) {
       if (!data || data.sessionId !== currentSessionId) return;
+
+      // Deduplicate messages across multiple channels within 1.5s
+      const dedupeKey = `${data.action}_${Math.floor((data.time || Date.now()) / 1500)}`;
+      if (handledMessageMap.has(dedupeKey)) return;
+      handledMessageMap.set(dedupeKey, true);
+      if (handledMessageMap.size > 100) handledMessageMap.clear();
 
       if (data.action === 'PHONE_CONNECTED' || data.action === 'PHONE_HEARTBEAT') {
         lastPhoneHeartbeatTime = Date.now();
@@ -929,7 +1180,6 @@
 
       if (data.action === 'PHONE_TAMPERED') {
         const now = Date.now();
-        // Debounce duplicate packets within 2 seconds
         if (now - lastTamperHandledTime > 2000) {
           lastTamperHandledTime = now;
           const reason = data.reason || 'MOBILE TAB SWITCHED / APP SWITCHED ON MOBILE PHONE';
@@ -951,14 +1201,48 @@
       }
     }
 
-    function initDesktopPairingUI() {
+    function updateDesktopPairingUrl(peerId) {
       let baseUrl = `${window.location.origin}${window.location.pathname}`;
       if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
         baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
       }
-      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
-      document.getElementById('pairing-session-id').innerText = currentSessionId;
-      document.getElementById('pairing-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mobileUrl)}`;
+      const peerParam = peerId ? `&peerId=${peerId}` : '';
+      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}${peerParam}`;
+      
+      const qrImg = document.getElementById('pairing-qr-img');
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mobileUrl)}`;
+      }
+      const sessionEl = document.getElementById('pairing-session-id');
+      if (sessionEl) sessionEl.innerText = currentSessionId;
+      const largeEl = document.getElementById('pairing-session-id-large');
+      if (largeEl) largeEl.innerText = currentSessionId;
+    }
+
+    function initDesktopPairingUI() {
+      updateDesktopPairingUrl(activeDesktopPeerId);
+    }
+
+    function copyPairingLink() {
+      let baseUrl = `${window.location.origin}${window.location.pathname}`;
+      if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
+        baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+      }
+      const peerParam = activeDesktopPeerId ? `&peerId=${activeDesktopPeerId}` : '';
+      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}${peerParam}`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(mobileUrl).then(() => {
+          alert(`✓ Mobile Guard Link Copied!
+
+Open this on your smartphone browser:
+${mobileUrl}`);
+        }).catch(() => {
+          prompt("Copy this Mobile Guard URL to your phone:", mobileUrl);
+        });
+      } else {
+        prompt("Copy this Mobile Guard URL to your phone:", mobileUrl);
+      }
     }
 
     function openPhoneGuardInTab() {
@@ -966,22 +1250,96 @@
       if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
         baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
       }
-      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
+      const peerParam = activeDesktopPeerId ? `&peerId=${activeDesktopPeerId}` : '';
+      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}${peerParam}`;
       window.open(mobileUrl, '_blank', 'width=420,height=750');
     }
 
     function markPhoneAsPaired() {
       isPhonePaired = true;
+      lastPhoneHeartbeatTime = Date.now();
       const ind = document.getElementById('phone-pairing-indicator');
       if (ind) {
-        ind.innerHTML = "<span class='text-emerald-400 font-bold'>✓ Smartphone Guard Connected & Locked!</span>";
+        ind.innerHTML = "<span class='text-emerald-400 font-bold flex items-center gap-1.5'><span class='w-2 h-2 rounded-full bg-emerald-400 animate-pulse'></span> ✓ Smartphone Guard Connected & Locked!</span>";
       }
       const btn = document.getElementById('btn-proceed-to-biometrics');
       if (btn) {
         btn.disabled = false;
-        btn.className = "flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30 cursor-pointer";
+        btn.className = "flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30 cursor-pointer animate-pulse";
         btn.innerHTML = "<span>Continue to Lab Biometrics →</span>";
       }
+    }
+
+    function simulatePhonePairing() {
+      console.log("⚡ Quick Pair / Test Mode activated");
+      markPhoneAsPaired();
+      
+      if (simulatedPhoneHeartbeatInterval) clearInterval(simulatedPhoneHeartbeatInterval);
+      simulatedPhoneHeartbeatInterval = setInterval(() => {
+        lastPhoneHeartbeatTime = Date.now();
+      }, 2500);
+
+      const ind = document.getElementById('phone-pairing-indicator');
+      if (ind) {
+        ind.innerHTML = "<span class='text-emerald-400 font-bold flex items-center gap-1.5'><span class='w-2 h-2 rounded-full bg-emerald-400'></span> ✓ Quick Paired (Test Mode Active)</span>";
+      }
+    }
+
+    function regenerateSessionAndQR() {
+      sessionStorage.removeItem('cts_desktop_session');
+      currentSessionId = 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      sessionStorage.setItem('cts_desktop_session', currentSessionId);
+      isPhonePaired = false;
+      const ind = document.getElementById('phone-pairing-indicator');
+      if (ind) {
+        ind.innerHTML = "<span class='w-2 h-2 rounded-full bg-amber-400 pulse-dot'></span> Waiting for phone to connect...";
+      }
+      const btn = document.getElementById('btn-proceed-to-biometrics');
+      if (btn) {
+        btn.disabled = true;
+        btn.className = "flex-1 py-3.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed transition flex items-center justify-center gap-1.5 shadow-lg";
+        btn.innerHTML = "<span>Continue to Lab Biometrics →</span>";
+      }
+      initDesktopPairingUI();
+      initDesktopPeer();
+      setupDesktopCloudRelay();
+    }
+
+    function promptMobileSentinelMode() {
+      const pin = prompt("Enter the Session PIN from your desktop screen (e.g. CTS-884920):");
+      if (pin && pin.trim()) {
+        let baseUrl = `${window.location.origin}${window.location.pathname}`;
+        if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
+          baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+        }
+        window.location.href = `${baseUrl}?mode=phone_guard&session=${encodeURIComponent(pin.trim().toUpperCase())}`;
+      }
+    }
+
+    function changeMobileSessionPin() {
+      const pin = prompt("Enter Desktop Session PIN (e.g. CTS-884920):", remoteSessionId);
+      if (pin && pin.trim()) {
+        let baseUrl = `${window.location.origin}${window.location.pathname}`;
+        if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
+          baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+        }
+        window.location.href = `${baseUrl}?mode=phone_guard&session=${encodeURIComponent(pin.trim().toUpperCase())}`;
+      }
+    }
+
+    function forceMobileSyncPing() {
+      const statusEl = document.getElementById('phone-guard-status');
+      if (statusEl) {
+        statusEl.innerText = "Transmitting sync burst...";
+        statusEl.className = "text-amber-400 font-bold animate-pulse";
+      }
+      sendProctorMessage({ action: 'PHONE_CONNECTED', sessionId: remoteSessionId, time: Date.now(), manual: true });
+      setTimeout(() => {
+        if (statusEl) {
+          statusEl.innerText = "✓ Synced & Locked to Desktop Session";
+          statusEl.className = "text-emerald-400 font-bold";
+        }
+      }, 700);
     }
 
     function proceedToBiometricStage() {
@@ -1309,6 +1667,223 @@
       }
     }
 
+
+    // ==================== PROCTOR SESSION RECORDING ENGINE ====================
+    let proctorMediaRecorder = null;
+    let proctorRecordedChunks = [];
+    let proctorVideoBlob = null;
+    let proctorVideoUrl = null;
+    let recordingTimerInterval = null;
+    let recordingSecondsElapsed = 0;
+    let isRecordingPaused = false;
+    let screenStream = null;
+    let currentRecordingSource = 'webcam';
+
+    function startProctorRecording(source = 'webcam') {
+      currentRecordingSource = source;
+      proctorRecordedChunks = [];
+      recordingSecondsElapsed = 0;
+      isRecordingPaused = false;
+
+      let streamToRecord = labCamStream;
+      if (source === 'screen' && screenStream) {
+        streamToRecord = screenStream;
+      }
+
+      if (!streamToRecord) {
+        console.warn("No active stream to record.");
+        return;
+      }
+
+      try {
+        const mimeTypes = [
+          'video/webm;codecs=vp9,opus',
+          'video/webm;codecs=vp8,opus',
+          'video/webm;codecs=h264,opus',
+          'video/webm',
+          'video/mp4'
+        ];
+
+        let selectedMimeType = '';
+        for (const mt of mimeTypes) {
+          if (MediaRecorder.isTypeSupported(mt)) {
+            selectedMimeType = mt;
+            break;
+          }
+        }
+
+        const options = selectedMimeType ? { mimeType: selectedMimeType } : {};
+        proctorMediaRecorder = new MediaRecorder(streamToRecord, options);
+
+        proctorMediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            proctorRecordedChunks.push(e.data);
+          }
+        };
+
+        proctorMediaRecorder.onstop = () => {
+          clearInterval(recordingTimerInterval);
+          if (proctorRecordedChunks.length > 0) {
+            proctorVideoBlob = new Blob(proctorRecordedChunks, { type: selectedMimeType || 'video/webm' });
+            proctorVideoUrl = URL.createObjectURL(proctorVideoBlob);
+            onRecordingReady();
+          }
+        };
+
+        proctorMediaRecorder.start(1000); // 1-second chunks
+
+        // Start recording timer HUD
+        if (recordingTimerInterval) clearInterval(recordingTimerInterval);
+        recordingTimerInterval = setInterval(() => {
+          if (!isRecordingPaused) {
+            recordingSecondsElapsed++;
+            const m = Math.floor(recordingSecondsElapsed / 60).toString().padStart(2, '0');
+            const s = (recordingSecondsElapsed % 60).toString().padStart(2, '0');
+            const timerEl = document.getElementById('recording-timer-text');
+            if (timerEl) timerEl.innerText = `REC ${m}:${s}`;
+          }
+        }, 1000);
+
+        // Update HUD
+        const badge = document.getElementById('recording-hud-badge');
+        if (badge) {
+          badge.className = "flex items-center gap-1.5 text-red-400 font-mono text-xs font-bold";
+        }
+        const pulseDot = document.getElementById('recording-pulse-dot');
+        if (pulseDot) pulseDot.className = "h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse";
+
+        logViolationAudit({
+          timestamp: new Date().toLocaleTimeString(),
+          reason: `PROCTOR_RECORDING_STARTED (Source: ${source === 'screen' ? 'Screen Capture' : 'Lab Webcam + Mic'})`,
+          strikeNumber: 0,
+          strikesRemaining: strikesRemaining,
+          stage: 'Recording Engine'
+        });
+
+      } catch (err) {
+        console.error("Failed to start MediaRecorder:", err);
+      }
+    }
+
+    function toggleProctorRecordingPause() {
+      if (!proctorMediaRecorder) return;
+      const btn = document.getElementById('btn-pause-resume-rec');
+      const timerEl = document.getElementById('recording-timer-text');
+      const pulseDot = document.getElementById('recording-pulse-dot');
+
+      if (!isRecordingPaused) {
+        proctorMediaRecorder.pause();
+        isRecordingPaused = true;
+        if (btn) btn.innerText = "▶️";
+        if (timerEl) timerEl.innerText = "PAUSED";
+        if (pulseDot) pulseDot.className = "h-2.5 w-2.5 rounded-full bg-amber-400";
+      } else {
+        proctorMediaRecorder.resume();
+        isRecordingPaused = false;
+        if (btn) btn.innerText = "⏸️";
+        if (pulseDot) pulseDot.className = "h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse";
+      }
+    }
+
+    function stopProctorRecording() {
+      if (proctorMediaRecorder && proctorMediaRecorder.state !== 'inactive') {
+        try {
+          proctorMediaRecorder.stop();
+        } catch(e) {}
+      }
+      clearInterval(recordingTimerInterval);
+      const timerEl = document.getElementById('recording-timer-text');
+      if (timerEl) timerEl.innerText = "SAVED";
+      const pulseDot = document.getElementById('recording-pulse-dot');
+      if (pulseDot) pulseDot.className = "h-2.5 w-2.5 rounded-full bg-slate-500";
+    }
+
+    function onRecordingReady() {
+      if (!proctorVideoBlob) return;
+      const sizeMB = (proctorVideoBlob.size / (1024 * 1024)).toFixed(2);
+      const durationMins = Math.floor(recordingSecondsElapsed / 60);
+      const durationSecs = (recordingSecondsElapsed % 60).toString().padStart(2, '0');
+
+      // Update Admin Playback Video
+      const videoEl = document.getElementById('admin-playback-video');
+      const placeholder = document.getElementById('admin-playback-placeholder');
+      if (videoEl) {
+        videoEl.src = proctorVideoUrl;
+        videoEl.classList.remove('hidden');
+        if (placeholder) placeholder.classList.add('hidden');
+      }
+
+      // Update Admin Badge
+      const adminBadge = document.getElementById('admin-recording-badge');
+      if (adminBadge) {
+        adminBadge.className = "px-2.5 py-1 rounded-lg text-[11px] font-mono flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300";
+        adminBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Recorded (${sizeMB} MB, ${durationMins}:${durationSecs})`;
+      }
+
+      // Enable Download Buttons
+      const dlBtnAdmin = document.getElementById('btn-admin-download-rec');
+      if (dlBtnAdmin) {
+        dlBtnAdmin.disabled = false;
+        dlBtnAdmin.className = "px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer";
+      }
+      const dlBtnActive = document.getElementById('btn-download-recording-active');
+      if (dlBtnActive) {
+        dlBtnActive.disabled = false;
+        dlBtnActive.className = "px-2.5 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition";
+      }
+
+      const metaLabel = document.getElementById('recording-metadata-label');
+      if (metaLabel) {
+        metaLabel.innerText = `File: CTS_${currentSessionId}.webm • Size: ${sizeMB} MB • Duration: ${durationMins}:${durationSecs}`;
+      }
+
+      logViolationAudit({
+        timestamp: new Date().toLocaleTimeString(),
+        reason: `PROCTOR_RECORDING_READY (${sizeMB} MB, ${durationMins}:${durationSecs})`,
+        strikeNumber: 0,
+        strikesRemaining: strikesRemaining,
+        stage: 'Recording Engine'
+      });
+    }
+
+    async function changeRecordingSource(source) {
+      if (source === 'screen') {
+        try {
+          screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+          if (isExamActive) {
+            stopProctorRecording();
+            setTimeout(() => startProctorRecording('screen'), 500);
+          }
+        } catch (err) {
+          console.warn("Screen share cancelled or denied:", err);
+          document.getElementById('recording-source-select').value = 'webcam';
+        }
+      } else {
+        if (isExamActive) {
+          stopProctorRecording();
+          setTimeout(() => startProctorRecording('webcam'), 500);
+        }
+      }
+    }
+
+    function downloadSessionRecording() {
+      if (!proctorVideoBlob) {
+        if (proctorMediaRecorder && proctorMediaRecorder.state === 'recording') {
+          proctorMediaRecorder.requestData();
+          setTimeout(downloadSessionRecording, 300);
+          return;
+        }
+        alert("Session recording is not ready yet. Complete or start the exam first.");
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = proctorVideoUrl;
+      a.download = `CTS_Proctor_Recording_${currentSessionId}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     // ==================== STEP 3: EXAM PLATFORM LAUNCH & PROCTORING ====================
     async function startAssessment() {
       if (!isBiometricallyVerified) return;
@@ -1320,6 +1895,7 @@
       if (labCamStream) {
         proctorVideo.srcObject = labCamStream;
         setupAudioAnalysis(labCamStream);
+        startProctorRecording('webcam');
       }
 
       startContinuousExamProctorGuard();
@@ -1597,8 +2173,11 @@
     function submitFinalExam(isForced) {
       clearInterval(examTimerInterval);
       isExamActive = false;
+      stopProctorRecording();
       if (labCamStream) {
-        try { labCamStream.getTracks().forEach(t => t.stop()); } catch(e){}
+        setTimeout(() => {
+          try { labCamStream.getTracks().forEach(t => t.stop()); } catch(e){}
+        }, 800);
       }
 
       // Calculate score
