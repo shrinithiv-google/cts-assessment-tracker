@@ -9,6 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; user-select: none; -webkit-user-select: none; }
     .pulse-dot { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -171,7 +172,7 @@
           <div class="p-3.5 bg-indigo-950/50 border border-indigo-500/40 rounded-2xl flex items-center justify-between">
             <div>
               <span class="text-[10px] uppercase tracking-wider text-indigo-300 font-bold block">Desktop Session PIN</span>
-              <span id="pairing-session-id-large" class="text-2xl font-mono font-black text-white tracking-widest">CTS-XXXXXX</span>
+              <span id="pairing-session-id-large" class="text-2xl font-mono font-black text-white tracking-widest">CTS-884920</span>
             </div>
             <div class="flex gap-2">
               <button onclick="copyPairingLink()" class="px-3 py-1.5 bg-indigo-600/40 hover:bg-indigo-600/70 border border-indigo-400/40 text-indigo-200 rounded-xl text-xs font-semibold flex items-center gap-1 transition cursor-pointer">
@@ -622,17 +623,30 @@
     const urlParams = new URLSearchParams(window.location.search);
     const isMobileGuardMode = urlParams.get('mode') === 'phone_guard';
 
+    // Safe storage access to prevent SecurityError exceptions in restricted/iframe environments
+    function safeStorageGet(storage, key) {
+      try { return storage ? storage.getItem(key) : null; } catch(e) { return null; }
+    }
+    function safeStorageSet(storage, key, val) {
+      try { if (storage) storage.setItem(key, val); } catch(e) {}
+    }
+
     // Session IDs: Unique session on desktop; preserved in sessionStorage across reloads
-    let savedDesktopSession = sessionStorage.getItem('cts_desktop_session');
-    let currentSessionId;
-    if (isMobileGuardMode) {
-      currentSessionId = (urlParams.get('session') || 'CTS-884920').toUpperCase();
-    } else {
-      if (!savedDesktopSession) {
-        savedDesktopSession = 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        sessionStorage.setItem('cts_desktop_session', savedDesktopSession);
+    let savedDesktopSession = safeStorageGet(window.sessionStorage, 'cts_desktop_session');
+    let currentSessionId = 'CTS-884920';
+
+    try {
+      if (isMobileGuardMode) {
+        currentSessionId = (urlParams.get('session') || 'CTS-884920').toUpperCase();
+      } else {
+        if (!savedDesktopSession) {
+          savedDesktopSession = 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+          safeStorageSet(window.sessionStorage, 'cts_desktop_session', savedDesktopSession);
+        }
+        currentSessionId = savedDesktopSession;
       }
-      currentSessionId = savedDesktopSession;
+    } catch(err) {
+      console.warn("Session init fallback:", err);
     }
 
     const remoteSessionId = (urlParams.get('session') || currentSessionId).toUpperCase();
@@ -701,9 +715,14 @@
       document.getElementById('mobile-session-label').innerText = remoteSessionId;
       initPhoneGuardMode();
     } else {
-      setupDesktopProctorSync();
-      initDesktopPairingUI();
-      initGoogleSheetSyncUI();
+      // 1. Immediately update Pairing UI (PIN & QR Code) - ZERO DELAY, ZERO BLOCKING
+      try { initDesktopPairingUI(); } catch(e) { console.error("Pairing UI init error:", e); }
+
+      // 2. Start Multi-Channel Proctor Listening in background
+      try { setupDesktopProctorSync(); } catch(e) { console.error("Proctor sync init error:", e); }
+
+      // 3. Initialize Google Sheet Sync UI
+      try { initGoogleSheetSyncUI(); } catch(e) { console.error("Sheet sync UI error:", e); }
     }
 
     // ==================== GOOGLE SHEET LIVE SYNCHRONIZATION ====================
@@ -1209,14 +1228,42 @@
       const peerParam = peerId ? `&peerId=${peerId}` : '';
       const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}${peerParam}`;
       
-      const qrImg = document.getElementById('pairing-qr-img');
-      if (qrImg) {
-        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mobileUrl)}`;
-      }
-      const sessionEl = document.getElementById('pairing-session-id');
-      if (sessionEl) sessionEl.innerText = currentSessionId;
+      // Update PIN text elements immediately
       const largeEl = document.getElementById('pairing-session-id-large');
       if (largeEl) largeEl.innerText = currentSessionId;
+      const sessionEl = document.getElementById('pairing-session-id');
+      if (sessionEl) sessionEl.innerText = currentSessionId;
+
+      // Render QR code using offline generator or multi-CDN fallback
+      const qrImg = document.getElementById('pairing-qr-img');
+      if (qrImg) {
+        let renderedOffline = false;
+        if (typeof qrcode !== 'undefined') {
+          try {
+            const qr = qrcode(0, 'M');
+            qr.addData(mobileUrl);
+            qr.make();
+            qrImg.src = qr.createDataURL(5, 0);
+            renderedOffline = true;
+          } catch(err) {
+            console.warn("Client-side QR generation fallback:", err);
+          }
+        }
+
+        if (!renderedOffline) {
+          const encoded = encodeURIComponent(mobileUrl);
+          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encoded}`;
+          qrImg.onerror = function() {
+            if (!this.dataset.triedQuickChart) {
+              this.dataset.triedQuickChart = "true";
+              this.src = `https://quickchart.io/qr?text=${encoded}&size=250`;
+            } else if (!this.dataset.triedGoogleChart) {
+              this.dataset.triedGoogleChart = "true";
+              this.src = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encoded}`;
+            }
+          };
+        }
+      }
     }
 
     function initDesktopPairingUI() {
