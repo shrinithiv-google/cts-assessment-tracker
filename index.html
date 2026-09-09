@@ -9,6 +9,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; user-select: none; -webkit-user-select: none; }
@@ -182,9 +184,15 @@
           </div>
 
           <div class="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl bg-slate-950 border border-slate-800">
-            <!-- QR Code -->
-            <div class="p-2.5 bg-white rounded-2xl w-40 h-40 shrink-0 flex items-center justify-center shadow-lg">
-              <img id="pairing-qr-img" src="" alt="Pairing QR Code" class="w-full h-full object-contain">
+            <!-- QR Code Container with Canvas, DOM, and Image Support -->
+            <div id="pairing-qr-box" onclick="copyPairingLink()" title="Click to copy pairing link" class="p-2.5 bg-white rounded-2xl w-40 h-40 shrink-0 flex items-center justify-center shadow-lg relative cursor-pointer group">
+              <canvas id="pairing-qr-canvas" class="w-full h-full object-contain hidden"></canvas>
+              <div id="pairing-qr-div" class="w-full h-full flex items-center justify-center hidden"></div>
+              <img id="pairing-qr-img" src="" alt="Pairing QR Code" class="w-full h-full object-contain hidden">
+              <div id="pairing-qr-fallback" class="hidden flex flex-col items-center justify-center text-center p-2 text-slate-800">
+                <span class="text-3xl mb-1">📱</span>
+                <span class="text-[10px] font-bold text-slate-700 leading-tight">Tap to Copy<br>Mobile Link</span>
+              </div>
             </div>
 
             <div class="space-y-2 text-left w-full">
@@ -1234,35 +1242,92 @@
       const sessionEl = document.getElementById('pairing-session-id');
       if (sessionEl) sessionEl.innerText = currentSessionId;
 
-      // Render QR code using offline generator or multi-CDN fallback
-      const qrImg = document.getElementById('pairing-qr-img');
-      if (qrImg) {
-        let renderedOffline = false;
-        if (typeof qrcode !== 'undefined') {
-          try {
-            const qr = qrcode(0, 'M');
-            qr.addData(mobileUrl);
-            qr.make();
-            qrImg.src = qr.createDataURL(5, 0);
-            renderedOffline = true;
-          } catch(err) {
-            console.warn("Client-side QR generation fallback:", err);
-          }
-        }
+      const canvas = document.getElementById('pairing-qr-canvas');
+      const div = document.getElementById('pairing-qr-div');
+      const img = document.getElementById('pairing-qr-img');
+      const fallback = document.getElementById('pairing-qr-fallback');
+      let rendered = false;
 
-        if (!renderedOffline) {
-          const encoded = encodeURIComponent(mobileUrl);
-          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encoded}`;
-          qrImg.onerror = function() {
-            if (!this.dataset.triedQuickChart) {
-              this.dataset.triedQuickChart = "true";
-              this.src = `https://quickchart.io/qr?text=${encoded}&size=250`;
-            } else if (!this.dataset.triedGoogleChart) {
-              this.dataset.triedGoogleChart = "true";
-              this.src = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encoded}`;
-            }
-          };
+      // Tier 1: QRious (Pure HTML5 Canvas - client-side, zero network request)
+      if (typeof QRious !== 'undefined' && canvas) {
+        try {
+          new QRious({
+            element: canvas,
+            value: mobileUrl,
+            size: 140,
+            level: 'L',
+            background: '#ffffff',
+            foreground: '#000000'
+          });
+          canvas.classList.remove('hidden');
+          if (div) div.classList.add('hidden');
+          if (img) img.classList.add('hidden');
+          if (fallback) fallback.classList.add('hidden');
+          rendered = true;
+        } catch (e) {
+          console.warn("QRious generation failed:", e);
         }
+      }
+
+      // Tier 2: QRCode.js (David Shim - Canvas/DOM rendering)
+      if (!rendered && typeof QRCode !== 'undefined' && div) {
+        try {
+          div.innerHTML = '';
+          new QRCode(div, {
+            text: mobileUrl,
+            width: 130,
+            height: 130,
+            correctLevel: 1 // L level
+          });
+          div.classList.remove('hidden');
+          if (canvas) canvas.classList.add('hidden');
+          if (img) img.classList.add('hidden');
+          if (fallback) fallback.classList.add('hidden');
+          rendered = true;
+        } catch (e) {
+          console.warn("QRCode.js generation failed:", e);
+        }
+      }
+
+      // Tier 3: qrcode-generator (client-side data URL)
+      if (!rendered && typeof qrcode !== 'undefined' && img) {
+        try {
+          const qr = qrcode(0, 'L');
+          qr.addData(mobileUrl);
+          qr.make();
+          img.src = qr.createDataURL(4, 4);
+          img.classList.remove('hidden');
+          if (canvas) canvas.classList.add('hidden');
+          if (div) div.classList.add('hidden');
+          if (fallback) fallback.classList.add('hidden');
+          rendered = true;
+        } catch (e) {
+          console.warn("qrcode-generator failed:", e);
+        }
+      }
+
+      // Tier 4: Multi-CDN Image Fallback Chain
+      if (!rendered && img) {
+        const encoded = encodeURIComponent(mobileUrl);
+        img.classList.remove('hidden');
+        if (canvas) canvas.classList.add('hidden');
+        if (div) div.classList.add('hidden');
+        if (fallback) fallback.classList.add('hidden');
+        
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encoded}`;
+        img.onerror = function() {
+          if (!this.dataset.triedQuickChart) {
+            this.dataset.triedQuickChart = "true";
+            this.src = `https://quickchart.io/qr?text=${encoded}&size=250`;
+          } else if (!this.dataset.triedTecIt) {
+            this.dataset.triedTecIt = "true";
+            this.src = `https://qrcode.tec-it.com/API/QRCode?data=${encoded}`;
+          } else {
+            // All external CDNs and image services blocked: show clean interactive fallback button
+            this.classList.add('hidden');
+            if (fallback) fallback.classList.remove('hidden');
+          }
+        };
       }
     }
 
