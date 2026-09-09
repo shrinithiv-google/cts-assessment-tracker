@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CTS Sentinel - AI Proctor & Biometric Integrity Platform</title>
+  <title>Sentinel Proctor - AI Proctor & Biometric Integrity Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
@@ -27,8 +27,8 @@
   <div id="mobile-guard-view" class="hidden max-w-md mx-auto w-full min-h-screen flex flex-col justify-between p-4 space-y-4 text-center">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-3">
       <div class="inline-flex p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 text-3xl border border-indigo-500/20">📱 ⇄ 💻</div>
-      <h1 class="text-base font-bold text-white">CTS Sentinel Phone Guard</h1>
-      <p class="text-xs text-slate-400">Connected to Exam Session: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">CTS-SESSION</span> <button onclick="changeMobileSessionPin()" class="ml-2 text-[10px] text-blue-400 underline font-semibold">Change PIN</button></p>
+      <h1 class="text-base font-bold text-white">Sentinel Phone Guard</h1>
+      <p class="text-xs text-slate-400">Connected to Exam Session: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">EXAM-SESSION</span> <button onclick="changeMobileSessionPin()" class="ml-2 text-[10px] text-blue-400 underline font-semibold">Change PIN</button></p>
       
       <div class="p-3.5 bg-red-950/50 border border-red-800/60 rounded-2xl text-[11px] text-red-200 text-left space-y-1.5">
         <div class="font-bold flex items-center gap-1.5 text-red-400 text-xs">
@@ -85,7 +85,7 @@
       <div class="flex items-center gap-3.5 w-full sm:w-auto">
         <div class="h-10 w-10 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-center text-blue-400 font-bold text-lg">🛡️</div>
         <div>
-          <h1 class="font-bold text-base md:text-lg tracking-wide text-white">CTS Sentinel <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/50 ml-2">PROCTOR ACTIVE</span></h1>
+          <h1 class="font-bold text-base md:text-lg tracking-wide text-white">Sentinel Proctor <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/50 ml-2">PROCTOR ACTIVE</span></h1>
           <p class="text-xs text-slate-400">Lab Biometric Authentication & Dual-Perspective Phone Guard</p>
         </div>
       </div>
@@ -132,7 +132,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1">Candidate ID</label>
-                <input type="text" id="candidate-id" value="CTS-884920" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
+                <input type="text" id="candidate-id" value="CAND-884920" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1">Assessment Track</label>
@@ -140,8 +140,8 @@
               </div>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Cognizant Email / LDAP</label>
-              <input type="email" id="candidate-email" value="alex.mercer@cognizant.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Candidate Email / LDAP</label>
+              <input type="email" id="candidate-email" value="candidate@assessment.org" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
             </div>
           </div>
 
@@ -172,7 +172,7 @@
           <div class="p-3.5 bg-indigo-950/50 border border-indigo-500/40 rounded-2xl flex items-center justify-between">
             <div>
               <span class="text-[10px] uppercase tracking-wider text-indigo-300 font-bold block">Desktop Session PIN</span>
-              <span id="pairing-session-id-large" class="text-2xl font-mono font-black text-white tracking-widest">CTS-884920</span>
+              <span id="pairing-session-id-large" class="text-2xl font-mono font-black text-white tracking-widest">CAND-884920</span>
             </div>
             <div class="flex gap-2">
               <button onclick="copyPairingLink()" class="px-3 py-1.5 bg-indigo-600/40 hover:bg-indigo-600/70 border border-indigo-400/40 text-indigo-200 rounded-xl text-xs font-semibold flex items-center gap-1 transition cursor-pointer">
@@ -343,7 +343,7 @@
         <div class="flex items-center gap-3">
           <span class="h-3 w-3 rounded-full bg-emerald-400 pulse-dot"></span>
           <span class="font-bold text-sm text-white">Live Proctored Assessment</span>
-          <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-400 border border-blue-800/60 font-mono">Cognizant CTS-L2</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-400 border border-blue-800/60 font-mono">Senior Assessment Track</span>
         </div>
         <div class="flex items-center gap-6">
           <!-- Live Recording HUD Badge -->
@@ -558,7 +558,7 @@
             <tbody id="telemetry-table-body" class="divide-y divide-slate-800/60 font-mono">
               <tr>
                 <td class="p-3 text-slate-400">Init</td>
-                <td class="p-3 text-white">CTS-884920</td>
+                <td class="p-3 text-white">CAND-884920</td>
                 <td class="p-3 text-emerald-400">Session Initialized</td>
                 <td class="p-3 text-slate-400">0</td>
                 <td class="p-3 text-emerald-400">3/3</td>
@@ -617,7 +617,7 @@
 
   <!-- ==================== JAVASCRIPT PROCTORING ENGINE ==================== -->
   <script>
-    const GAS_WEBAPP_URL = "https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQSvWYcLFstT1xOi88ARYE2TWtJhvqiat5X1dR-bgqDrX0c9X5cDYxe_pFGND3/exec";
+    const GAS_WEBAPP_URL = "https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQsWYcLFsT1xOi88ARYE2TWtJhVqiat5X1dR-bgqDrX0c9X5cDYxe_pFgNd3/exec";
     const SAMPLE_PASSPORT_B64 = "data:image/jpeg;base64,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";
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -632,16 +632,16 @@
     }
 
     // Session IDs: Unique session on desktop; preserved in sessionStorage across reloads
-    let savedDesktopSession = safeStorageGet(window.sessionStorage, 'cts_desktop_session');
-    let currentSessionId = 'CTS-884920';
+    let savedDesktopSession = safeStorageGet(window.sessionStorage, 'sentinel_desktop_session');
+    let currentSessionId = 'CAND-884920';
 
     try {
       if (isMobileGuardMode) {
-        currentSessionId = (urlParams.get('session') || 'CTS-884920').toUpperCase();
+        currentSessionId = (urlParams.get('session') || 'CAND-884920').toUpperCase();
       } else {
         if (!savedDesktopSession) {
-          savedDesktopSession = 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-          safeStorageSet(window.sessionStorage, 'cts_desktop_session', savedDesktopSession);
+          savedDesktopSession = 'EXAM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+          safeStorageSet(window.sessionStorage, 'sentinel_desktop_session', savedDesktopSession);
         }
         currentSessionId = savedDesktopSession;
       }
@@ -698,7 +698,7 @@
     // BroadcastChannel for same-device local testing
     let broadcastChannel = null;
     try {
-      broadcastChannel = new BroadcastChannel('cts_sentinel_bus');
+      broadcastChannel = new BroadcastChannel('sentinel_proctor_bus');
     } catch (e) {
       console.warn("BroadcastChannel unsupported:", e);
     }
@@ -733,16 +733,16 @@
     }
 
     async function syncToGoogleSheet(action, data = {}) {
-      const activeUrl = localStorage.getItem('cts_gas_url') || GAS_WEBAPP_URL;
+      const activeUrl = localStorage.getItem('sentinel_gas_url') || GAS_WEBAPP_URL;
       if (!isValidGasUrl(activeUrl)) {
         console.warn('Google Sheet sync skipped: Valid Google Apps Script URL not configured.');
         return false;
       }
 
       try {
-        const candidateEmail = document.getElementById('candidate-email')?.value || 'alex.mercer@cognizant.com';
+        const candidateEmail = document.getElementById('candidate-email')?.value || 'candidate@assessment.org';
         const candidateName = document.getElementById('candidate-name')?.value || 'Alex Mercer';
-        const candidateId = document.getElementById('candidate-id')?.value || 'CTS-884920';
+        const candidateId = document.getElementById('candidate-id')?.value || 'CAND-884920';
         const cohort = document.getElementById('candidate-role')?.value || 'Fullstack Engineer';
 
         const params = new URLSearchParams({
@@ -770,7 +770,7 @@
     }
 
     function initGoogleSheetSyncUI() {
-      const savedUrl = localStorage.getItem('cts_gas_url') || GAS_WEBAPP_URL;
+      const savedUrl = localStorage.getItem('sentinel_gas_url') || GAS_WEBAPP_URL;
       const input = document.getElementById('gas-url-input');
       const badge = document.getElementById('gas-sync-status-badge');
       if (input && savedUrl && !savedUrl.includes('_example')) {
@@ -800,13 +800,13 @@
         return;
       }
 
-      localStorage.setItem('cts_gas_url', url);
+      localStorage.setItem('sentinel_gas_url', url);
       resultDiv.className = 'text-xs text-amber-400 font-mono';
       resultDiv.innerText = '⏳ Transmitting test ping to Google Sheet...';
       resultDiv.classList.remove('hidden');
 
       try {
-        const candidateEmail = document.getElementById('candidate-email')?.value || 'alex.mercer@cognizant.com';
+        const candidateEmail = document.getElementById('candidate-email')?.value || 'candidate@assessment.org';
         const params = new URLSearchParams({
           action: 'logViolation',
           session: currentSessionId,
@@ -914,7 +914,7 @@
           config: { iceServers: PEER_ICE_SERVERS }
         });
 
-        const targetPeerId = urlParams.get('peerId') || ('cts-' + remoteSessionId.toLowerCase().replace(/[^a-z0-9]/g, ''));
+        const targetPeerId = urlParams.get('peerId') || ('sentinel-' + remoteSessionId.toLowerCase().replace(/[^a-z0-9]/g, ''));
 
         mobilePeer.on('open', (id) => {
           console.log('Mobile peer initialized:', id);
@@ -961,7 +961,7 @@
 
     function setupMobileCloudRelay() {
       const cleanSession = remoteSessionId.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const topic = 'cts_proctor_' + cleanSession;
+      const topic = 'sentinel_proctor_' + cleanSession;
 
       // Broadcast connect immediately to cloud relay
       fetch(`https://ntfy.sh/${topic}`, {
@@ -994,7 +994,7 @@
       // Channel 2: Cloud Relay (ntfy.sh)
       const cleanSession = (msg.sessionId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       if (cleanSession) {
-        fetch(`https://ntfy.sh/cts_proctor_${cleanSession}`, {
+        fetch(`https://ntfy.sh/sentinel_proctor_${cleanSession}`, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain' },
           body: msgStr
@@ -1008,7 +1008,7 @@
 
       // Channel 4: LocalStorage
       try {
-        localStorage.setItem('cts_event_' + msg.sessionId, JSON.stringify({ ...msg, time: Date.now() }));
+        localStorage.setItem('sentinel_event_' + msg.sessionId, JSON.stringify({ ...msg, time: Date.now() }));
       } catch(e){}
 
       // Channel 5: Google Apps Script sync on tamper
@@ -1036,7 +1036,7 @@
 
       // Channel 4: LocalStorage cross-tab events
       window.addEventListener('storage', (e) => {
-        if (e.key === 'cts_event_' + currentSessionId && e.newValue) {
+        if (e.key === 'sentinel_event_' + currentSessionId && e.newValue) {
           try { handleIncomingProctorMessage(JSON.parse(e.newValue)); } catch(err){}
         }
       });
@@ -1066,7 +1066,7 @@
       }
       
       const cleanSession = currentSessionId.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const dynamicPeerId = 'cts-' + cleanSession + '-' + Math.random().toString(36).substring(2, 6);
+      const dynamicPeerId = 'sentinel-' + cleanSession + '-' + Math.random().toString(36).substring(2, 6);
 
       try {
         if (desktopPeer && !desktopPeer.destroyed) {
@@ -1124,7 +1124,7 @@
 
     function setupDesktopCloudRelay() {
       const cleanSession = currentSessionId.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const topic = 'cts_proctor_' + cleanSession;
+      const topic = 'sentinel_proctor_' + cleanSession;
 
       try {
         if (cloudRelayEventSource) {
@@ -1223,7 +1223,7 @@
     function updateDesktopPairingUrl(peerId) {
       let baseUrl = `${window.location.origin}${window.location.pathname}`;
       if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
-        baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+        baseUrl = 'https://shrinithiv-google.github.io/assessment-tracker/';
       }
       const peerParam = peerId ? `&peerId=${peerId}` : '';
       const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}${peerParam}`;
@@ -1273,7 +1273,7 @@
     function copyPairingLink() {
       let baseUrl = `${window.location.origin}${window.location.pathname}`;
       if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
-        baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+        baseUrl = 'https://shrinithiv-google.github.io/assessment-tracker/';
       }
       const peerParam = activeDesktopPeerId ? `&peerId=${activeDesktopPeerId}` : '';
       const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}${peerParam}`;
@@ -1295,7 +1295,7 @@ ${mobileUrl}`);
     function openPhoneGuardInTab() {
       let baseUrl = `${window.location.origin}${window.location.pathname}`;
       if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
-        baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+        baseUrl = 'https://shrinithiv-google.github.io/assessment-tracker/';
       }
       const peerParam = activeDesktopPeerId ? `&peerId=${activeDesktopPeerId}` : '';
       const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}${peerParam}`;
@@ -1333,9 +1333,9 @@ ${mobileUrl}`);
     }
 
     function regenerateSessionAndQR() {
-      sessionStorage.removeItem('cts_desktop_session');
-      currentSessionId = 'CTS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-      sessionStorage.setItem('cts_desktop_session', currentSessionId);
+      safeStorageRemove(window.sessionStorage, 'sentinel_desktop_session');
+      currentSessionId = 'EXAM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      safeStorageSet(window.sessionStorage, 'sentinel_desktop_session', currentSessionId);
       isPhonePaired = false;
       const ind = document.getElementById('phone-pairing-indicator');
       if (ind) {
@@ -1353,22 +1353,22 @@ ${mobileUrl}`);
     }
 
     function promptMobileSentinelMode() {
-      const pin = prompt("Enter the Session PIN from your desktop screen (e.g. CTS-884920):");
+      const pin = prompt("Enter the Session PIN from your desktop screen (e.g. CAND-884920):");
       if (pin && pin.trim()) {
         let baseUrl = `${window.location.origin}${window.location.pathname}`;
         if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
-          baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+          baseUrl = 'https://shrinithiv-google.github.io/assessment-tracker/';
         }
         window.location.href = `${baseUrl}?mode=phone_guard&session=${encodeURIComponent(pin.trim().toUpperCase())}`;
       }
     }
 
     function changeMobileSessionPin() {
-      const pin = prompt("Enter Desktop Session PIN (e.g. CTS-884920):", remoteSessionId);
+      const pin = prompt("Enter Desktop Session PIN (e.g. CAND-884920):", remoteSessionId);
       if (pin && pin.trim()) {
         let baseUrl = `${window.location.origin}${window.location.pathname}`;
         if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
-          baseUrl = 'https://shrinithiv-google.github.io/cts-assessment-tracker/';
+          baseUrl = 'https://shrinithiv-google.github.io/assessment-tracker/';
         }
         window.location.href = `${baseUrl}?mode=phone_guard&session=${encodeURIComponent(pin.trim().toUpperCase())}`;
       }
@@ -1412,7 +1412,7 @@ ${mobileUrl}`);
     window.addEventListener('load', loadBlazeFaceModel);
 
     function useSamplePassportPhoto() {
-      setPassportImageAndExtract(SAMPLE_PASSPORT_B64, "Cognizant_Registered_Sample.jpg");
+      setPassportImageAndExtract(SAMPLE_PASSPORT_B64, "Candidate_Registered_Sample.jpg");
     }
 
     function handlePassportUpload(event) {
@@ -1881,7 +1881,7 @@ ${mobileUrl}`);
 
       const metaLabel = document.getElementById('recording-metadata-label');
       if (metaLabel) {
-        metaLabel.innerText = `File: CTS_${currentSessionId}.webm • Size: ${sizeMB} MB • Duration: ${durationMins}:${durationSecs}`;
+        metaLabel.innerText = `File: Sentinel_${currentSessionId}.webm • Size: ${sizeMB} MB • Duration: ${durationMins}:${durationSecs}`;
       }
 
       logViolationAudit({
@@ -1925,7 +1925,7 @@ ${mobileUrl}`);
       }
       const a = document.createElement('a');
       a.href = proctorVideoUrl;
-      a.download = `CTS_Proctor_Recording_${currentSessionId}.webm`;
+      a.download = `Sentinel_Proctor_Recording_${currentSessionId}.webm`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -2198,7 +2198,7 @@ ${mobileUrl}`);
       const tbody = document.getElementById('telemetry-table-body');
       if (tbody) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="p-3 text-slate-400">${event.timestamp}</td><td class="p-3 text-white">CTS-884920</td><td class="p-3 text-red-400 font-bold">${event.reason}</td><td class="p-3 text-red-400">-1 Strike</td><td class="p-3 text-slate-300">${event.strikesRemaining}/3</td><td class="p-3 text-amber-400 font-semibold">Strike Recorded</td>`;
+        tr.innerHTML = `<td class="p-3 text-slate-400">${event.timestamp}</td><td class="p-3 text-white">CAND-884920</td><td class="p-3 text-red-400 font-bold">${event.reason}</td><td class="p-3 text-red-400">-1 Strike</td><td class="p-3 text-slate-300">${event.strikesRemaining}/3</td><td class="p-3 text-amber-400 font-semibold">Strike Recorded</td>`;
         tbody.prepend(tr);
       }
 
@@ -2262,7 +2262,7 @@ ${mobileUrl}`);
     function exportAuditLogJSON() {
       const data = { session: currentSessionId, strikesConsumed, timestamp: new Date().toISOString() };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `CTS_Audit_${currentSessionId}.json`; a.click();
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Sentinel_Audit_${currentSessionId}.json`; a.click();
     }
   </script>
 </body>
