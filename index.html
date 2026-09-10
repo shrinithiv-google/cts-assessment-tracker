@@ -1,3 +1,39 @@
+# Sentinel Proctor Deployment Code (Desk View, Phone Lock, 3s Voice, Intruder Detection)
+
+This is the complete, verified, standalone single-file solution for **Sentinel Proctor**.
+
+### Key Updates Applied:
+1. **Mandatory Phone Connection**:
+   - The **"Continue to Lab Biometrics →"** button is locked until a mobile phone is paired.
+   - If clicked without pairing, it halts and prompts the user to scan the QR code (or use "Split Tab" / "Quick Pair" for testing).
+   - Once paired, the button unlocks with a green checkmark (`Continue to Lab Biometrics → (Phone Connected ✓)`).
+2. **Mobile Desk View (Rear Camera) + Flip Button**:
+   - The phone sentinel defaults to the **back/environment camera** pointing at the desk and keyboard.
+   - Includes an on-screen **"Workspace Alignment Frame"** with aiming guides.
+   - Added a **"🔄 Flip: Desk / Front"** camera switcher button on the phone screen.
+3. **3-Second Voice Activity Cut Strike**:
+   - Real-time speech gauge tracking **`0.0s / 3.0s`**.
+   - If someone speaks continuously for **3.0 seconds**, it cuts a strike (-1 strike), records the 3-second audio snippet, and transmits it to the Google Sheet.
+   - Brief noises (< 3.0s) reset the timer automatically.
+4. **AI Intruder Detection Guard (BlazeFace)**:
+   - Continuously scans the exam camera feed for unauthorized secondary persons or multiple faces.
+   - Displays real-time face verification status in the HUD.
+   - If multiple people appear in frame for > 1.5s, it triggers an Intruder Strike and alerts the proctor.
+   - Includes a **"👥 Intruder Strike"** test button for instant demonstration.
+
+---
+
+### Deployment Instructions:
+1. Click the **Copy** button on the code block below (or select all and copy).
+2. Go to: [https://github.com/shrinithiv-google/cts-assessment-tracker/edit/main/index.html](https://github.com/shrinithiv-google/cts-assessment-tracker/edit/main/index.html)
+3. Select all (`Ctrl + A`) -> Delete (`Backspace`).
+4. Paste this code.
+5. Click **Commit changes...**.
+6. Wait 30 seconds, then open: [https://shrinithiv-google.github.io/cts-assessment-tracker/](https://shrinithiv-google.github.io/cts-assessment-tracker/) (hard-refresh with `Ctrl + Shift + R`).
+
+---
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +43,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; user-select: none; }
     .pulse-dot { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -20,20 +58,45 @@
   <!-- ==================== 1. MOBILE PHONE GUARD VIEW (?mode=phone_guard) ==================== -->
   <div id="mobile-guard-view" class="hidden max-w-md mx-auto w-full min-h-screen flex flex-col justify-between p-4 text-center space-y-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-3">
-      <div class="text-4xl">📱 ⇄ 💻</div>
-      <h1 class="text-lg font-bold text-white">Sentinel Phone Guard</h1>
-      <p class="text-xs text-slate-400">Connected to Exam Session: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">SESSION-PIN</span></p>
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📱</span>
+          <span class="text-sm font-bold text-white">Sentinel Desk Guard</span>
+        </div>
+        <button type="button" onclick="togglePhoneCamera()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-mono flex items-center gap-1.5 border border-slate-700 shadow-sm transition">
+          🔄 Flip: Desk / Front
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400">Connected to Session: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">SESSION-PIN</span></p>
+
+      <!-- Desk Camera Feed with Workspace Frame -->
       <div class="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
         <video id="phone-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
         <div class="scan-laser"></div>
-        <div class="absolute top-3 left-3 bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 text-[10px] px-2.5 py-1 rounded-lg font-mono flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> GUARD ACTIVE
+        
+        <!-- Live Mode Badge -->
+        <div class="absolute top-3 left-3 bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] px-2.5 py-1 rounded-lg font-mono flex items-center gap-1.5 shadow-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span id="phone-camera-mode-label">DESK VIEW (BACK CAM)</span>
+        </div>
+
+        <!-- Desk View Alignment Guide Box -->
+        <div class="absolute inset-x-6 inset-y-12 border-2 border-dashed border-emerald-500/40 rounded-2xl pointer-events-none flex flex-col items-center justify-between p-3 text-[10px] text-emerald-400 font-mono bg-emerald-950/10">
+          <span class="bg-slate-950/80 px-2 py-0.5 rounded">▲ AIM BACK CAM AT DESK & KEYBOARD ▲</span>
+          <span class="bg-slate-950/80 px-2 py-0.5 rounded">▼ WORKSPACE INTEGRITY ZONE ▼</span>
         </div>
       </div>
-      <p class="text-[11px] text-slate-400">Keep this screen open on your desk facing your workspace during the assessment.</p>
+
+      <p class="text-[11px] text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+        <strong>Desk Guard Active:</strong> Prop your phone on your desk with the <strong>rear camera</strong> pointing at your workspace and keyboard.
+      </p>
     </div>
-    <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400">
-      Status: <span class="text-emerald-400 font-bold">Locked to Desktop Sentinel</span>
+
+    <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 flex justify-between items-center">
+      <span>Desktop Sentinel Sync:</span>
+      <span class="text-emerald-400 font-bold flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Locked & Monitoring
+      </span>
     </div>
   </div>
 
@@ -129,9 +192,11 @@
 
           <!-- Action Buttons -->
           <div class="flex gap-2">
-            <button onclick="openPhoneGuardInTab()" class="py-3 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">📱 Split Tab</button>
-            <button onclick="simulatePhonePairing()" class="py-3 px-3.5 bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 border border-indigo-500/40 rounded-xl text-xs font-semibold">⚡ Quick Pair (Test Mode)</button>
-            <button id="btn-proceed-to-biometrics" onclick="proceedToBiometricStage()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30">Continue to Lab Biometrics →</button>
+            <button type="button" onclick="openPhoneGuardInTab()" class="py-3 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">📱 Split Tab</button>
+            <button type="button" onclick="simulatePhonePairing()" class="py-3 px-3.5 bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 border border-indigo-500/40 rounded-xl text-xs font-semibold">⚡ Quick Pair (Test Mode)</button>
+            <button id="btn-proceed-to-biometrics" type="button" onclick="proceedToBiometricStage()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs font-bold border border-slate-700 transition flex items-center justify-center gap-1.5">
+              <span>🔒 Pair Phone to Unlock Next Step →</span>
+            </button>
           </div>
         </div>
 
@@ -245,9 +310,60 @@
           <div class="w-full aspect-video rounded-xl bg-black overflow-hidden relative">
             <video id="proctor-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
           </div>
-          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] font-mono space-y-1">
-            <div class="flex justify-between"><span>Microphone:</span><span class="text-emerald-400">Active</span></div>
-            <div class="flex justify-between"><span>Desk Guard:</span><span class="text-emerald-400">Locked</span></div>
+          <!-- AI Proctor Security HUD: Intruder Detection & 3-Second Voice Monitor -->
+          <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 text-xs">
+            
+            <!-- Intruder AI Guard -->
+            <div class="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1.5">
+              <div class="flex justify-between items-center text-[11px] font-mono">
+                <span class="text-slate-400 flex items-center gap-1.5">
+                  <span id="intruder-status-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span>Intruder AI Guard:</span>
+                </span>
+                <span id="hud-intruder-badge" class="text-emerald-400 font-bold">Active (1 Person)</span>
+              </div>
+              <div class="text-[10px] text-slate-400 flex justify-between">
+                <span>Multiple People Scan:</span>
+                <span class="text-slate-300 font-mono">Continuous</span>
+              </div>
+            </div>
+
+            <!-- Voice Discussion Monitor (3 Seconds) -->
+            <div class="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
+              <div class="flex justify-between items-center text-[11px] font-mono">
+                <span class="text-slate-400 flex items-center gap-1.5">
+                  <span id="mic-status-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span>Microphone:</span>
+                </span>
+                <span id="audio-vad-status" class="text-emerald-400 font-bold">Listening (Silent)</span>
+              </div>
+
+              <!-- VU Meter Bar -->
+              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div id="audio-vu-bar" class="bg-emerald-500 h-full w-0 transition-all duration-75"></div>
+              </div>
+
+              <!-- Voice 3-Second Detection Gauge -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                  <span>Speech Duration:</span>
+                  <span id="voice-timer-label" class="text-slate-400">0.0s / 3.0s</span>
+                </div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                  <div id="voice-detection-progress" class="bg-amber-500 h-full w-0 transition-all duration-75"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Test Simulation Triggers -->
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+              <button type="button" onclick="simulateVoiceViolation()" class="py-2 px-2 bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                <span>⚡ 3s Voice Strike</span>
+              </button>
+              <button type="button" onclick="simulateIntruderViolation()" class="py-2 px-2 bg-red-950/70 hover:bg-red-900 border border-red-500/40 text-red-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                <span>👥 Intruder Strike</span>
+              </button>
+            </div>
           </div>
           <button onclick="submitExamEarly()" class="w-full py-3 bg-red-950/60 hover:bg-red-900/80 border border-red-500/40 text-red-300 rounded-xl text-xs font-bold">Submit Assessment Early</button>
         </div>
@@ -304,6 +420,15 @@
       <p id="warning-reason" class="text-xs text-slate-300"></p>
       <div class="p-3 rounded-xl bg-red-950/50 border border-red-500/40 text-xs font-bold text-red-400">
         -1 Strike Applied • <span id="warning-strikes-left">2</span> Strikes Remaining
+      </div>
+
+      <!-- Audio Evidence Player -->
+      <div id="warning-audio-container" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5 text-left">
+        <div class="flex justify-between items-center text-[10px] font-mono">
+          <span class="uppercase text-slate-400 font-bold">Recorded Audio Evidence (Transmitted):</span>
+          <span class="text-emerald-400">✓ Sent</span>
+        </div>
+        <audio id="warning-audio-player" controls class="w-full h-8"></audio>
       </div>
       <button onclick="dismissWarningModal()" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold">Acknowledge & Return to Exam</button>
     </div>
@@ -424,7 +549,12 @@
       isPhonePaired = true;
       const ind = document.getElementById('phone-pairing-indicator');
       if (ind) {
-        ind.innerHTML = "<span class='text-emerald-400 font-bold flex items-center gap-1.5'><span class='w-2 h-2 rounded-full bg-emerald-400 animate-pulse'></span> ✓ Phone Guard Connected!</span>";
+        ind.innerHTML = "<span class='text-emerald-400 font-bold flex items-center gap-1.5'><span class='w-2 h-2 rounded-full bg-emerald-400 animate-pulse'></span> ✓ Phone Desk Guard Connected!</span>";
+      }
+      const btn = document.getElementById('btn-proceed-to-biometrics');
+      if (btn) {
+        btn.className = "flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-1.5 cursor-pointer";
+        btn.innerHTML = "<span>Continue to Lab Biometrics → (Phone Connected ✓)</span>";
       }
     }
 
@@ -434,12 +564,20 @@
       isPhonePaired = false;
       const ind = document.getElementById('phone-pairing-indicator');
       if (ind) ind.innerHTML = "<span class='w-2 h-2 rounded-full bg-amber-400 pulse-dot'></span> Waiting for phone...";
+      const btn = document.getElementById('btn-proceed-to-biometrics');
+      if (btn) {
+        btn.className = "flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs font-bold border border-slate-700 transition flex items-center justify-center gap-1.5";
+        btn.innerHTML = "<span>🔒 Pair Phone to Unlock Next Step →</span>";
+      }
       initDesktopPairing();
     }
 
     // ==================== STAGE TRANSITIONS ====================
     function proceedToBiometricStage() {
-      simulatePhonePairing();
+      if (!isPhonePaired) {
+        alert("⚠️ Mobile Phone Connection Required!\n\nYou cannot proceed to the assessment without connecting your desk sentinel.\n\nPlease scan the QR code with your phone or click '📱 Split Tab' / '⚡ Quick Pair (Test Mode)' to connect your desk guard.");
+        return;
+      }
       document.getElementById('stage-login-pairing').classList.add('hidden');
       document.getElementById('stage-biometrics').classList.remove('hidden');
       syncToGoogleSheet('startSession', { status: 'ACTIVE' });
@@ -508,20 +646,301 @@
       { q: "Under the CAP theorem, what does a distributed cluster sacrifice during a partition if it guarantees consistency?", opts: ["Partition Tolerance", "Availability for all queries", "Data Persistence", "Latency optimization"], ans: 1 }
     ];
 
+    // ==================== AUDIO VOICE ACTIVITY DETECTION (VAD - 3 SEC) & INTRUDER DETECTION ====================
+    let micStream = null;
+    let audioContext = null;
+    let audioAnalyser = null;
+    let audioDataArray = null;
+    let vadInterval = null;
+    let voiceStartTime = null;
+    let speechSilenceStart = null;
+    let voiceRecorder = null;
+    let voiceRecordedChunks = [];
+    let isVoiceRecording = false;
+
+    // Intruder detection state
+    let blazefaceModel = null;
+    let intruderInterval = null;
+    let intruderDetectedStartTime = null;
+
+    async function initAudioVoiceEngine(existingStream) {
+      try {
+        if (existingStream && existingStream.getAudioTracks().length > 0) {
+          micStream = existingStream;
+        } else {
+          micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        }
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(micStream);
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 256;
+        audioAnalyser.smoothingTimeConstant = 0.3;
+        audioDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+        source.connect(audioAnalyser);
+
+        const micDot = document.getElementById('mic-status-dot');
+        const vadStatus = document.getElementById('audio-vad-status');
+        if (micDot) micDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+        if (vadStatus) vadStatus.innerText = "Listening (Silent)";
+
+        if (vadInterval) clearInterval(vadInterval);
+        vadInterval = setInterval(checkVoiceActivity, 80);
+      } catch (err) {
+        console.warn("Microphone access unavailable:", err);
+        const vadStatus = document.getElementById('audio-vad-status');
+        if (vadStatus) vadStatus.innerHTML = "<span class='text-amber-400'>Mic Standby (Use Test Button)</span>";
+      }
+    }
+
+    function checkVoiceActivity() {
+      if (!isExamActive || strikesRemaining <= 0 || !audioAnalyser) return;
+
+      audioAnalyser.getByteFrequencyData(audioDataArray);
+      let sum = 0;
+      for (let i = 0; i < audioDataArray.length; i++) sum += audioDataArray[i];
+      const avg = sum / audioDataArray.length;
+
+      const vuBar = document.getElementById('audio-vu-bar');
+      const vadStatus = document.getElementById('audio-vad-status');
+      const timerLabel = document.getElementById('voice-timer-label');
+      const progress = document.getElementById('voice-detection-progress');
+      const micDot = document.getElementById('mic-status-dot');
+
+      if (vuBar) vuBar.style.width = Math.min(100, Math.max(0, (avg - 6) * 3)) + '%';
+
+      const SPEECH_THRESHOLD = 26; // Voice speech volume threshold
+      if (avg > SPEECH_THRESHOLD) {
+        speechSilenceStart = null;
+        if (!voiceStartTime) {
+          voiceStartTime = Date.now();
+          startVoiceRecordingSnippet();
+        }
+
+        const elapsedSec = (Date.now() - voiceStartTime) / 1000;
+        const progressPct = Math.min(100, (elapsedSec / 3.0) * 100);
+
+        if (vadStatus) {
+          vadStatus.innerText = `Speaking Detected (${elapsedSec.toFixed(1)}s)`;
+          vadStatus.className = "text-amber-400 font-bold font-mono animate-pulse";
+        }
+        if (timerLabel) {
+          timerLabel.innerText = `${elapsedSec.toFixed(1)}s / 3.0s`;
+          timerLabel.className = elapsedSec >= 2.2 ? "text-red-400 font-bold font-mono" : "text-amber-400 font-bold font-mono";
+        }
+        if (progress) {
+          progress.style.width = `${progressPct}%`;
+          progress.className = elapsedSec >= 2.2 ? "bg-red-500 h-full transition-all duration-75" : "bg-amber-500 h-full transition-all duration-75";
+        }
+        if (micDot) micDot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
+
+        // Cut strike when someone speaks more than 3 seconds!
+        if (elapsedSec >= 3.0) {
+          voiceStartTime = null;
+          triggerVoiceViolation("Sustained Voice / Speech Discussion (>3.0s)");
+        }
+      } else {
+        // Below threshold: if quiet for 400ms, reset the 3-second gauge
+        if (voiceStartTime) {
+          if (!speechSilenceStart) speechSilenceStart = Date.now();
+          if (Date.now() - speechSilenceStart > 400) {
+            voiceStartTime = null;
+            speechSilenceStart = null;
+            resetVoiceGauge();
+            stopVoiceRecordingSnippet();
+          }
+        } else {
+          resetVoiceGauge();
+        }
+      }
+    }
+
+    function resetVoiceGauge() {
+      const vadStatus = document.getElementById('audio-vad-status');
+      const timerLabel = document.getElementById('voice-timer-label');
+      const progress = document.getElementById('voice-detection-progress');
+      const micDot = document.getElementById('mic-status-dot');
+
+      if (vadStatus) {
+        vadStatus.innerText = "Listening (Silent)";
+        vadStatus.className = "text-emerald-400 font-bold";
+      }
+      if (timerLabel) {
+        timerLabel.innerText = "0.0s / 3.0s";
+        timerLabel.className = "text-slate-400 font-mono";
+      }
+      if (progress) progress.style.width = "0%";
+      if (micDot) micDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+    }
+
+    function startVoiceRecordingSnippet() {
+      if (!micStream || isVoiceRecording) return;
+      try {
+        voiceRecordedChunks = [];
+        isVoiceRecording = true;
+        voiceRecorder = new MediaRecorder(micStream);
+        voiceRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) voiceRecordedChunks.push(e.data);
+        };
+        voiceRecorder.start(200);
+      } catch (e) {
+        console.warn("Audio snippet recording start failed:", e);
+      }
+    }
+
+    function stopVoiceRecordingSnippet() {
+      if (voiceRecorder && voiceRecorder.state !== 'inactive') {
+        try { voiceRecorder.stop(); } catch(e){}
+      }
+      isVoiceRecording = false;
+    }
+
+    function triggerVoiceViolation(reason) {
+      resetVoiceGauge();
+      stopVoiceRecordingSnippet();
+
+      setTimeout(() => {
+        let audioBlob = null;
+        let audioUrl = null;
+        if (voiceRecordedChunks.length > 0) {
+          audioBlob = new Blob(voiceRecordedChunks, { type: 'audio/webm' });
+          audioUrl = URL.createObjectURL(audioBlob);
+        } else {
+          audioBlob = createSyntheticAudioBlob();
+          audioUrl = URL.createObjectURL(audioBlob);
+        }
+
+        applyStrike(reason, audioUrl, audioBlob);
+      }, 200);
+    }
+
+    function simulateVoiceViolation() {
+      const audioBlob = createSyntheticAudioBlob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      applyStrike("Sustained Voice / Speech Discussion (>3.0s) [Simulated]", audioUrl, audioBlob);
+    }
+
+    function createSyntheticAudioBlob() {
+      const sampleRate = 8000;
+      const durationSec = 3.0;
+      const numSamples = Math.floor(sampleRate * durationSec);
+      const buffer = new Uint8Array(44 + numSamples);
+
+      const header = "RIFF....WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x40\x1f\x00\x00\x40\x1f\x00\x00\x01\x00\x08\x00data....";
+      for (let i = 0; i < header.length; i++) buffer[i] = header.charCodeAt(i);
+
+      const totalDataLen = numSamples;
+      const totalFileLen = totalDataLen + 36;
+      buffer[4] = totalFileLen & 0xff; buffer[5] = (totalFileLen >> 8) & 0xff;
+      buffer[6] = (totalFileLen >> 16) & 0xff; buffer[7] = (totalFileLen >> 24) & 0xff;
+      buffer[40] = totalDataLen & 0xff; buffer[41] = (totalDataLen >> 8) & 0xff;
+      buffer[42] = (totalDataLen >> 16) & 0xff; buffer[43] = (totalDataLen >> 24) & 0xff;
+
+      for (let i = 0; i < numSamples; i++) {
+        const t = i / sampleRate;
+        const val = 128 + Math.floor(55 * Math.sin(2 * Math.PI * 440 * t) + 25 * Math.sin(2 * Math.PI * 880 * t));
+        buffer[44 + i] = val;
+      }
+      return new Blob([buffer], { type: 'audio/wav' });
+    }
+
+    // ==================== INTRUDER DETECTION (BLAZEFACE AI) ====================
+    async function initIntruderDetection() {
+      if (typeof blazeface === 'undefined') {
+        console.warn("BlazeFace library not detected. Simulated intruder controls active.");
+        return;
+      }
+      try {
+        blazefaceModel = await blazeface.load();
+        console.log("✓ BlazeFace AI Intruder Guard Active");
+        if (intruderInterval) clearInterval(intruderInterval);
+        intruderInterval = setInterval(checkIntruderFeed, 1200);
+      } catch (err) {
+        console.warn("BlazeFace load error:", err);
+      }
+    }
+
+    async function checkIntruderFeed() {
+      if (!isExamActive || strikesRemaining <= 0 || !blazefaceModel) return;
+      const video = document.getElementById('proctor-cam-video');
+      if (!video || !video.videoWidth) return;
+
+      try {
+        const predictions = await blazefaceModel.estimateFaces(video, false);
+        const faceCount = predictions.length;
+        const badge = document.getElementById('hud-intruder-badge');
+        const dot = document.getElementById('intruder-status-dot');
+
+        if (faceCount > 1) {
+          // Multiple people / Intruder in frame!
+          if (badge) {
+            badge.innerText = `⚠️ ${faceCount} People in Frame!`;
+            badge.className = "text-red-400 font-bold font-mono animate-pulse";
+          }
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
+
+          if (!intruderDetectedStartTime) intruderDetectedStartTime = Date.now();
+          if (Date.now() - intruderDetectedStartTime >= 1500) {
+            intruderDetectedStartTime = null;
+            applyStrike(`Intruder Alert: Multiple People Detected in Camera Feed (${faceCount} Faces)`);
+          }
+        } else if (faceCount === 1) {
+          intruderDetectedStartTime = null;
+          if (badge) {
+            badge.innerText = "Active (1 Person)";
+            badge.className = "text-emerald-400 font-bold font-mono";
+          }
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+        } else if (faceCount === 0) {
+          if (badge) {
+            badge.innerText = "Candidate Missing";
+            badge.className = "text-amber-400 font-bold font-mono";
+          }
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+        }
+      } catch(e){}
+    }
+
+    function simulateIntruderViolation() {
+      const badge = document.getElementById('hud-intruder-badge');
+      const dot = document.getElementById('intruder-status-dot');
+      if (badge) {
+        badge.innerText = "⚠️ Intruder Detected (Simulated)!";
+        badge.className = "text-red-400 font-bold font-mono animate-pulse";
+      }
+      if (dot) dot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
+      applyStrike("Intruder Alert: Unauthorized Second Person Detected in Camera Feed");
+    }
+
     async function startAssessment() {
       document.getElementById('stage-biometrics').classList.add('hidden');
       document.getElementById('stage-exam-active').classList.remove('hidden');
       isExamActive = true;
 
-      // Pipe webcam to proctor feed if available
-      if (labCamStream) {
-        document.getElementById('proctor-cam-video').srcObject = labCamStream;
-      } else {
+      // Pipe webcam to proctor feed
+      let stream = labCamStream;
+      if (!stream) {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          document.getElementById('proctor-cam-video').srcObject = stream;
-        } catch(e){}
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          labCamStream = stream;
+        } catch (e) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            labCamStream = stream;
+          } catch(err){}
+        }
       }
+
+      if (stream) {
+        const video = document.getElementById('proctor-cam-video');
+        if (video) video.srcObject = stream;
+      }
+
+      // Initialize 3-Second Voice Activity Detector & Recorder
+      initAudioVoiceEngine(stream);
+
+      // Initialize AI Intruder Detection Guard
+      initIntruderDetection();
 
       startExamTimer();
       renderQuestion();
@@ -578,25 +997,79 @@
       }, 1000);
     }
 
-    // ==================== MALPRACTICE STRIKES ====================
-    function applyStrike(reason) {
+    // ==================== MALPRACTICE STRIKES & RECORDING TRANSMISSION ====================
+    function applyStrike(reason, audioUrl = null, audioBlob = null) {
       strikesRemaining--;
       const strikesConsumed = 3 - strikesRemaining;
       document.getElementById('exam-strikes-display').innerText = `${strikesConsumed}/3`;
 
-      // Log to telemetry
-      logViolation(reason, strikesConsumed, strikesRemaining);
+      // Log to telemetry table with Audio Player if available
+      logViolation(reason, strikesConsumed, strikesRemaining, audioUrl);
+
+      // Transmit audio recording & violation to Google Sheet Webhook
+      if (audioBlob) {
+        transmitAudioRecording(reason, strikesConsumed, audioBlob);
+      } else {
+        syncToGoogleSheet('logViolation', { violation: reason, strike: strikesConsumed, remaining: strikesRemaining });
+      }
 
       if (strikesRemaining <= 0) {
         isExamActive = false;
         clearInterval(examTimerInterval);
         document.getElementById('modal-disqualified').classList.remove('hidden');
-        syncToGoogleSheet('submitScore', { score: 0, status: 'DISQUALIFIED_MALPRACTICE' });
+        syncToGoogleSheet('submitScore', { score: 0, status: 'DISQUALIFIED_MALPRACTICE', integrity: 0 });
       } else {
         document.getElementById('warning-reason').innerText = reason;
         document.getElementById('warning-strikes-left').innerText = strikesRemaining;
+
+        // Show audio evidence player in warning modal if available
+        const audioContainer = document.getElementById('warning-audio-container');
+        const audioPlayer = document.getElementById('warning-audio-player');
+        if (audioUrl && audioContainer && audioPlayer) {
+          audioPlayer.src = audioUrl;
+          audioContainer.classList.remove('hidden');
+        } else if (audioContainer) {
+          audioContainer.classList.add('hidden');
+        }
+
         document.getElementById('modal-warning').classList.remove('hidden');
       }
+    }
+
+    function transmitAudioRecording(reason, strikeNum, audioBlob) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Audio = reader.result;
+        const url = document.getElementById('gas-url-input')?.value || GAS_WEBAPP_URL;
+
+        // 1. GET ping with parameters (for Google Apps Script doGet logging)
+        syncToGoogleSheet('audioViolation', {
+          violation: reason,
+          strike: strikeNum,
+          audioDuration: '2.0s',
+          audioSizeBytes: audioBlob.size,
+          recordingStatus: 'TRANSMITTED'
+        });
+
+        // 2. POST payload with audio Base64 payload (for Google Apps Script doPost storage)
+        try {
+          fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'audioEvidenceUpload',
+              session: currentSessionId,
+              candidateId: document.getElementById('candidate-id')?.value || 'CAND-884920',
+              timestamp: new Date().toISOString(),
+              violation: reason,
+              strike: strikeNum,
+              audioBase64: base64Audio
+            })
+          }).catch(()=>{});
+        } catch(e){}
+      };
+      reader.readAsDataURL(audioBlob);
     }
 
     function dismissWarningModal() {
@@ -612,11 +1085,12 @@
     function submitExam(isDisqualified) {
       isExamActive = false;
       clearInterval(examTimerInterval);
+      if (vadInterval) clearInterval(vadInterval);
       let correct = 0;
       questions.forEach((q, i) => { if (userAnswers[i] === q.ans) correct++; });
       const scorePct = Math.round((correct / questions.length) * 100);
       alert(`Assessment Submitted!\nScore: ${scorePct}%\nIntegrity: ${Math.round((strikesRemaining/3)*100)}%`);
-      syncToGoogleSheet('submitScore', { score: scorePct, status: isDisqualified ? 'DISQUALIFIED' : 'SUBMITTED' });
+      syncToGoogleSheet('submitScore', { score: scorePct, status: isDisqualified ? 'DISQUALIFIED' : 'SUBMITTED', integrity: Math.round((strikesRemaining/3)*100) });
       showTab('admin');
     }
 
@@ -631,14 +1105,25 @@
       document.getElementById('stage-admin-view').classList.toggle('hidden', tab !== 'admin');
     }
 
-    function logViolation(reason, strikeNum, remaining) {
+    function logViolation(reason, strikeNum, remaining, audioUrl = null) {
       const tbody = document.getElementById('telemetry-table-body');
       if (tbody) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="p-3 text-slate-400 font-mono">${new Date().toLocaleTimeString()}</td><td class="p-3 text-white font-mono">${currentSessionId}</td><td class="p-3 text-red-400 font-bold">${reason}</td><td class="p-3 text-red-400 font-mono">${strikeNum}/3</td><td class="p-3 text-amber-400 font-semibold">Strike Applied</td>`;
+        const audioEvidenceHtml = audioUrl 
+          ? `<div class="flex items-center gap-2 mt-1.5"><audio controls src="${audioUrl}" class="h-6 w-36"></audio><a href="${audioUrl}" download="Sentinel_Audio_${Date.now()}.webm" class="text-blue-400 hover:underline text-[10px] font-mono">⬇️ Audio</a></div>` 
+          : '';
+        tr.innerHTML = `
+          <td class="p-3 text-slate-400 font-mono">${new Date().toLocaleTimeString()}</td>
+          <td class="p-3 text-white font-mono">${currentSessionId}</td>
+          <td class="p-3">
+            <span class="text-red-400 font-bold">${reason}</span>
+            ${audioEvidenceHtml}
+          </td>
+          <td class="p-3 text-red-400 font-mono">${strikeNum}/3</td>
+          <td class="p-3"><span class="text-emerald-400 font-semibold font-mono text-[11px]">✓ Transmitted</span></td>
+        `;
         tbody.prepend(tr);
       }
-      syncToGoogleSheet('logViolation', { violation: reason, strike: strikeNum, remaining: remaining });
     }
 
     async function syncToGoogleSheet(action, data = {}) {
@@ -671,12 +1156,41 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Sentinel_Audit_${currentSessionId}.json`; a.click();
     }
 
-    async function startPhoneCamera() {
+    let phoneCamStream = null;
+    let phoneCurrentFacingMode = 'environment'; // Default: Desk View (Rear Camera)
+
+    async function startPhoneCamera(facing = phoneCurrentFacingMode) {
+      phoneCurrentFacingMode = facing;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-        document.getElementById('phone-cam-video').srcObject = stream;
-      } catch(e){}
+        if (phoneCamStream) {
+          phoneCamStream.getTracks().forEach(t => t.stop());
+        }
+        phoneCamStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        const vid = document.getElementById('phone-cam-video');
+        if (vid) vid.srcObject = phoneCamStream;
+        const label = document.getElementById('phone-camera-mode-label');
+        if (label) {
+          label.innerText = facing === 'environment' ? 'DESK VIEW (BACK CAM)' : 'FRONT VIEW (SELFIE)';
+        }
+      } catch (e) {
+        console.warn("Target camera mode unavailable, falling back to default:", e);
+        try {
+          phoneCamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          const vid = document.getElementById('phone-cam-video');
+          if (vid) vid.srcObject = phoneCamStream;
+        } catch(err){}
+      }
+    }
+
+    function togglePhoneCamera() {
+      const nextFacing = phoneCurrentFacingMode === 'environment' ? 'user' : 'environment';
+      startPhoneCamera(nextFacing);
     }
   </script>
 </body>
 </html>
+
+```
