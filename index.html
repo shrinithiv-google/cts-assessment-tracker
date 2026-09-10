@@ -1,39 +1,3 @@
-# Sentinel Proctor Deployment Code (Desk View, Phone Lock, 3s Voice, Intruder Detection)
-
-This is the complete, verified, standalone single-file solution for **Sentinel Proctor**.
-
-### Key Updates Applied:
-1. **Mandatory Phone Connection**:
-   - The **"Continue to Lab Biometrics →"** button is locked until a mobile phone is paired.
-   - If clicked without pairing, it halts and prompts the user to scan the QR code (or use "Split Tab" / "Quick Pair" for testing).
-   - Once paired, the button unlocks with a green checkmark (`Continue to Lab Biometrics → (Phone Connected ✓)`).
-2. **Mobile Desk View (Rear Camera) + Flip Button**:
-   - The phone sentinel defaults to the **back/environment camera** pointing at the desk and keyboard.
-   - Includes an on-screen **"Workspace Alignment Frame"** with aiming guides.
-   - Added a **"🔄 Flip: Desk / Front"** camera switcher button on the phone screen.
-3. **3-Second Voice Activity Cut Strike**:
-   - Real-time speech gauge tracking **`0.0s / 3.0s`**.
-   - If someone speaks continuously for **3.0 seconds**, it cuts a strike (-1 strike), records the 3-second audio snippet, and transmits it to the Google Sheet.
-   - Brief noises (< 3.0s) reset the timer automatically.
-4. **AI Intruder Detection Guard (BlazeFace)**:
-   - Continuously scans the exam camera feed for unauthorized secondary persons or multiple faces.
-   - Displays real-time face verification status in the HUD.
-   - If multiple people appear in frame for > 1.5s, it triggers an Intruder Strike and alerts the proctor.
-   - Includes a **"👥 Intruder Strike"** test button for instant demonstration.
-
----
-
-### Deployment Instructions:
-1. Click the **Copy** button on the code block below (or select all and copy).
-2. Go to: [https://github.com/shrinithiv-google/cts-assessment-tracker/edit/main/index.html](https://github.com/shrinithiv-google/cts-assessment-tracker/edit/main/index.html)
-3. Select all (`Ctrl + A`) -> Delete (`Backspace`).
-4. Paste this code.
-5. Click **Commit changes...**.
-6. Wait 30 seconds, then open: [https://shrinithiv-google.github.io/cts-assessment-tracker/](https://shrinithiv-google.github.io/cts-assessment-tracker/) (hard-refresh with `Ctrl + Shift + R`).
-
----
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
