@@ -34,6 +34,16 @@
 
       <p class="text-xs text-slate-400">Connected to Session PIN: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">TRACE-884920</span></p>
 
+      <!-- Phone Tamper Warning Alert Banner -->
+      <div id="phone-tamper-banner" class="hidden p-3.5 bg-red-950 border border-red-500 rounded-2xl text-xs text-red-200 font-bold animate-pulse text-left space-y-1">
+        <div class="flex items-center gap-1.5 text-red-400 font-extrabold text-xs">
+          <span>🛑 MALPRACTICE STRIKE RECORDED</span>
+        </div>
+        <p class="text-[11px] text-red-300 font-medium leading-relaxed">
+          You navigated away from Trace Desk Guard (ChatGPT or external app opened). 1 strike has been deducted on your exam monitor!
+        </p>
+      </div>
+
       <!-- Desk Camera Feed with Workspace Frame -->
       <div class="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
         <video id="phone-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
@@ -54,6 +64,9 @@
       <p class="text-[11px] text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
         <strong>Desk Guard Active:</strong> Prop your phone on your desk with the <strong>rear camera</strong> pointing at your workspace and keyboard.
       </p>
+      <button type="button" onclick="simulatePhoneTamperEvent()" class="w-full py-2.5 bg-red-950/80 hover:bg-red-900 border border-red-600/50 text-red-300 rounded-xl text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 shadow-md">
+        <span>⚡ Test ChatGPT / Tab Switch Strike</span>
+      </button>
     </div>
 
     <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 flex justify-between items-center">
@@ -302,7 +315,7 @@
               </div>
             </div>
 
-            <!-- Voice Discussion Monitor (3 Seconds) -->
+            <!-- Voice Discussion Monitor (2.0 Seconds) -->
             <div class="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
               <div class="flex justify-between items-center text-[11px] font-mono">
                 <span class="text-slate-400 flex items-center gap-1.5">
@@ -317,11 +330,11 @@
                 <div id="audio-vu-bar" class="bg-emerald-500 h-full w-0 transition-all duration-75"></div>
               </div>
 
-              <!-- Voice 3-Second Detection Gauge -->
+              <!-- Voice 2-Second Detection Gauge -->
               <div class="space-y-1">
                 <div class="flex justify-between text-[10px] font-mono text-slate-400">
                   <span>Speech Duration:</span>
-                  <span id="voice-timer-label" class="text-slate-400">0.0s / 3.0s</span>
+                  <span id="voice-timer-label" class="text-slate-400">0.0s / 2.0s</span>
                 </div>
                 <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
                   <div id="voice-detection-progress" class="bg-amber-500 h-full w-0 transition-all duration-75"></div>
@@ -329,14 +342,23 @@
               </div>
             </div>
 
-            <!-- Test Simulation Triggers -->
-            <div class="grid grid-cols-2 gap-2 pt-0.5">
-              <button type="button" onclick="simulateVoiceViolation()" class="py-2 px-2 bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
-                <span>⚡ 3s Voice Strike</span>
-              </button>
-              <button type="button" onclick="simulateIntruderViolation()" class="py-2 px-2 bg-red-950/70 hover:bg-red-900 border border-red-500/40 text-red-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
-                <span>👥 Intruder Strike</span>
-              </button>
+            <!-- Instant Malpractice Test Triggers (All 4 Vectors) -->
+            <div class="space-y-1.5 pt-0.5">
+              <div class="text-[10px] font-mono uppercase text-slate-400 font-bold">Test Malpractice Triggers:</div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button type="button" onclick="simulateVoiceViolation()" class="py-1.5 px-2 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                  <span>🎤 Voice (&gt;2s)</span>
+                </button>
+                <button type="button" onclick="simulateIntruderViolation()" class="py-1.5 px-2 bg-red-950/80 hover:bg-red-900 border border-red-500/40 text-red-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                  <span>👥 Intruder</span>
+                </button>
+                <button type="button" onclick="applyStrike('Phone Guard Tab Switched / Minimized (ChatGPT Detected on Phone)')" class="py-1.5 px-2 bg-purple-950/80 hover:bg-purple-900 border border-purple-500/40 text-purple-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                  <span>📱 Phone ChatGPT</span>
+                </button>
+                <button type="button" onclick="applyStrike('Desktop Exam Tab Switched or Minimized (External Navigation Detected)')" class="py-1.5 px-2 bg-blue-950/80 hover:bg-blue-900 border border-blue-500/40 text-blue-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                  <span>💻 Desktop Tab</span>
+                </button>
+              </div>
             </div>
           </div>
           <button onclick="submitExamEarly()" class="w-full py-3 bg-red-950/60 hover:bg-red-900/80 border border-red-500/40 text-red-300 rounded-xl text-xs font-bold">Submit Assessment Early</button>
@@ -348,7 +370,38 @@
     <div id="stage-admin-view" class="hidden bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h2 class="text-lg font-bold text-white">Admin Live Telemetry & Audit Logs</h2>
-        <button onclick="exportAuditLogJSON()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">Export Audit JSON</button>
+        <div class="flex items-center gap-2">
+          <button onclick="exportAuditLogJSON()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">Export Audit JSON</button>
+        </div>
+      </div>
+
+      <!-- Live Integrity Malpractice Simulator Suite -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="text-xs font-bold text-white flex items-center gap-2">
+              <span>⚡</span> Real-Time Malpractice Test Simulation Suite
+            </span>
+            <p class="text-[11px] text-slate-400">Click any trigger to simulate live candidate malpractice, strike deduction, and immediate Google Sheet sync:</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-indigo-950 text-indigo-400 border border-indigo-800">
+            TEST MODE ACTIVE
+          </span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button type="button" onclick="applyStrike('Phone Guard Tab Switched / Minimized (ChatGPT Detected on Phone)')" class="py-2 px-3 bg-purple-950 hover:bg-purple-900 border border-purple-600/60 text-purple-300 rounded-xl text-xs font-mono font-bold transition flex items-center justify-center gap-1.5">
+            <span>📱 Phone ChatGPT Strike</span>
+          </button>
+          <button type="button" onclick="applyStrike('Desktop Exam Tab Switched or Minimized (External Navigation Detected)')" class="py-2 px-3 bg-blue-950 hover:bg-blue-900 border border-blue-600/60 text-blue-300 rounded-xl text-xs font-mono font-bold transition flex items-center justify-center gap-1.5">
+            <span>💻 Desktop Tab Switch</span>
+          </button>
+          <button type="button" onclick="simulateVoiceViolation()" class="py-2 px-3 bg-indigo-950 hover:bg-indigo-900 border border-indigo-600/60 text-indigo-300 rounded-xl text-xs font-mono font-bold transition flex items-center justify-center gap-1.5">
+            <span>🎤 Voice Strike (&gt;2.0s)</span>
+          </button>
+          <button type="button" onclick="simulateIntruderViolation()" class="py-2 px-3 bg-red-950 hover:bg-red-900 border border-red-600/60 text-red-300 rounded-xl text-xs font-mono font-bold transition flex items-center justify-center gap-1.5">
+            <span>👥 Intruder Detection</span>
+          </button>
+        </div>
       </div>
       <!-- 1. Google Sheet Real-Time Sync & Diagnostics Panel -->
       <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
@@ -582,20 +635,101 @@
       document.getElementById('mobile-guard-view').classList.remove('hidden');
       document.getElementById('mobile-session-label').innerText = currentSessionId;
       startPhoneCamera();
-      // Send heartbeat
+      
+      // Periodic heartbeat pulse
       setInterval(() => {
         if (channel) channel.postMessage({ type: 'HEARTBEAT', session: currentSessionId });
-      }, 3000);
+      }, 2500);
+
+      // Mobile anti-tamper detection: Detect when candidate minimizes phone, opens ChatGPT or switches tabs
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          handlePhoneTamper("Phone Guard Tab Switched or Minimized (ChatGPT / External App Detected on Phone)");
+        }
+      });
+      window.addEventListener('pagehide', () => {
+        handlePhoneTamper("Phone Guard Page Hidden (External App Opened on Phone)");
+      });
+      window.addEventListener('blur', () => {
+        handlePhoneTamper("Phone Guard Screen Lost Focus (Interaction with external app detected)");
+      });
+
     } else {
-      initDesktopPairing(); renderQuestionBankUI();
-      // Listen for phone heartbeat
+      initDesktopPairing(); 
+      renderQuestionBankUI();
+      // Pre-warm BlazeFace AI in background so intruder detection is instant
+      setTimeout(initIntruderDetection, 1000);
+
+      // Listen for phone messages (Heartbeat + Tamper/ChatGPT detection)
       if (channel) {
         channel.onmessage = (e) => {
           if (e.data && e.data.session === currentSessionId) {
-            markPhoneAsPaired();
+            if (e.data.type === 'HEARTBEAT' || e.data.type === 'PHONE_CONNECTED') {
+              markPhoneAsPaired();
+            } else if (e.data.type === 'PHONE_TAMPER') {
+              applyStrike(e.data.reason || "Phone Guard Tab Switched / Minimized (ChatGPT Detected on Phone)");
+            }
           }
         };
       }
+
+      // Storage event listener for cross-tab phone tamper
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'trace_tamper_' + currentSessionId && e.newValue) {
+          try {
+            const data = JSON.parse(e.newValue);
+            if (data && data.session === currentSessionId) {
+              applyStrike(data.reason || "Phone Guard Tab Switched / Minimized (ChatGPT Detected on Phone)");
+            }
+          } catch(err){}
+        }
+      });
+
+      // Desktop Tab-switch & window blur detection on candidate monitor
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && isExamActive && strikesRemaining > 0) {
+          applyStrike("Desktop Exam Tab Switched or Minimized (External Navigation Detected)");
+        }
+      });
+      window.addEventListener('blur', () => {
+        if (isExamActive && strikesRemaining > 0) {
+          applyStrike("Desktop Window Focus Lost (Interaction with external window detected)");
+        }
+      });
+    }
+
+    function handlePhoneTamper(reason) {
+      const cleanReason = reason || "Phone Guard Tab Switched or Minimized (ChatGPT / External App Detected on Phone)";
+      const banner = document.getElementById('phone-tamper-banner');
+      if (banner) {
+        banner.innerText = `🛑 MALPRACTICE STRIKE RECORDED: ${cleanReason}`;
+        banner.classList.remove('hidden');
+      }
+
+      const payload = {
+        type: 'PHONE_TAMPER',
+        reason: cleanReason,
+        session: currentSessionId,
+        timestamp: new Date().toISOString()
+      };
+
+      if (channel) {
+        try { channel.postMessage(payload); } catch(e){}
+      }
+      try {
+        localStorage.setItem('trace_tamper_' + currentSessionId, JSON.stringify(payload));
+      } catch(e){}
+      try {
+        syncToGoogleSheet('logViolation', {
+          violation: cleanReason,
+          strike: 'PHONE_TAMPER',
+          device: 'Mobile Phone Guard'
+        });
+      } catch(e){}
+    }
+
+    function simulatePhoneTamperEvent() {
+      handlePhoneTamper("Phone Guard Tab Switched or Minimized (ChatGPT Detected on Phone) [Test]");
     }
 
     // ==================== PAIRING & QR CODE ====================
@@ -838,32 +972,32 @@
         }
 
         const elapsedSec = (Date.now() - voiceStartTime) / 1000;
-        const progressPct = Math.min(100, (elapsedSec / 3.0) * 100);
+        const progressPct = Math.min(100, (elapsedSec / 2.0) * 100);
 
         if (vadStatus) {
           vadStatus.innerText = `Speaking Detected (${elapsedSec.toFixed(1)}s)`;
           vadStatus.className = "text-amber-400 font-bold font-mono animate-pulse";
         }
         if (timerLabel) {
-          timerLabel.innerText = `${elapsedSec.toFixed(1)}s / 3.0s`;
-          timerLabel.className = elapsedSec >= 2.2 ? "text-red-400 font-bold font-mono" : "text-amber-400 font-bold font-mono";
+          timerLabel.innerText = `${elapsedSec.toFixed(1)}s / 2.0s`;
+          timerLabel.className = elapsedSec >= 1.5 ? "text-red-400 font-bold font-mono" : "text-amber-400 font-bold font-mono";
         }
         if (progress) {
           progress.style.width = `${progressPct}%`;
-          progress.className = elapsedSec >= 2.2 ? "bg-red-500 h-full transition-all duration-75" : "bg-amber-500 h-full transition-all duration-75";
+          progress.className = elapsedSec >= 1.5 ? "bg-red-500 h-full transition-all duration-75" : "bg-amber-500 h-full transition-all duration-75";
         }
         if (micDot) micDot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
 
-        // Cut strike when someone speaks more than 3 seconds!
-        if (elapsedSec >= 3.0) {
+        // Cut strike when someone speaks more than 2 seconds!
+        if (elapsedSec >= 2.0) {
           voiceStartTime = null;
-          triggerVoiceViolation("Sustained Voice / Speech Discussion (>3.0s)");
+          triggerVoiceViolation("Sustained Voice / Speech Discussion (>2.0s)");
         }
       } else {
-        // Below threshold: if quiet for 400ms, reset the 3-second gauge
+        // Below threshold: if quiet for 350ms, reset the 2-second gauge
         if (voiceStartTime) {
           if (!speechSilenceStart) speechSilenceStart = Date.now();
-          if (Date.now() - speechSilenceStart > 400) {
+          if (Date.now() - speechSilenceStart > 350) {
             voiceStartTime = null;
             speechSilenceStart = null;
             resetVoiceGauge();
@@ -886,7 +1020,7 @@
         vadStatus.className = "text-emerald-400 font-bold";
       }
       if (timerLabel) {
-        timerLabel.innerText = "0.0s / 3.0s";
+        timerLabel.innerText = "0.0s / 2.0s";
         timerLabel.className = "text-slate-400 font-mono";
       }
       if (progress) progress.style.width = "0%";
@@ -1014,12 +1148,12 @@
     function simulateVoiceViolation() {
       const audioBlob = createSyntheticAudioBlob();
       const audioUrl = URL.createObjectURL(audioBlob);
-      applyStrike("Sustained Voice / Speech Discussion (>3.0s) [Simulated]", audioUrl, audioBlob);
+      applyStrike("Sustained Voice / Speech Discussion (>2.0s) [Simulated]", audioUrl, audioBlob);
     }
 
     function createSyntheticAudioBlob() {
       const sampleRate = 8000;
-      const durationSec = 3.0;
+      const durationSec = 2.0;
       const numSamples = Math.floor(sampleRate * durationSec);
       const buffer = new Uint8Array(44 + numSamples);
 
@@ -1060,7 +1194,7 @@
     async function checkIntruderFeed() {
       if (!isExamActive || strikesRemaining <= 0 || !blazefaceModel) return;
       const video = document.getElementById('proctor-cam-video');
-      if (!video || !video.videoWidth) return;
+      if (!video || video.readyState < 2 || !video.videoWidth) return;
 
       try {
         const predictions = await blazefaceModel.estimateFaces(video, false);
@@ -1071,13 +1205,13 @@
         if (faceCount > 1) {
           // Multiple people / Intruder in frame!
           if (badge) {
-            badge.innerText = `⚠️ ${faceCount} People in Frame!`;
+            badge.innerText = `⚠️ Intruder Alert (${faceCount} Faces)!`;
             badge.className = "text-red-400 font-bold font-mono animate-pulse";
           }
           if (dot) dot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
 
           if (!intruderDetectedStartTime) intruderDetectedStartTime = Date.now();
-          if (Date.now() - intruderDetectedStartTime >= 1500) {
+          if (Date.now() - intruderDetectedStartTime >= 1000) {
             intruderDetectedStartTime = null;
             applyStrike(`Intruder Alert: Multiple People Detected in Camera Feed (${faceCount} Faces)`);
           }
@@ -1113,10 +1247,21 @@
       document.getElementById('stage-biometrics').classList.add('hidden');
       document.getElementById('stage-exam-active').classList.remove('hidden');
       isExamActive = true;
+      currentQuestionIdx = 0;
+      userAnswers = userAnswers || {};
 
-      // Pipe webcam to proctor feed
+      // 1. INSTANT ZERO-DELAY QUESTION RENDERING & TIMER START
+      // Never block question rendering on webcam or permissions!
+      renderQuestion();
+      startExamTimer();
+
+      // 2. Non-blocking asynchronous camera, audio VAD, and intruder setup
+      setupExamSecurityFeeds();
+    }
+
+    async function setupExamSecurityFeeds() {
       let stream = labCamStream;
-      if (!stream) {
+      if (!stream && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
           stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
           labCamStream = stream;
@@ -1130,43 +1275,59 @@
 
       if (stream) {
         const video = document.getElementById('proctor-cam-video');
-        if (video) video.srcObject = stream;
+        if (video) {
+          video.srcObject = stream;
+          video.play().catch(()=>{});
+        }
       }
 
-      // Initialize 3-Second Voice Activity Detector & Recorder
-      initAudioVoiceEngine(stream);
+      // Initialize 2-Second Voice Activity Detector & Recorder
+      try { initAudioVoiceEngine(stream); } catch(e){}
 
       // Initialize AI Intruder Detection Guard
-      initIntruderDetection();
-      startSessionRecording(stream);
+      try { initIntruderDetection(); } catch(e){}
 
-      startExamTimer();
-      renderQuestion();
-
-      // Window blur tamper strike
-      window.addEventListener('blur', () => {
-        if (isExamActive) applyStrike("Window Focus Lost (Tab switch or external app detected)");
-      });
+      // Start full exam session recording
+      try { startSessionRecording(stream); } catch(e){}
     }
 
     function renderQuestion() {
-      const q = questions[currentQuestionIdx];
-      document.getElementById('question-number-badge').innerText = `Question ${currentQuestionIdx + 1} of ${questions.length}`;
-      document.getElementById('question-text').innerText = q.q;
+      if (!questions || !Array.isArray(questions) || questions.length === 0) {
+        questions = [...defaultQuestions];
+      }
+      if (currentQuestionIdx < 0 || currentQuestionIdx >= questions.length) {
+        currentQuestionIdx = 0;
+      }
+      const q = questions[currentQuestionIdx] || defaultQuestions[0];
+      
+      const badge = document.getElementById('question-number-badge');
+      if (badge) badge.innerText = `Question ${currentQuestionIdx + 1} of ${questions.length}`;
+
+      const qText = document.getElementById('question-text');
+      if (qText) qText.innerText = q.q;
 
       const container = document.getElementById('options-container');
-      container.innerHTML = '';
-      q.opts.forEach((opt, idx) => {
-        const isSelected = userAnswers[currentQuestionIdx] === idx;
-        const div = document.createElement('div');
-        div.className = `p-3 rounded-xl border text-xs cursor-pointer transition flex items-center gap-3 ${isSelected ? 'bg-blue-600/20 border-blue-500 text-white font-semibold' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'}`;
-        div.onclick = () => { userAnswers[currentQuestionIdx] = idx; renderQuestion(); };
-        div.innerHTML = `<span class="h-4 w-4 rounded-full border flex items-center justify-center text-[10px] ${isSelected ? 'border-blue-400 bg-blue-500 text-white' : 'border-slate-600'}">${String.fromCharCode(65 + idx)}</span> <span>${opt}</span>`;
-        container.appendChild(div);
-      });
+      if (container) {
+        container.innerHTML = '';
+        const opts = (q.opts && Array.isArray(q.opts) && q.opts.length > 0) ? q.opts : ["Option A", "Option B", "Option C", "Option D"];
+        opts.forEach((opt, idx) => {
+          const isSelected = userAnswers && userAnswers[currentQuestionIdx] === idx;
+          const div = document.createElement('div');
+          div.className = `p-3.5 rounded-xl border text-xs cursor-pointer transition flex items-center gap-3 ${isSelected ? 'bg-blue-600/20 border-blue-500 text-white font-semibold' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'}`;
+          div.onclick = () => { 
+            if (!userAnswers) userAnswers = {};
+            userAnswers[currentQuestionIdx] = idx; 
+            renderQuestion(); 
+          };
+          div.innerHTML = `<span class="h-5 w-5 rounded-full border flex items-center justify-center text-[10px] font-bold ${isSelected ? 'border-blue-400 bg-blue-500 text-white' : 'border-slate-600 text-slate-400'}">${String.fromCharCode(65 + idx)}</span> <span>${opt}</span>`;
+          container.appendChild(div);
+        });
+      }
 
-      document.getElementById('btn-prev-q').disabled = currentQuestionIdx === 0;
-      document.getElementById('btn-next-q').innerText = currentQuestionIdx === questions.length - 1 ? 'Finish & Submit' : 'Next →';
+      const prevBtn = document.getElementById('btn-prev-q');
+      if (prevBtn) prevBtn.disabled = currentQuestionIdx === 0;
+      const nextBtn = document.getElementById('btn-next-q');
+      if (nextBtn) nextBtn.innerText = currentQuestionIdx === questions.length - 1 ? 'Finish & Submit' : 'Next →';
     }
 
     function navigateQuestion(delta) {
@@ -1196,7 +1357,12 @@
     }
 
     // ==================== MALPRACTICE STRIKES & RECORDING TRANSMISSION ====================
+    let lastStrikeTimestamp = 0;
     function applyStrike(reason, audioUrl = null, audioBlob = null) {
+      const now = Date.now();
+      if (now - lastStrikeTimestamp < 1200) return; // Prevent double-counting rapid events
+      lastStrikeTimestamp = now;
+
       strikesRemaining--;
       const strikesConsumed = 3 - strikesRemaining;
       document.getElementById('exam-strikes-display').innerText = `${strikesConsumed}/3`;
