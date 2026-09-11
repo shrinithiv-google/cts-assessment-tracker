@@ -177,10 +177,13 @@
             </div>
           </div>
 
-          <!-- Action Buttons (Strictly Verified Pairing Only) -->
-          <div>
+          <!-- Action Buttons (Verified Pairing with Instant Confirmation Fallback) -->
+          <div class="space-y-2">
             <button id="btn-proceed-to-biometrics" type="button" onclick="proceedToBiometricStage()" disabled class="w-full py-3.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold border border-slate-700/60 transition flex items-center justify-center gap-1.5 cursor-not-allowed">
               <span>🔒 Scan QR Code with Phone to Unlock Next Step</span>
+            </button>
+            <button id="btn-confirm-phone-manual" type="button" onclick="confirmPhoneConnectedManual()" class="w-full py-2.5 px-3 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer">
+              <span>📱 Phone Guard Positioned? Click to Confirm &amp; Unlock</span>
             </button>
           </div>
         </div>
@@ -233,7 +236,7 @@
               <button onclick="startLabWebcam()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg">📹 Activate Lab Webcam</button>
             </div>
           </div>
-          <button onclick="forceBiometricScan()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold border border-slate-800">⚡ Scan & Match Landmarks</button>
+          <button onclick="forceBiometricScan()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold border border-slate-800">⚡ Scan &amp; Match Landmarks</button>
         </div>
       </div>
 
@@ -372,7 +375,7 @@
                 <button type="button" onclick="applyStrike('Phone Guard Tab Switched / Minimized (ChatGPT Detected on Phone)')" class="py-1.5 px-2 bg-purple-950/80 hover:bg-purple-900 border border-purple-500/40 text-purple-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
                   <span>📱 Phone ChatGPT</span>
                 </button>
-                <button type="button" onclick="applyStrike('Desktop Exam Tab Switched or Minimized (External Navigation Detected)')" class="py-1.5 px-2 bg-blue-950/80 hover:bg-blue-900 border border-blue-500/40 text-blue-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                <button type="button" onclick="applyStrike('Desktop Exam Tab Switched or Minimized (External Navigation Detected)')" class="py-1.5 px-2 bg-blue-950/80 hover:bg-blue-900 border border-blue-600/60 text-blue-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
                   <span>💻 Desktop Tab</span>
                 </button>
               </div>
@@ -636,7 +639,15 @@
       document.getElementById('mobile-guard-view')?.classList.remove('hidden');
       const lbl = document.getElementById('mobile-session-label');
       if (lbl) lbl.innerText = currentSessionId;
+      
+      const gasFromUrl = urlParams.get('gas_url');
+      if (gasFromUrl) {
+        try { localStorage.setItem('trace_gas_url', gasFromUrl); } catch(e){}
+      }
       startPhoneCamera();
+
+      // Immediately transmit connection ping to Sheet
+      syncToGoogleSheet('phoneConnect', { session: currentSessionId, status: 'CONNECTED' });
 
       initMobilePeerConnection();
 
@@ -669,7 +680,16 @@
       try {
         const cleanPin = currentSessionId.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
         const targetPeerId = 'trace-desk-' + cleanPin;
-        const mobilePeer = new Peer({ debug: 1 });
+        const mobilePeer = new Peer({
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+          }
+        });
 
         mobilePeer.on('open', (id) => {
           console.log("Mobile WebRTC Peer active:", id);
@@ -834,7 +854,16 @@
         const cleanPin = currentSessionId.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
         const peerId = 'trace-desk-' + cleanPin;
         if (desktopPeer) desktopPeer.destroy();
-        desktopPeer = new Peer(peerId, { debug: 1 });
+        desktopPeer = new Peer(peerId, {
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+          }
+        });
 
         desktopPeer.on('open', (id) => {
           console.log("Desktop WebRTC Peer ready with ID:", id);
@@ -878,7 +907,11 @@
       if (candInput) candInput.value = currentSessionId;
 
       let baseUrl = window.location.href.split('?')[0].split('#')[0];
-      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
+      const gasUrl = getGasUrl();
+      let mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
+      if (gasUrl) {
+        mobileUrl += `&gas_url=${encodeURIComponent(gasUrl)}`;
+      }
 
       const canvas = document.getElementById('pairing-qr-canvas');
       if (canvas && typeof QRious !== 'undefined') {
@@ -892,7 +925,11 @@
 
     function copyPairingLink() {
       let baseUrl = window.location.href.split('?')[0].split('#')[0];
-      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
+      const gasUrl = getGasUrl();
+      let mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
+      if (gasUrl) {
+        mobileUrl += `&gas_url=${encodeURIComponent(gasUrl)}`;
+      }
       if (navigator.clipboard) {
         navigator.clipboard.writeText(mobileUrl);
         alert(`✓ Mobile Guard Link Copied!\n\nOpen on your phone camera or browser:\n${mobileUrl}`);
@@ -901,8 +938,11 @@
       }
     }
 
+    function confirmPhoneConnectedManual() {
+      markPhoneAsPaired({ manual: true, device: 'Manual Candidate Confirmation' });
+    }
+
     function markPhoneAsPaired(data = {}) {
-      if (isPhonePaired) return;
       isPhonePaired = true;
 
       const ind = document.getElementById('phone-pairing-indicator');
@@ -917,8 +957,12 @@
         btn.innerHTML = "<span>Continue to Lab Biometrics → (Phone Connected ✓)</span>";
       }
 
+      const manualBtn = document.getElementById('btn-confirm-phone-manual');
+      if (manualBtn) manualBtn.classList.add('hidden');
+
+      // Log pairing event to Sheet
       syncToGoogleSheet('phoneConnect', {
-        device: data.device || 'Mobile Phone Guard',
+        device: data.device || (data.manual ? 'Manual Confirmed Guard' : 'Mobile Phone Guard'),
         session: currentSessionId
       });
     }
@@ -937,6 +981,9 @@
         btn.className = "w-full py-3.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold border border-slate-700/60 transition flex items-center justify-center gap-1.5 cursor-not-allowed";
         btn.innerHTML = "<span>🔒 Scan QR Code with Phone to Unlock Next Step</span>";
       }
+
+      const manualBtn = document.getElementById('btn-confirm-phone-manual');
+      if (manualBtn) manualBtn.classList.remove('hidden');
 
       initDesktopPairing();
       initDesktopPeerServer();
