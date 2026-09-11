@@ -771,6 +771,69 @@
       setTimeout(initApp, 10);
     }
 
+        // ==================== REAL-TIME CROSS-DEVICE CLOUD RELAY ====================
+    function initMobileRelay() {
+      const cleanPin = currentSessionId.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
+      const pingData = { type: 'PHONE_CONNECTED', session: currentSessionId, device: navigator.userAgent || 'Mobile Phone' };
+      try {
+        fetch('https://ntfy.sh/trace_sess_' + cleanPin, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pingData)
+        }).catch(()=>{});
+      } catch(e){}
+    }
+
+    function sendMobileTamperRelay(reason) {
+      const cleanPin = currentSessionId.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
+      const payload = {
+        type: 'PHONE_TAMPER',
+        reason: reason || "Phone Guard Tab Switched or Minimized (ChatGPT Detected on Phone)",
+        session: currentSessionId
+      };
+      try {
+        fetch('https://ntfy.sh/trace_sess_' + cleanPin, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(()=>{});
+      } catch(e){}
+    }
+
+    function initDesktopRelay() {
+      const cleanPin = currentSessionId.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
+      try {
+        const es = new EventSource('https://ntfy.sh/trace_sess_' + cleanPin + '/sse');
+        es.onmessage = (evt) => {
+          try {
+            const data = JSON.parse(evt.data);
+            let payload = data;
+            if (data.message) {
+              try { payload = JSON.parse(data.message); } catch(e){ payload = data.message; }
+            }
+            if (payload && (payload.type === 'PHONE_CONNECTED' || payload === 'PHONE_CONNECTED')) {
+              markPhoneAsPaired(typeof payload === 'object' ? payload : { session: currentSessionId });
+            } else if (payload && payload.type === 'PHONE_TAMPER') {
+              applyStrike(payload.reason || "Phone Guard Tab Switched / Minimized (ChatGPT Detected on Phone)");
+            }
+          } catch(err){}
+        };
+      } catch(e){}
+
+      // Polling fallback every 2s
+      setInterval(() => {
+        if (!isPhonePaired) {
+          fetch('https://ntfy.sh/trace_sess_' + cleanPin + '/json?poll=1&since=5m')
+            .then(res => res.text())
+            .then(text => {
+              if (text && text.includes('PHONE_CONNECTED')) {
+                markPhoneAsPaired({ session: currentSessionId });
+              }
+            }).catch(()=>{});
+        }
+      }, 2000);
+    }
+
     function initApp() {
       if (isMobileGuardMode) {
         initMobileGuardMode();
@@ -781,6 +844,7 @@
 
     // ==================== 2. MOBILE PHONE GUARD MODE ====================
     function initMobileGuardMode() {
+      initMobileRelay();
       document.getElementById('desktop-app')?.classList.add('hidden');
       document.getElementById('mobile-guard-view')?.classList.remove('hidden');
       const lbl = document.getElementById('mobile-session-label');
@@ -875,6 +939,7 @@
     }
 
         function notifyDesktopConnected() {
+      initMobileRelay();
       const btn = document.getElementById('btn-phone-confirm-connected');
       if (btn) {
         btn.innerText = "✓ Connected & Unlocked on Laptop!";
@@ -905,6 +970,7 @@
     }
 
     function handlePhoneTamper(reason) {
+      sendMobileTamperRelay(reason);
       const cleanReason = reason || "Phone Guard Tab Switched or Minimized (ChatGPT / External App Detected on Phone)";
       const banner = document.getElementById('phone-tamper-banner');
       if (banner) {
@@ -978,6 +1044,7 @@
 
     // ==================== 3. MAIN DESKTOP APPLICATION ====================
     function initDesktopMode() {
+      initDesktopRelay();
       initDesktopPairing();
       initDesktopPeerServer();
       renderQuestion(); // Immediately render Question 1
@@ -1123,6 +1190,7 @@ ${mobileUrl}`);
 
     function confirmPhoneConnectedManual() {
       markPhoneAsPaired({ manual: true, device: 'Manual Candidate Confirmation' });
+      proceedToBiometricStage();
     }
 
     function markPhoneAsPaired(data = {}) {
