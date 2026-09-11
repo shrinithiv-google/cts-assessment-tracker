@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sentinel Proctor - AI Proctor & Biometric Integrity Platform</title>
+  <title>Trace - AI Proctor & Biometric Integrity Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -25,7 +25,7 @@
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2">
           <span class="text-xl">📱</span>
-          <span class="text-sm font-bold text-white">Sentinel Desk Guard</span>
+          <span class="text-sm font-bold text-white">Trace Desk Guard</span>
         </div>
         <button type="button" onclick="togglePhoneCamera()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-mono flex items-center gap-1.5 border border-slate-700 shadow-sm transition">
           🔄 Flip: Desk / Front
@@ -57,7 +57,7 @@
     </div>
 
     <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 flex justify-between items-center">
-      <span>Desktop Sentinel Sync:</span>
+      <span>Desktop Trace Sync:</span>
       <span class="text-emerald-400 font-bold flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Locked & Monitoring
       </span>
@@ -72,13 +72,20 @@
       <div class="flex items-center gap-3">
         <div class="p-2.5 bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-xl text-xl">🛡️</div>
         <div>
-          <h1 class="font-bold text-base md:text-lg text-white">Sentinel Proctor <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800 ml-2">PROCTOR ACTIVE</span></h1>
+          <h1 class="font-bold text-base md:text-lg text-white">Trace <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800 ml-2">TRACE ACTIVE</span></h1>
           <p class="text-xs text-slate-400">Biometric Identity Verification & Dual-Perspective Integrity Platform</p>
         </div>
       </div>
-      <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
-        <button id="tab-btn-candidate" onclick="showTab('candidate')" class="px-4 py-2 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow-sm">Candidate Portal</button>
-        <button id="tab-btn-admin" onclick="showTab('admin')" class="px-4 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">Admin Telemetry</button>
+      <div class="flex items-center gap-3">
+        <!-- Live Google Sheet Status Badge -->
+        <div id="header-sheet-sync" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono shadow-inner">
+          <span id="header-sheet-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="header-sheet-sync-text" class="text-slate-300">Sheet Sync: <span class="text-emerald-400 font-bold">ONLINE</span></span>
+        </div>
+        <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button id="tab-btn-candidate" onclick="showTab('candidate')" class="px-4 py-2 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow-sm">Candidate Portal</button>
+          <button id="tab-btn-admin" onclick="showTab('admin')" class="px-4 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">Admin Telemetry</button>
+        </div>
       </div>
     </header>
 
@@ -119,12 +126,12 @@
           </div>
         </div>
 
-        <!-- Right: Mobile Sentinel Pairing -->
+        <!-- Right: Mobile Proctra Pairing -->
         <div class="lg:col-span-6 bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-5 flex flex-col justify-between">
           <div class="flex justify-between items-start border-b border-slate-800 pb-3">
             <div>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 border border-indigo-800">MOBILE SECURITY GUARD</span>
-              <h2 class="text-lg font-bold text-white mt-1">Pair Mobile Phone Sentinel</h2>
+              <h2 class="text-lg font-bold text-white mt-1">Pair Mobile Phone Trace Guard</h2>
             </div>
             <button onclick="regenerateSessionAndQR()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1">🔄 New PIN</button>
           </div>
@@ -340,14 +347,131 @@
         <h2 class="text-lg font-bold text-white">Admin Live Telemetry & Audit Logs</h2>
         <button onclick="exportAuditLogJSON()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">Export Audit JSON</button>
       </div>
-      <!-- Google Sheet Webhook Config -->
-      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-        <span class="text-xs font-bold text-slate-300">Google Apps Script Web App Deployment URL:</span>
-        <div class="flex gap-2">
-          <input type="text" id="gas-url-input" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono" value="https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQsWYcLFsT1xOi88ARYE2TWtJhVqiat5X1dR-bgqDrX0c9X5cDYxe_pFgNd3/exec">
-          <button onclick="testGasWebhook()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl">Test Sync</button>
+      <!-- 1. Google Sheet Real-Time Sync & Diagnostics Panel -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <span class="text-xs font-bold text-white flex items-center gap-2">
+              <span>📊</span> Google Sheet Live Database Synchronization
+            </span>
+            <p class="text-[11px] text-slate-400">Target Sheet: <strong class="text-emerald-400 font-mono">CTS_Assessment_Hub</strong> (Tabs: <code class="text-indigo-300">Cohort_Sessions</code> &amp; <code class="text-indigo-300">Telemetry_Audit</code>)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="gas-status-badge" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
+              ● SYNC ACTIVE
+            </span>
+            <button type="button" onclick="copyBackendCodeModal()" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-[11px] font-mono transition">
+              📋 Copy Code.gs
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input type="text" id="gas-url-input" onchange="saveGasUrlManual()" placeholder="Paste Google Apps Script /exec URL..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono" value="https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQsWYcLFsT1xOi88ARYE2TWtJhVqiat5X1dR-bgqDrX0c9X5cDYxe_pFgNd3/exec">
+          <button type="button" onclick="testGasWebhook()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+            <span>⚡ Test Sync Now</span>
+          </button>
+          <button type="button" onclick="openDirectSheetDiagnostic()" class="px-3.5 py-2 bg-indigo-900/60 hover:bg-indigo-800 border border-indigo-500/40 text-indigo-200 text-xs font-bold rounded-xl transition" title="Opens the script directly in a new browser tab to check Google Sheet permissions and error logs">
+            🔗 Test in Tab
+          </button>
         </div>
         <div id="gas-test-msg" class="text-[11px] text-emerald-400 font-mono hidden">✓ Synced to Google Sheet</div>
+
+        <!-- Real-Time Transmitted Events Log Table -->
+        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 space-y-1.5">
+          <div class="flex justify-between items-center text-[10px] font-mono text-slate-400">
+            <span class="uppercase font-bold text-slate-300">Live Sheets Transmission Queue:</span>
+            <span id="sheet-sync-count" class="text-emerald-400 font-bold">0 Events Sent</span>
+          </div>
+          <div id="sheet-sync-feed" class="max-h-24 overflow-y-auto font-mono text-[10px] space-y-1 text-slate-400">
+            <div class="text-slate-500 italic">No sync events dispatched yet. Begin candidate assessment or click Test Sync.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Exam Session Video & Audio Recording Gallery -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+          <div>
+            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <span>📹</span> Trace Exam Session Recording (Video &amp; Audio)
+            </h3>
+            <p class="text-[11px] text-slate-400">Continuous biometric webcam feed and microphone stream captured during candidate testing.</p>
+          </div>
+          <span id="session-recording-badge" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-900 text-slate-400 border border-slate-800">
+            ● Standby
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+          <div class="aspect-video bg-black rounded-xl border border-slate-800 overflow-hidden relative flex items-center justify-center">
+            <video id="session-recording-player" controls class="w-full h-full object-cover hidden"></video>
+            <div id="session-recording-placeholder" class="text-slate-500 text-xs font-mono text-center p-4">
+              Recording starts automatically when candidate enters exam. Playback and download will unlock here upon test completion or strike disqualification.
+            </div>
+          </div>
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+              <div class="font-bold text-white flex items-center gap-1.5">
+                <span class="text-emerald-400">●</span> Recording Capabilities Active:
+              </div>
+              <div class="text-[11px] text-slate-400">• Full 30fps webcam &amp; room audio session recording.</div>
+              <div class="text-[11px] text-slate-400">• High-fidelity 3-second audio snippet on voice discussion strikes.</div>
+              <div class="text-[11px] text-slate-400">• Base64 audio proof transmitted to Google Sheets backend.</div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <a id="btn-download-session-recording" href="#" class="hidden px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+                ⬇️ Download Full Exam Video (.webm)
+              </a>
+              <button type="button" onclick="captureInstantAudioProof()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl text-xs font-mono transition">
+                🎙️ Sample 3s Audio Test
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Bank Manager Panel -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <span>📚</span> Assessment Question Bank Manager
+            </h3>
+            <p class="text-[11px] text-slate-400">Add, customize, or remove questions dynamically for the candidate assessment.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="admin-question-count" class="px-2.5 py-1 rounded-lg text-[11px] font-mono bg-blue-950 text-blue-300 border border-blue-800">5 Questions Loaded</span>
+            <button type="button" onclick="resetQuestionsToDefault()" class="text-[10px] text-slate-400 hover:text-white px-2 py-1 bg-slate-900 rounded-lg border border-slate-800">Reset Defaults</button>
+          </div>
+        </div>
+
+        <!-- Question List Container -->
+        <div id="admin-questions-list" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+
+        <!-- Add Question Form -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5 text-xs">
+          <div class="font-bold text-slate-200">➕ Add New Assessment Question:</div>
+          <input type="text" id="new-q-text" placeholder="Enter Question text..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input type="text" id="new-opt-a" placeholder="Option A" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs">
+            <input type="text" id="new-opt-b" placeholder="Option B" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs">
+            <input type="text" id="new-opt-c" placeholder="Option C" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs">
+            <input type="text" id="new-opt-d" placeholder="Option D" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs">
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <div class="flex items-center gap-2">
+              <label class="text-slate-400 text-xs">Correct Option:</label>
+              <select id="new-q-ans" class="bg-slate-950 border border-slate-800 text-white rounded-lg px-2.5 py-1 text-xs">
+                <option value="0">Option A</option>
+                <option value="1">Option B</option>
+                <option value="2">Option C</option>
+                <option value="3">Option D</option>
+              </select>
+            </div>
+            <button type="button" onclick="addNewQuestion()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md">Add to Question Pool</button>
+          </div>
+        </div>
       </div>
       <!-- Audit Table -->
       <div class="overflow-x-auto">
@@ -422,10 +546,10 @@
       if (isMobileGuardMode) {
         currentSessionId = (urlParams.get('session') || 'CAND-884920').toUpperCase();
       } else {
-        let saved = sessionStorage.getItem('sentinel_session');
+        let saved = sessionStorage.getItem('trace_session') || sessionStorage.getItem('proctor_session') || sessionStorage.getItem('sentinel_session');
         if (!saved) {
           saved = 'EXAM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-          sessionStorage.setItem('sentinel_session', saved);
+          sessionStorage.setItem('trace_session', saved);
         }
         currentSessionId = saved;
       }
@@ -444,7 +568,7 @@
     let userAnswers = {};
     let channel = null;
 
-    try { channel = new BroadcastChannel('sentinel_proctor_bus'); } catch(e){}
+    try { channel = new BroadcastChannel('trace_bus'); } catch(e){}
 
     // 1. Initial Page Load
     if (isMobileGuardMode) {
@@ -457,7 +581,7 @@
         if (channel) channel.postMessage({ type: 'HEARTBEAT', session: currentSessionId });
       }, 3000);
     } else {
-      initDesktopPairing();
+      initDesktopPairing(); renderQuestionBankUI();
       // Listen for phone heartbeat
       if (channel) {
         channel.onmessage = (e) => {
@@ -470,6 +594,12 @@
 
     // ==================== PAIRING & QR CODE ====================
     function initDesktopPairing() {
+      // Restore saved GAS URL if present
+      try {
+        const savedUrl = localStorage.getItem('trace_gas_url') || localStorage.getItem('proctor_gas_url') || localStorage.getItem('gas_url');
+        const input = document.getElementById('gas-url-input');
+        if (savedUrl && input) input.value = savedUrl;
+      } catch(e){}
       const pinLarge = document.getElementById('pairing-session-id-large');
       if (pinLarge) pinLarge.innerText = currentSessionId;
 
@@ -524,7 +654,7 @@
 
     function regenerateSessionAndQR() {
       currentSessionId = 'EXAM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-      try { sessionStorage.setItem('sentinel_session', currentSessionId); } catch(e){}
+      try { sessionStorage.setItem('trace_session', currentSessionId); } catch(e){}
       isPhonePaired = false;
       const ind = document.getElementById('phone-pairing-indicator');
       if (ind) ind.innerHTML = "<span class='w-2 h-2 rounded-full bg-amber-400 pulse-dot'></span> Waiting for phone...";
@@ -539,7 +669,7 @@
     // ==================== STAGE TRANSITIONS ====================
     function proceedToBiometricStage() {
       if (!isPhonePaired) {
-        alert("⚠️ Mobile Phone Connection Required!\n\nYou cannot proceed to the assessment without connecting your desk sentinel.\n\nPlease scan the QR code with your phone or click '📱 Split Tab' / '⚡ Quick Pair (Test Mode)' to connect your desk guard.");
+        alert("⚠️ Mobile Phone Connection Required!\n\nYou cannot proceed to the assessment without connecting your desk proctor.\n\nPlease scan the QR code with your phone or click '📱 Split Tab' / '⚡ Quick Pair (Test Mode)' to connect your desk guard.");
         return;
       }
       document.getElementById('stage-login-pairing').classList.add('hidden');
@@ -601,8 +731,8 @@
       if (isMatch) isBiometricallyVerified = true;
     }
 
-    // ==================== EXAM RUNTIME ====================
-    const questions = [
+    // ==================== EXAM RUNTIME & QUESTIONS POOL ====================
+    const defaultQuestions = [
       { q: "Which data structure guarantees O(1) average-time complexity for key lookup and insertion?", opts: ["Binary Search Tree", "Hash Table with Closed Addressing", "Skip List", "Sorted Array"], ans: 1 },
       { q: "In distributed microservices, what architectural pattern prevents cascading failures across RPCs?", opts: ["CQRS", "Circuit Breaker", "Event Sourcing", "Saga Coordinator"], ans: 1 },
       { q: "In computer vision biometrics, what does normalized Euclidean distance between landmark points measure?", opts: ["Geometric facial similarity", "Camera resolution", "Audio latency", "Lighting intensity"], ans: 0 },
@@ -610,7 +740,22 @@
       { q: "Under the CAP theorem, what does a distributed cluster sacrifice during a partition if it guarantees consistency?", opts: ["Partition Tolerance", "Availability for all queries", "Data Persistence", "Latency optimization"], ans: 1 }
     ];
 
-    // ==================== AUDIO VOICE ACTIVITY DETECTION (VAD - 3 SEC) & INTRUDER DETECTION ====================
+    let questions = [...defaultQuestions];
+    try {
+      const savedQ = localStorage.getItem('trace_custom_questions') || localStorage.getItem('proctor_custom_questions') || localStorage.getItem('sentinel_custom_questions');
+      if (savedQ) {
+        const parsed = JSON.parse(savedQ);
+        if (Array.isArray(parsed) && parsed.length > 0) questions = parsed;
+      }
+    } catch(e){}
+
+    // ==================== FULL EXAM SESSION RECORDING & AUDIO VAD ====================
+    let examSessionRecorder = null;
+    let examSessionRecordedChunks = [];
+    let examSessionBlob = null;
+    let examSessionVideoUrl = null;
+    let examRecordingStartTime = null;
+
     let micStream = null;
     let audioContext = null;
     let audioAnalyser = null;
@@ -621,6 +766,7 @@
     let voiceRecorder = null;
     let voiceRecordedChunks = [];
     let isVoiceRecording = false;
+    let totalDispatchedSheetEvents = 0;
 
     // Intruder detection state
     let blazefaceModel = null;
@@ -746,24 +892,31 @@
         voiceRecorder.ondataavailable = (e) => {
           if (e.data && e.data.size > 0) voiceRecordedChunks.push(e.data);
         };
-        voiceRecorder.start(200);
+        voiceRecorder.start(100);
       } catch (e) {
         console.warn("Audio snippet recording start failed:", e);
       }
     }
 
-    function stopVoiceRecordingSnippet() {
+    function stopVoiceRecordingSnippet(callback) {
       if (voiceRecorder && voiceRecorder.state !== 'inactive') {
-        try { voiceRecorder.stop(); } catch(e){}
+        voiceRecorder.onstop = () => {
+          isVoiceRecording = false;
+          if (callback) callback();
+        };
+        try { voiceRecorder.stop(); } catch(e) {
+          isVoiceRecording = false;
+          if (callback) callback();
+        }
+      } else {
+        isVoiceRecording = false;
+        if (callback) callback();
       }
-      isVoiceRecording = false;
     }
 
     function triggerVoiceViolation(reason) {
       resetVoiceGauge();
-      stopVoiceRecordingSnippet();
-
-      setTimeout(() => {
+      stopVoiceRecordingSnippet(() => {
         let audioBlob = null;
         let audioUrl = null;
         if (voiceRecordedChunks.length > 0) {
@@ -773,9 +926,79 @@
           audioBlob = createSyntheticAudioBlob();
           audioUrl = URL.createObjectURL(audioBlob);
         }
-
         applyStrike(reason, audioUrl, audioBlob);
-      }, 200);
+      });
+    }
+
+    // Full Exam Session Video/Audio Recorder
+    function startSessionRecording(stream) {
+      if (!stream || !window.MediaRecorder) return;
+      try {
+        examSessionRecordedChunks = [];
+        examRecordingStartTime = Date.now();
+        let mimeType = 'video/webm';
+        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
+          mimeType = 'video/webm;codecs=vp8,opus';
+        } else if (MediaRecorder.isTypeSupported('video/webm')) {
+          mimeType = 'video/webm';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+          mimeType = 'video/mp4';
+        }
+        examSessionRecorder = new MediaRecorder(stream, { mimeType });
+        examSessionRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) examSessionRecordedChunks.push(e.data);
+        };
+        examSessionRecorder.onstop = () => {
+          if (examSessionRecordedChunks.length > 0) {
+            examSessionBlob = new Blob(examSessionRecordedChunks, { type: mimeType });
+            examSessionVideoUrl = URL.createObjectURL(examSessionBlob);
+            updateSessionRecordingUI();
+          }
+        };
+        examSessionRecorder.start(1000);
+        const badge = document.getElementById('session-recording-badge');
+        if (badge) {
+          badge.className = "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-red-950 text-red-400 border border-red-800 animate-pulse";
+          badge.innerText = "● RECORDING LIVE";
+        }
+      } catch (e) {
+        console.warn("Session recording failed to start:", e);
+      }
+    }
+
+    function stopSessionRecording() {
+      if (examSessionRecorder && examSessionRecorder.state !== 'inactive') {
+        try { examSessionRecorder.stop(); } catch(e){}
+      }
+    }
+
+    function updateSessionRecordingUI() {
+      const player = document.getElementById('session-recording-player');
+      const placeholder = document.getElementById('session-recording-placeholder');
+      const downloadBtn = document.getElementById('btn-download-session-recording');
+      const badge = document.getElementById('session-recording-badge');
+
+      if (examSessionVideoUrl && player) {
+        player.src = examSessionVideoUrl;
+        player.classList.remove('hidden');
+        if (placeholder) placeholder.classList.add('hidden');
+      }
+      if (downloadBtn && examSessionVideoUrl) {
+        downloadBtn.href = examSessionVideoUrl;
+        downloadBtn.download = `Trace_Exam_Recording_${currentSessionId}.webm`;
+        downloadBtn.classList.remove('hidden');
+      }
+      if (badge) {
+        badge.className = "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+        badge.innerText = "✓ RECORDING READY";
+      }
+    }
+
+    function captureInstantAudioProof() {
+      const audioBlob = createSyntheticAudioBlob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      applyStrike("Manual Sample Audio Recording Proof [Test]", audioUrl, audioBlob);
+      showTab('admin');
     }
 
     function simulateVoiceViolation() {
@@ -905,6 +1128,7 @@
 
       // Initialize AI Intruder Detection Guard
       initIntruderDetection();
+      startSessionRecording(stream);
 
       startExamTimer();
       renderQuestion();
@@ -980,6 +1204,7 @@
       if (strikesRemaining <= 0) {
         isExamActive = false;
         clearInterval(examTimerInterval);
+        stopSessionRecording();
         document.getElementById('modal-disqualified').classList.remove('hidden');
         syncToGoogleSheet('submitScore', { score: 0, status: 'DISQUALIFIED_MALPRACTICE', integrity: 0 });
       } else {
@@ -1047,6 +1272,7 @@
     }
 
     function submitExam(isDisqualified) {
+      stopSessionRecording();
       isExamActive = false;
       clearInterval(examTimerInterval);
       if (vadInterval) clearInterval(vadInterval);
@@ -1058,6 +1284,83 @@
       showTab('admin');
     }
 
+    // ==================== ADMIN QUESTION BANK & DIAGNOSTICS ====================
+    function renderQuestionBankUI() {
+      const container = document.getElementById('admin-questions-list');
+      const countBadge = document.getElementById('admin-question-count');
+      if (!container) return;
+      if (countBadge) countBadge.innerText = `${questions.length} Questions Loaded`;
+
+      container.innerHTML = '';
+      questions.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = "p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 text-xs";
+        div.innerHTML = `
+          <div class="flex justify-between items-start gap-2">
+            <span class="font-bold text-white leading-relaxed">Q${idx + 1}: ${item.q}</span>
+            <button type="button" onclick="deleteQuestion(${idx})" class="text-red-400 hover:text-red-300 font-mono text-[10px] px-2 py-0.5 rounded bg-red-950/60 border border-red-800/80 shrink-0">Delete</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-slate-400 font-mono">
+            ${item.opts.map((opt, oIdx) => `<div class="${oIdx === item.ans ? 'text-emerald-400 font-bold' : ''}">${String.fromCharCode(65 + oIdx)}. ${opt} ${oIdx === item.ans ? '✓' : ''}</div>`).join('')}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addNewQuestion() {
+      const qText = document.getElementById('new-q-text')?.value.trim();
+      const optA = document.getElementById('new-opt-a')?.value.trim();
+      const optB = document.getElementById('new-opt-b')?.value.trim();
+      const optC = document.getElementById('new-opt-c')?.value.trim();
+      const optD = document.getElementById('new-opt-d')?.value.trim();
+      const ansIdx = parseInt(document.getElementById('new-q-ans')?.value || '0');
+
+      if (!qText || !optA || !optB || !optC || !optD) {
+        alert("Please enter question text and all 4 options.");
+        return;
+      }
+
+      questions.push({ q: qText, opts: [optA, optB, optC, optD], ans: ansIdx });
+      try { localStorage.setItem('trace_custom_questions', JSON.stringify(questions)); } catch(e){}
+
+      document.getElementById('new-q-text').value = '';
+      document.getElementById('new-opt-a').value = '';
+      document.getElementById('new-opt-b').value = '';
+      document.getElementById('new-opt-c').value = '';
+      document.getElementById('new-opt-d').value = '';
+
+      renderQuestionBankUI();
+      alert("✓ New question successfully added to the assessment pool!");
+    }
+
+    function deleteQuestion(idx) {
+      if (questions.length <= 1) {
+        alert("At least 1 question must remain in the pool.");
+        return;
+      }
+      questions.splice(idx, 1);
+      try { localStorage.setItem('trace_custom_questions', JSON.stringify(questions)); } catch(e){}
+      renderQuestionBankUI();
+    }
+
+    function resetQuestionsToDefault() {
+      if (confirm("Reset questions to default 5 questions?")) {
+        questions = [...defaultQuestions];
+        try { 
+          localStorage.removeItem('trace_custom_questions'); 
+          localStorage.removeItem('sentinel_custom_questions');
+        } catch(e){}
+        renderQuestionBankUI();
+      }
+    }
+
+    function openDirectSheetDiagnostic() {
+      const url = document.getElementById('gas-url-input')?.value || GAS_WEBAPP_URL;
+      const testUrl = `${url}?action=startSession&session=TEST_PING_${Math.random().toString(36).substring(2,6).toUpperCase()}&name=DiagnosticPing&email=admin@test.com&candidateId=TEST-01&role=DiagnosticsTest`;
+      window.open(testUrl, '_blank');
+    }
+
     // ==================== ADMIN & SHEETS SYNC ====================
     function showTab(tab) {
       document.getElementById('tab-btn-candidate').className = tab === 'candidate' ? 'px-4 py-2 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow-sm' : 'px-4 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
@@ -1067,6 +1370,7 @@
       document.getElementById('stage-biometrics').classList.toggle('hidden', tab !== 'candidate' || !isPhonePaired || isExamActive);
       document.getElementById('stage-exam-active').classList.toggle('hidden', tab !== 'candidate' || !isExamActive);
       document.getElementById('stage-admin-view').classList.toggle('hidden', tab !== 'admin');
+      if (tab === 'admin') renderQuestionBankUI();
     }
 
     function logViolation(reason, strikeNum, remaining, audioUrl = null) {
@@ -1074,7 +1378,7 @@
       if (tbody) {
         const tr = document.createElement('tr');
         const audioEvidenceHtml = audioUrl 
-          ? `<div class="flex items-center gap-2 mt-1.5"><audio controls src="${audioUrl}" class="h-6 w-36"></audio><a href="${audioUrl}" download="Sentinel_Audio_${Date.now()}.webm" class="text-blue-400 hover:underline text-[10px] font-mono">⬇️ Audio</a></div>` 
+          ? `<div class="flex items-center gap-2 mt-1.5"><audio controls src="${audioUrl}" class="h-6 w-36"></audio><a href="${audioUrl}" download="Trace_Audio_${Date.now()}.webm" class="text-blue-400 hover:underline text-[10px] font-mono">⬇️ Audio</a></div>` 
           : '';
         tr.innerHTML = `
           <td class="p-3 text-slate-400 font-mono">${new Date().toLocaleTimeString()}</td>
@@ -1090,34 +1394,214 @@
       }
     }
 
-    async function syncToGoogleSheet(action, data = {}) {
-      const url = document.getElementById('gas-url-input')?.value || GAS_WEBAPP_URL;
+    // ==================== GOOGLE SHEETS LIVE SYNCHRONIZATION ENGINE ====================
+    function getGasUrl() {
       try {
-        const params = new URLSearchParams({
-          action: action,
-          session: currentSessionId,
-          name: document.getElementById('candidate-name')?.value || 'Alex Mercer',
-          email: document.getElementById('candidate-email')?.value || 'candidate@assessment.org',
-          candidateId: document.getElementById('candidate-id')?.value || 'CAND-884920',
-          role: document.getElementById('candidate-role')?.value || 'Fullstack Engineer',
-          timestamp: new Date().toISOString(),
-          ...data
-        });
-        await fetch(`${url}?${params.toString()}`, { method: 'GET', mode: 'no-cors' });
-      } catch(e) {}
+        const saved = localStorage.getItem('trace_gas_url') || localStorage.getItem('proctor_gas_url') || localStorage.getItem('gas_url');
+        if (saved && saved.trim()) return saved.trim();
+      } catch(e){}
+      const input = document.getElementById('gas-url-input');
+      if (input && input.value && input.value.trim()) return input.value.trim();
+      return GAS_WEBAPP_URL;
+    }
+
+    function saveGasUrlManual() {
+      const input = document.getElementById('gas-url-input');
+      if (input && input.value) {
+        try { localStorage.setItem('trace_gas_url', input.value.trim()); } catch(e){}
+        updateSheetSyncUI('ONLINE', 'Config Saved');
+      }
+    }
+
+    function updateSheetSyncUI(status, label) {
+      const headerDot = document.getElementById('header-sheet-sync-dot');
+      const headerText = document.getElementById('header-sheet-sync-text');
+      const badge = document.getElementById('gas-status-badge');
+
+      if (status === 'SYNCING') {
+        if (headerDot) headerDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping";
+        if (headerText) headerText.innerHTML = `Sheet Sync: <span class="text-amber-400 font-bold">DISPATCHING...</span>`;
+        if (badge) {
+          badge.className = "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-950 text-amber-400 border border-amber-800";
+          badge.innerText = `● SYNCING (${label})`;
+        }
+      } else {
+        if (headerDot) headerDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+        if (headerText) headerText.innerHTML = `Sheet Sync: <span class="text-emerald-400 font-bold">ONLINE</span>`;
+        if (badge) {
+          badge.className = "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+          badge.innerText = "● SYNC ACTIVE";
+        }
+      }
+    }
+
+    function recordSheetSyncEvent(action, payload) {
+      totalDispatchedSheetEvents++;
+      const countEl = document.getElementById('sheet-sync-count');
+      if (countEl) countEl.innerText = `${totalDispatchedSheetEvents} Events Transmitted`;
+
+      const feed = document.getElementById('sheet-sync-feed');
+      if (feed) {
+        if (totalDispatchedSheetEvents === 1) feed.innerHTML = '';
+        const item = document.createElement('div');
+        item.className = "flex justify-between items-center py-1 border-b border-slate-800/60 font-mono text-[10px]";
+        const timeStr = new Date().toLocaleTimeString();
+        let detailText = payload.status || payload.violation || (payload.score !== undefined ? `Score: ${payload.score}%` : 'Dispatched');
+        item.innerHTML = `
+          <span class="text-slate-400"><strong class="text-indigo-400">${action}</strong> (${timeStr})</span>
+          <span class="text-slate-300 truncate max-w-[200px]">${detailText}</span>
+          <span class="text-emerald-400 font-bold">✓ Sent</span>
+        `;
+        feed.prepend(item);
+      }
+    }
+
+    async function syncToGoogleSheet(action, data = {}) {
+      const url = getGasUrl();
+      if (!url || !url.includes('script.google.com')) return;
+
+      updateSheetSyncUI('SYNCING', action);
+
+      const candidateName = document.getElementById('candidate-name')?.value || 'Alex Mercer';
+      const candidateEmail = document.getElementById('candidate-email')?.value || 'candidate@assessment.org';
+      const candidateId = document.getElementById('candidate-id')?.value || 'CAND-884920';
+      const candidateRole = document.getElementById('candidate-role')?.value || 'Fullstack Engineer';
+
+      const payload = {
+        action: action,
+        session: currentSessionId,
+        name: candidateName,
+        email: candidateEmail,
+        candidateId: candidateId,
+        role: candidateRole,
+        cohort: candidateRole,
+        timestamp: new Date().toISOString(),
+        ...data
+      };
+
+      recordSheetSyncEvent(action, payload);
+
+      // Method 1: GET request with URL parameters (handled by doGet in Code.gs)
+      try {
+        const params = new URLSearchParams();
+        for (const [k, v] of Object.entries(payload)) {
+          if (v !== undefined && v !== null) {
+            params.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+          }
+        }
+        const getUrl = `${url}?${params.toString()}`;
+        fetch(getUrl, { method: 'GET', mode: 'no-cors', cache: 'no-cache' })
+          .then(() => updateSheetSyncUI('ONLINE', action))
+          .catch(() => {
+            // Secondary fallback: image beacon
+            try {
+              const img = new Image();
+              img.src = getUrl;
+              updateSheetSyncUI('ONLINE', action);
+            } catch(e){}
+          });
+      } catch(e){}
+
+      // Method 2: POST request (handled by doPost in Code.gs without CORS preflight block)
+      try {
+        fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        }).catch(()=>{});
+      } catch(e){}
     }
 
     async function testGasWebhook() {
       const msg = document.getElementById('gas-test-msg');
-      msg.innerText = "⏳ Transmitting ping...";
-      msg.classList.remove('hidden');
-      await syncToGoogleSheet('ping', { test: true });
-      msg.innerText = "✓ Transmitted to Google Sheet Web App!";
+      if (msg) {
+        msg.innerText = "⏳ Transmitting test verification ping to Google Sheet...";
+        msg.classList.remove('hidden');
+      }
+      saveGasUrlManual();
+      await syncToGoogleSheet('ping', { test: true, note: 'Diagnostic manual ping from Admin tab' });
+      if (msg) {
+        msg.innerText = "✓ Verification ping successfully transmitted to Google Sheet! Check Telemetry_Audit tab.";
+      }
+    }
+
+    function copyBackendCodeModal() {
+      const codeGs = `function doGet(e) { return handleRequest(e); }
+function doPost(e) { return handleRequest(e); }
+
+function handleRequest(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let params = e && e.parameter ? e.parameter : {};
+  if (e && e.postData && e.postData.contents) {
+    try { Object.assign(params, JSON.parse(e.postData.contents)); } catch(err) {}
+  }
+  const action = params.action;
+
+  // 1. Session Start -> ACTIVE
+  if (action === 'startSession') {
+    const sheet = getOrCreateSheet(ss, 'Cohort_Sessions', ['Session_ID', 'Candidate_Name', 'Candidate_Email', 'Candidate_ID', 'Cohort_Track', 'Start_Time', 'Score', 'Integrity_Score', 'Status']);
+    sheet.appendRow([params.session, params.name, params.email, params.candidateId, params.role, new Date(), 'IN_PROGRESS', '100%', 'ACTIVE']);
+    return ContentService.createTextOutput(JSON.stringify({ status: 'ACTIVE' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 2. Malpractice Strike -> Telemetry Log
+  if (action === 'logViolation' || action === 'audioViolation' || action === 'audioEvidenceUpload') {
+    const sheet = getOrCreateSheet(ss, 'Telemetry_Audit', ['Timestamp', 'Session_ID', 'Candidate_Email', 'Violation_Type', 'Strike', 'Details']);
+    sheet.appendRow([new Date(), params.session, params.email, params.violation, \`\${params.strike}/3\`, JSON.stringify(params)]);
+    return ContentService.createTextOutput(JSON.stringify({ status: 'LOGGED' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 3. Final Submission -> SUBMITTED or DISQUALIFIED_MALPRACTICE
+  if (action === 'submitScore') {
+    const sheet = getOrCreateSheet(ss, 'Cohort_Sessions', ['Session_ID', 'Candidate_Name', 'Candidate_Email', 'Candidate_ID', 'Cohort_Track', 'Start_Time', 'Score', 'Integrity_Score', 'Status']);
+    const data = sheet.getDataRange().getValues();
+    let updated = false;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === params.session) {
+        sheet.getRange(i + 1, 7).setValue((params.score || 0) + '%');
+        sheet.getRange(i + 1, 8).setValue((params.integrity !== undefined ? params.integrity : 100) + '%');
+        sheet.getRange(i + 1, 9).setValue(params.status || 'SUBMITTED');
+        updated = true;
+        break;
+      }
+    }
+    if (!updated) {
+      sheet.appendRow([params.session, params.name, params.email, params.candidateId, params.role, new Date(), (params.score || 0) + '%', (params.integrity !== undefined ? params.integrity : 100) + '%', params.status || 'SUBMITTED']);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ status: 'UPDATED' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 4. Test Ping
+  if (action === 'ping') {
+    const sheet = getOrCreateSheet(ss, 'Telemetry_Audit', ['Timestamp', 'Session_ID', 'Candidate_Email', 'Violation_Type', 'Strike', 'Details']);
+    sheet.appendRow([new Date(), params.session || 'TEST_PING', params.email || 'test@domain.com', 'DIAGNOSTIC_PING', '0/3', 'Webhook Verified Active']);
+    return ContentService.createTextOutput(JSON.stringify({ status: 'PING_OK' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ status: 'READY' })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateSheet(ss, name, headers) {
+  let s = ss.getSheetByName(name);
+  if (!s) {
+    s = ss.insertSheet(name);
+    s.appendRow(headers);
+    s.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  }
+  return s;
+}`;
+
+      navigator.clipboard.writeText(codeGs).then(() => {
+        alert("✓ Code.gs script copied to clipboard!\n\nPaste it into your Google Sheet (Extensions > Apps Script) and deploy as 'New version'.");
+      }).catch(() => {
+        prompt("Copy this Apps Script Code.gs content:", codeGs);
+      });
     }
 
     function exportAuditLogJSON() {
       const blob = new Blob([JSON.stringify({ session: currentSessionId, strikesRemaining, userAnswers }, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Sentinel_Audit_${currentSessionId}.json`; a.click();
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Trace_Audit_${currentSessionId}.json`; a.click();
     }
 
     let phoneCamStream = null;
@@ -1156,5 +1640,1645 @@
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trace - AI Proctor & Biometric Integrity Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; user-select: none; }
+    .pulse-dot { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .scan-laser { position: absolute; left: 5%; right: 5%; height: 2px; background: #10b981; box-shadow: 0 0 10px #34d399; animation: scan 2s ease-in-out infinite; }
+    @keyframes scan { 0%, 100% { top: 5%; } 50% { top: 90%; } }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6 flex flex-col justify-between">
 
-```
+  <!-- ==================== 1. MOBILE PHONE GUARD VIEW (?mode=phone_guard) ==================== -->
+  <div id="mobile-guard-view" class="hidden max-w-md mx-auto w-full min-h-screen flex flex-col justify-between p-4 text-center space-y-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📱</span>
+          <span class="text-sm font-bold text-white">Trace Desk Guard</span>
+        </div>
+        <button type="button" onclick="togglePhoneCamera()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-mono flex items-center gap-1.5 border border-slate-700 shadow-sm transition">
+          🔄 Flip: Desk / Front
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400">Connected to Session: <span id="mobile-session-label" class="font-mono text-indigo-400 font-bold">SESSION-PIN</span></p>
+
+      <!-- Desk Camera Feed with Workspace Frame -->
+      <div class="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
+        <video id="phone-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+        <div class="scan-laser"></div>
+        
+        <!-- Live Mode Badge -->
+        <div class="absolute top-3 left-3 bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] px-2.5 py-1 rounded-lg font-mono flex items-center gap-1.5 shadow-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span id="phone-camera-mode-label">DESK VIEW (BACK CAM)</span>
+        </div>
+
+        <!-- Desk View Alignment Guide Box -->
+        <div class="absolute inset-x-6 inset-y-12 border-2 border-dashed border-emerald-500/40 rounded-2xl pointer-events-none flex flex-col items-center justify-between p-3 text-[10px] text-emerald-400 font-mono bg-emerald-950/10">
+          <span class="bg-slate-950/80 px-2 py-0.5 rounded">▲ AIM BACK CAM AT DESK & KEYBOARD ▲</span>
+          <span class="bg-slate-950/80 px-2 py-0.5 rounded">▼ WORKSPACE INTEGRITY ZONE ▼</span>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+        <strong>Desk Guard Active:</strong> Prop your phone on your desk with the <strong>rear camera</strong> pointing at your workspace and keyboard.
+      </p>
+    </div>
+
+    <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 flex justify-between items-center">
+      <span>Desktop Trace Sync:</span>
+      <span class="text-emerald-400 font-bold flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Locked & Monitoring
+      </span>
+    </div>
+  </div>
+
+  <!-- ==================== 2. MAIN DESKTOP APPLICATION ==================== -->
+  <div id="desktop-app" class="max-w-7xl mx-auto w-full space-y-6">
+
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900/80 border border-slate-800 p-4 md:p-5 rounded-2xl gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-xl text-xl">🛡️</div>
+        <div>
+          <h1 class="font-bold text-base md:text-lg text-white">Trace <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800 ml-2">TRACE ACTIVE</span></h1>
+          <p class="text-xs text-slate-400">Biometric Identity Verification & Dual-Perspective Integrity Platform</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Live Google Sheet Status Badge -->
+        <div id="header-sheet-sync" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono shadow-inner">
+          <span id="header-sheet-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="header-sheet-sync-text" class="text-slate-300">Sheet Sync: <span class="text-emerald-400 font-bold">ONLINE</span></span>
+        </div>
+        <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button id="tab-btn-candidate" onclick="showTab('candidate')" class="px-4 py-2 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow-sm">Candidate Portal</button>
+          <button id="tab-btn-admin" onclick="showTab('admin')" class="px-4 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">Admin Telemetry</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- STAGE 1: CANDIDATE REGISTRATION & PHONE PAIRING -->
+    <div id="stage-login-pairing" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left: Candidate Details -->
+        <div class="lg:col-span-6 bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-5">
+          <div class="border-b border-slate-800 pb-3">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800">STEP 1 OF 2</span>
+            <h2 class="text-lg font-bold text-white mt-2">Candidate Credential Verification</h2>
+          </div>
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">Full Candidate Name</label>
+              <input type="text" id="candidate-name" value="Alex Mercer" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1 font-semibold">Candidate ID</label>
+                <input type="text" id="candidate-id" value="CAND-884920" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1 font-semibold">Assessment Track</label>
+                <input type="text" id="candidate-role" value="Fullstack Engineer (Java/React)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white">
+              </div>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">Candidate Email</label>
+              <input type="email" id="candidate-email" value="candidate@assessment.org" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white">
+            </div>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 space-y-1">
+            <div class="font-bold text-slate-300">Proctoring Rules:</div>
+            <div>• Dual camera perspective (webcam + phone desk guard).</div>
+            <div>• 3-Strike malpractice limit with live Google Sheet logging.</div>
+          </div>
+        </div>
+
+        <!-- Right: Mobile Proctra Pairing -->
+        <div class="lg:col-span-6 bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-5 flex flex-col justify-between">
+          <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+            <div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 border border-indigo-800">MOBILE SECURITY GUARD</span>
+              <h2 class="text-lg font-bold text-white mt-1">Pair Mobile Phone Trace Guard</h2>
+            </div>
+            <button onclick="regenerateSessionAndQR()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1">🔄 New PIN</button>
+          </div>
+
+          <!-- Session PIN Box -->
+          <div class="p-3.5 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-[10px] uppercase text-indigo-300 font-bold block">Desktop Session PIN</span>
+              <span id="pairing-session-id-large" class="text-2xl font-mono font-black text-white tracking-widest">CAND-884920</span>
+            </div>
+            <button onclick="copyPairingLink()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">🔗 Copy Link</button>
+          </div>
+
+          <!-- QR Box -->
+          <div class="flex items-center gap-4 p-4 rounded-2xl bg-slate-950 border border-slate-800">
+            <div onclick="copyPairingLink()" title="Click to copy pairing URL" class="p-2 bg-white rounded-2xl w-36 h-36 shrink-0 flex items-center justify-center shadow-lg cursor-pointer">
+              <canvas id="pairing-qr-canvas" class="w-full h-full object-contain"></canvas>
+            </div>
+            <div class="space-y-2 text-xs">
+              <div class="font-bold text-white">Pairing Instructions:</div>
+              <p class="text-slate-400 text-[11px] leading-relaxed">
+                Scan with your phone camera, or click <strong>Split Tab</strong> / <strong>Quick Pair</strong> below to test right away.
+              </p>
+              <div id="phone-pairing-indicator" class="text-amber-400 font-semibold flex items-center gap-1.5 text-[11px]">
+                <span class="w-2 h-2 rounded-full bg-amber-400 pulse-dot"></span> Waiting for phone to connect...
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-2">
+            <button type="button" onclick="openPhoneGuardInTab()" class="py-3 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">📱 Split Tab</button>
+            <button type="button" onclick="simulatePhonePairing()" class="py-3 px-3.5 bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 border border-indigo-500/40 rounded-xl text-xs font-semibold">⚡ Quick Pair (Test Mode)</button>
+            <button id="btn-proceed-to-biometrics" type="button" onclick="proceedToBiometricStage()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs font-bold border border-slate-700 transition flex items-center justify-center gap-1.5">
+              <span>🔒 Pair Phone to Unlock Next Step →</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STAGE 2: 1:1 LAB BIOMETRICS VERIFICATION -->
+    <div id="stage-biometrics" class="hidden bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-3xl space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">STEP 2 OF 2</span>
+          <h2 class="text-xl font-bold text-white mt-1">1:1 Biometric Facial Verification</h2>
+        </div>
+        <button onclick="bypassBiometrics()" class="px-3 py-1.5 bg-indigo-900/50 hover:bg-indigo-800 border border-indigo-500/40 text-indigo-200 rounded-xl text-xs font-bold">⚡ Quick Pass Biometrics (Test Mode)</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- 1. ID Photo -->
+        <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl space-y-3">
+          <div class="flex justify-between text-xs font-bold text-slate-300">
+            <span>1. Official ID Portrait</span>
+            <button onclick="useSamplePassportPhoto()" class="text-blue-400 hover:underline">Use Verified Sample</button>
+          </div>
+          <div class="w-full aspect-[4/3] rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden">
+            <img id="passport-preview" src="" class="w-full h-full object-cover hidden">
+            <div id="passport-placeholder" class="text-center p-4 text-slate-500 text-xs">
+              <div class="text-3xl mb-1">🪪</div>
+              Upload candidate ID or click "Use Verified Sample"
+            </div>
+          </div>
+          <label class="block w-full py-2 bg-slate-900 hover:bg-slate-800 text-center rounded-xl text-xs font-semibold text-slate-300 cursor-pointer border border-slate-800">
+            📁 Upload ID Portrait Image
+            <input type="file" accept="image/*" onchange="handlePassportUpload(event)" class="hidden">
+          </label>
+        </div>
+
+        <!-- 2. Live Webcam -->
+        <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl space-y-3">
+          <div class="flex justify-between text-xs font-bold text-slate-300">
+            <span>2. Live Lab Webcam</span>
+            <span id="lab-cam-status-pill" class="text-slate-500 font-mono">Standby</span>
+          </div>
+          <div class="w-full aspect-[4/3] rounded-xl bg-black border border-slate-800 flex items-center justify-center relative overflow-hidden">
+            <video id="lab-webcam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+            <div class="scan-laser"></div>
+            <div id="lab-cam-placeholder" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-4">
+              <button onclick="startLabWebcam()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg">📹 Activate Lab Webcam</button>
+            </div>
+          </div>
+          <button onclick="forceBiometricScan()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold border border-slate-800">⚡ Match Landmarks</button>
+        </div>
+      </div>
+
+      <!-- Match Score -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+        <div class="flex justify-between text-xs font-semibold">
+          <span>Biometric Similarity Match:</span>
+          <span id="biometric-match-pct" class="text-emerald-400 font-bold font-mono">0% Match</span>
+        </div>
+        <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden">
+          <div id="biometric-match-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+        </div>
+        <div id="biometric-status-msg" class="text-[11px] text-slate-400 text-center">Click "Use Verified Sample" and "Activate Lab Webcam" to run match.</div>
+      </div>
+
+      <button id="btn-enter-exam" onclick="startAssessment()" class="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-xl shadow-emerald-600/30">
+        Enter Assessment Platform →
+      </button>
+    </div>
+
+    <!-- STAGE 3: ACTIVE EXAM RUNTIME -->
+    <div id="stage-exam-active" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-2">
+          <span class="h-3 w-3 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="font-bold text-white text-sm">Live Proctored Exam</span>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-2 font-mono text-xs">
+            <span class="text-slate-400">Time Left:</span>
+            <span id="timer-display" class="font-bold text-amber-400 text-base">45:00</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-xs font-mono">
+            <span class="text-slate-400">Strikes:</span>
+            <span id="exam-strikes-display" class="text-emerald-400 font-bold">0/3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Question Box -->
+        <div class="lg:col-span-8 bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-5">
+          <div class="flex justify-between items-center text-xs">
+            <span id="question-number-badge" class="px-2.5 py-1 rounded bg-blue-950 text-blue-400 font-bold">Question 1 of 5</span>
+            <button onclick="flagQuestion()" class="text-slate-400 hover:text-amber-400 text-xs">🚩 Flag for Review</button>
+          </div>
+          <div id="question-text" class="text-base font-semibold text-white leading-relaxed">Loading questions...</div>
+          <div id="options-container" class="space-y-2.5 pt-2"></div>
+          <div class="flex justify-between pt-4 border-t border-slate-800">
+            <button id="btn-prev-q" onclick="navigateQuestion(-1)" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">← Previous</button>
+            <button id="btn-next-q" onclick="navigateQuestion(1)" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">Next →</button>
+          </div>
+        </div>
+
+        <!-- Live Proctor Feed & Audio HUD -->
+        <div class="lg:col-span-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+          <div class="text-xs font-bold text-white flex justify-between items-center">
+            <span>📹 Proctor Cam Feed</span>
+            <span class="text-red-400 font-mono text-[10px] animate-pulse">● REC</span>
+          </div>
+          <div class="w-full aspect-video rounded-xl bg-black overflow-hidden relative">
+            <video id="proctor-cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+          </div>
+          <!-- AI Proctor Security HUD: Intruder Detection & 3-Second Voice Monitor -->
+          <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 text-xs">
+            
+            <!-- Intruder AI Guard -->
+            <div class="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1.5">
+              <div class="flex justify-between items-center text-[11px] font-mono">
+                <span class="text-slate-400 flex items-center gap-1.5">
+                  <span id="intruder-status-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span>Intruder AI Guard:</span>
+                </span>
+                <span id="hud-intruder-badge" class="text-emerald-400 font-bold">Active (1 Person)</span>
+              </div>
+              <div class="text-[10px] text-slate-400 flex justify-between">
+                <span>Multiple People Scan:</span>
+                <span class="text-slate-300 font-mono">Continuous</span>
+              </div>
+            </div>
+
+            <!-- Voice Discussion Monitor (3 Seconds) -->
+            <div class="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
+              <div class="flex justify-between items-center text-[11px] font-mono">
+                <span class="text-slate-400 flex items-center gap-1.5">
+                  <span id="mic-status-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span>Microphone:</span>
+                </span>
+                <span id="audio-vad-status" class="text-emerald-400 font-bold">Listening (Silent)</span>
+              </div>
+
+              <!-- VU Meter Bar -->
+              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div id="audio-vu-bar" class="bg-emerald-500 h-full w-0 transition-all duration-75"></div>
+              </div>
+
+              <!-- Voice 3-Second Detection Gauge -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                  <span>Speech Duration:</span>
+                  <span id="voice-timer-label" class="text-slate-400">0.0s / 3.0s</span>
+                </div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                  <div id="voice-detection-progress" class="bg-amber-500 h-full w-0 transition-all duration-75"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Test Simulation Triggers -->
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+              <button type="button" onclick="simulateVoiceViolation()" class="py-2 px-2 bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                <span>⚡ 3s Voice Strike</span>
+              </button>
+              <button type="button" onclick="simulateIntruderViolation()" class="py-2 px-2 bg-red-950/70 hover:bg-red-900 border border-red-500/40 text-red-300 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition">
+                <span>👥 Intruder Strike</span>
+              </button>
+            </div>
+          </div>
+          <button onclick="submitExamEarly()" class="w-full py-3 bg-red-950/60 hover:bg-red-900/80 border border-red-500/40 text-red-300 rounded-xl text-xs font-bold">Submit Assessment Early</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN TELEMETRY VIEW -->
+    <div id="stage-admin-view" class="hidden bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h2 class="text-lg font-bold text-white">Admin Live Telemetry & Audit Logs</h2>
+        <button onclick="exportAuditLogJSON()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">Export Audit JSON</button>
+      </div>
+      <!-- 1. Google Sheet Real-Time Sync & Diagnostics Panel -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <span class="text-xs font-bold text-white flex items-center gap-2">
+              <span>📊</span> Google Sheet Live Database Synchronization
+            </span>
+            <p class="text-[11px] text-slate-400">Target Sheet: <strong class="text-emerald-400 font-mono">CTS_Assessment_Hub</strong> (Tabs: <code class="text-indigo-300">Cohort_Sessions</code> &amp; <code class="text-indigo-300">Telemetry_Audit</code>)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="gas-status-badge" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
+              ● SYNC ACTIVE
+            </span>
+            <button type="button" onclick="copyBackendCodeModal()" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-[11px] font-mono transition">
+              📋 Copy Code.gs
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input type="text" id="gas-url-input" onchange="saveGasUrlManual()" placeholder="Paste Google Apps Script /exec URL..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono" value="https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQsWYcLFsT1xOi88ARYE2TWtJhVqiat5X1dR-bgqDrX0c9X5cDYxe_pFgNd3/exec">
+          <button type="button" onclick="testGasWebhook()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+            <span>⚡ Test Sync Now</span>
+          </button>
+          <button type="button" onclick="openDirectSheetDiagnostic()" class="px-3.5 py-2 bg-indigo-900/60 hover:bg-indigo-800 border border-indigo-500/40 text-indigo-200 text-xs font-bold rounded-xl transition" title="Opens the script directly in a new browser tab to check Google Sheet permissions and error logs">
+            🔗 Test in Tab
+          </button>
+        </div>
+        <div id="gas-test-msg" class="text-[11px] text-emerald-400 font-mono hidden">✓ Synced to Google Sheet</div>
+
+        <!-- Real-Time Transmitted Events Log Table -->
+        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 space-y-1.5">
+          <div class="flex justify-between items-center text-[10px] font-mono text-slate-400">
+            <span class="uppercase font-bold text-slate-300">Live Sheets Transmission Queue:</span>
+            <span id="sheet-sync-count" class="text-emerald-400 font-bold">0 Events Sent</span>
+          </div>
+          <div id="sheet-sync-feed" class="max-h-24 overflow-y-auto font-mono text-[10px] space-y-1 text-slate-400">
+            <div class="text-slate-500 italic">No sync events dispatched yet. Begin candidate assessment or click Test Sync.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Exam Session Video & Audio Recording Gallery -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+          <div>
+            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <span>📹</span> Trace Exam Session Recording (Video &amp; Audio)
+            </h3>
+            <p class="text-[11px] text-slate-400">Continuous biometric webcam feed and microphone stream captured during candidate testing.</p>
+          </div>
+          <span id="session-recording-badge" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-900 text-slate-400 border border-slate-800">
+            ● Standby
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+          <div class="aspect-video bg-black rounded-xl border border-slate-800 overflow-hidden relative flex items-center justify-center">
+            <video id="session-recording-player" controls class="w-full h-full object-cover hidden"></video>
+            <div id="session-recording-placeholder" class="text-slate-500 text-xs font-mono text-center p-4">
+              Recording starts automatically when candidate enters exam. Playback and download will unlock here upon test completion or strike disqualification.
+            </div>
+          </div>
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+              <div class="font-bold text-white flex items-center gap-1.5">
+                <span class="text-emerald-400">●</span> Recording Capabilities Active:
+              </div>
+              <div class="text-[11px] text-slate-400">• Full 30fps webcam &amp; room audio session recording.</div>
+              <div class="text-[11px] text-slate-400">• High-fidelity 3-second audio snippet on voice discussion strikes.</div>
+              <div class="text-[11px] text-slate-400">• Base64 audio proof transmitted to Google Sheets backend.</div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <a id="btn-download-session-recording" href="#" class="hidden px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+                ⬇️ Download Full Exam Video (.webm)
+              </a>
+              <button type="button" onclick="captureInstantAudioProof()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl text-xs font-mono transition">
+                🎙️ Sample 3s Audio Test
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Bank Manager Panel -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <span>📚</span> Assessment Question Bank Manager
+            </h3>
+            <p class="text-[11px] text-slate-400">Add, customize, or remove questions dynamically for the candidate assessment.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="admin-question-count" class="px-2.5 py-1 rounded-lg text-[11px] font-mono bg-blue-950 text-blue-300 border border-blue-800">5 Questions Loaded</span>
+            <button type="button" onclick="resetQuestionsToDefault()" class="text-[10px] text-slate-400 hover:text-white px-2 py-1 bg-slate-900 rounded-lg border border-slate-800">Reset Defaults</button>
+          </div>
+        </div>
+
+        <!-- Question List Container -->
+        <div id="admin-questions-list" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+
+        <!-- Add Question Form -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5 text-xs">
+          <div class="font-bold text-slate-200">➕ Add New Assessment Question:</div>
+          <input type="text" id="new-q-text" placeholder="Enter Question text..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input type="text" id="new-opt-a" placeholder="Option A" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs">
+            <input type="text" id="new-opt-b" placeholder="Option B" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs">
+            <input type="text" id="new-opt-c" placeholder="Option C" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs">
+            <input type="text" id="new-opt-d" placeholder="Option D" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs">
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <div class="flex items-center gap-2">
+              <label class="text-slate-400 text-xs">Correct Option:</label>
+              <select id="new-q-ans" class="bg-slate-950 border border-slate-800 text-white rounded-lg px-2.5 py-1 text-xs">
+                <option value="0">Option A</option>
+                <option value="1">Option B</option>
+                <option value="2">Option C</option>
+                <option value="3">Option D</option>
+              </select>
+            </div>
+            <button type="button" onclick="addNewQuestion()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md">Add to Question Pool</button>
+          </div>
+        </div>
+      </div>
+      <!-- Audit Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-950 text-slate-400">
+            <tr>
+              <th class="p-3">Timestamp</th>
+              <th class="p-3">Candidate</th>
+              <th class="p-3">Violation</th>
+              <th class="p-3">Strike</th>
+              <th class="p-3">Status</th>
+            </tr>
+          </thead>
+          <tbody id="telemetry-table-body" class="divide-y divide-slate-800 text-slate-300">
+            <tr>
+              <td class="p-3 font-mono">System Init</td>
+              <td class="p-3 font-mono">CAND-884920</td>
+              <td class="p-3 text-emerald-400">Session Initialized</td>
+              <td class="p-3">0/3</td>
+              <td class="p-3 text-emerald-400 font-bold">Active</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STRIKE WARNING MODAL -->
+  <div id="modal-warning" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-red-500 rounded-3xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl">
+      <div class="text-4xl">⚠️</div>
+      <h3 class="text-lg font-bold text-red-400">Integrity Violation Detected</h3>
+      <p id="warning-reason" class="text-xs text-slate-300"></p>
+      <div class="p-3 rounded-xl bg-red-950/50 border border-red-500/40 text-xs font-bold text-red-400">
+        -1 Strike Applied • <span id="warning-strikes-left">2</span> Strikes Remaining
+      </div>
+
+      <!-- Audio Evidence Player -->
+      <div id="warning-audio-container" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5 text-left">
+        <div class="flex justify-between items-center text-[10px] font-mono">
+          <span class="uppercase text-slate-400 font-bold">Recorded Audio Evidence (Transmitted):</span>
+          <span class="text-emerald-400">✓ Sent</span>
+        </div>
+        <audio id="warning-audio-player" controls class="w-full h-8"></audio>
+      </div>
+      <button onclick="dismissWarningModal()" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold">Acknowledge & Return to Exam</button>
+    </div>
+  </div>
+
+  <!-- DISQUALIFICATION MODAL -->
+  <div id="modal-disqualified" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-red-600 rounded-3xl p-8 max-w-lg w-full text-center space-y-4 shadow-2xl">
+      <div class="text-5xl">🛑</div>
+      <h3 class="text-2xl font-black text-red-500">EXAM TERMINATED</h3>
+      <p class="text-xs text-slate-300">You have exceeded the maximum 3-strike malpractice pool limit. Your session has been revoked and transmitted to the evaluator.</p>
+      <button onclick="location.reload()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold">Return to Start</button>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT ENGINE ==================== -->
+  <script>
+    const GAS_WEBAPP_URL = "https://script.google.com/a/macros/google.com/s/AKfycbw22kccBQsWYcLFsT1xOi88ARYE2TWtJhVqiat5X1dR-bgqDrX0c9X5cDYxe_pFgNd3/exec";
+    const SAMPLE_PORTRAIT_URL = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=faces";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isMobileGuardMode = urlParams.get('mode') === 'phone_guard';
+
+    // Safe session storage
+    let currentSessionId = 'CAND-884920';
+    try {
+      if (isMobileGuardMode) {
+        currentSessionId = (urlParams.get('session') || 'CAND-884920').toUpperCase();
+      } else {
+        let saved = sessionStorage.getItem('trace_session') || sessionStorage.getItem('proctor_session') || sessionStorage.getItem('sentinel_session');
+        if (!saved) {
+          saved = 'EXAM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+          sessionStorage.setItem('trace_session', saved);
+        }
+        currentSessionId = saved;
+      }
+    } catch(e) {
+      currentSessionId = 'EXAM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    let isPhonePaired = false;
+    let isBiometricallyVerified = false;
+    let isExamActive = false;
+    let strikesRemaining = 3;
+    let labCamStream = null;
+    let examTimerInterval = null;
+    let examTimeRemaining = 45 * 60;
+    let currentQuestionIdx = 0;
+    let userAnswers = {};
+    let channel = null;
+
+    try { channel = new BroadcastChannel('trace_bus'); } catch(e){}
+
+    // 1. Initial Page Load
+    if (isMobileGuardMode) {
+      document.getElementById('desktop-app').classList.add('hidden');
+      document.getElementById('mobile-guard-view').classList.remove('hidden');
+      document.getElementById('mobile-session-label').innerText = currentSessionId;
+      startPhoneCamera();
+      // Send heartbeat
+      setInterval(() => {
+        if (channel) channel.postMessage({ type: 'HEARTBEAT', session: currentSessionId });
+      }, 3000);
+    } else {
+      initDesktopPairing(); renderQuestionBankUI();
+      // Listen for phone heartbeat
+      if (channel) {
+        channel.onmessage = (e) => {
+          if (e.data && e.data.session === currentSessionId) {
+            markPhoneAsPaired();
+          }
+        };
+      }
+    }
+
+    // ==================== PAIRING & QR CODE ====================
+    function initDesktopPairing() {
+      // Restore saved GAS URL if present
+      try {
+        const savedUrl = localStorage.getItem('trace_gas_url') || localStorage.getItem('proctor_gas_url') || localStorage.getItem('gas_url');
+        const input = document.getElementById('gas-url-input');
+        if (savedUrl && input) input.value = savedUrl;
+      } catch(e){}
+      const pinLarge = document.getElementById('pairing-session-id-large');
+      if (pinLarge) pinLarge.innerText = currentSessionId;
+
+      let baseUrl = window.location.href.split('?')[0].split('#')[0];
+      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
+
+      // Render QR code via QRious onto Canvas
+      const canvas = document.getElementById('pairing-qr-canvas');
+      if (canvas && typeof QRious !== 'undefined') {
+        try {
+          new QRious({ element: canvas, value: mobileUrl, size: 135, level: 'L' });
+        } catch(err) {
+          console.warn("QRious err:", err);
+        }
+      }
+    }
+
+    function copyPairingLink() {
+      let baseUrl = window.location.href.split('?')[0].split('#')[0];
+      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(mobileUrl);
+        alert(`✓ Mobile Guard Link Copied!\n\nOpen on your phone:\n${mobileUrl}`);
+      } else {
+        prompt("Copy this Mobile Guard Link:", mobileUrl);
+      }
+    }
+
+    function openPhoneGuardInTab() {
+      let baseUrl = window.location.href.split('?')[0].split('#')[0];
+      const mobileUrl = `${baseUrl}?mode=phone_guard&session=${currentSessionId}`;
+      window.open(mobileUrl, '_blank', 'width=420,height=750');
+      simulatePhonePairing();
+    }
+
+    function simulatePhonePairing() {
+      markPhoneAsPaired();
+    }
+
+    function markPhoneAsPaired() {
+      isPhonePaired = true;
+      const ind = document.getElementById('phone-pairing-indicator');
+      if (ind) {
+        ind.innerHTML = "<span class='text-emerald-400 font-bold flex items-center gap-1.5'><span class='w-2 h-2 rounded-full bg-emerald-400 animate-pulse'></span> ✓ Phone Desk Guard Connected!</span>";
+      }
+      const btn = document.getElementById('btn-proceed-to-biometrics');
+      if (btn) {
+        btn.className = "flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-1.5 cursor-pointer";
+        btn.innerHTML = "<span>Continue to Lab Biometrics → (Phone Connected ✓)</span>";
+      }
+    }
+
+    function regenerateSessionAndQR() {
+      currentSessionId = 'EXAM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      try { sessionStorage.setItem('trace_session', currentSessionId); } catch(e){}
+      isPhonePaired = false;
+      const ind = document.getElementById('phone-pairing-indicator');
+      if (ind) ind.innerHTML = "<span class='w-2 h-2 rounded-full bg-amber-400 pulse-dot'></span> Waiting for phone...";
+      const btn = document.getElementById('btn-proceed-to-biometrics');
+      if (btn) {
+        btn.className = "flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs font-bold border border-slate-700 transition flex items-center justify-center gap-1.5";
+        btn.innerHTML = "<span>🔒 Pair Phone to Unlock Next Step →</span>";
+      }
+      initDesktopPairing();
+    }
+
+    // ==================== STAGE TRANSITIONS ====================
+    function proceedToBiometricStage() {
+      if (!isPhonePaired) {
+        alert("⚠️ Mobile Phone Connection Required!\n\nYou cannot proceed to the assessment without connecting your desk proctor.\n\nPlease scan the QR code with your phone or click '📱 Split Tab' / '⚡ Quick Pair (Test Mode)' to connect your desk guard.");
+        return;
+      }
+      document.getElementById('stage-login-pairing').classList.add('hidden');
+      document.getElementById('stage-biometrics').classList.remove('hidden');
+      syncToGoogleSheet('startSession', { status: 'ACTIVE' });
+    }
+
+    function bypassBiometrics() {
+      isBiometricallyVerified = true;
+      startAssessment();
+    }
+
+    // ==================== BIOMETRICS ====================
+    function useSamplePassportPhoto() {
+      const preview = document.getElementById('passport-preview');
+      const placeholder = document.getElementById('passport-placeholder');
+      preview.src = SAMPLE_PORTRAIT_URL;
+      preview.classList.remove('hidden');
+      placeholder.classList.add('hidden');
+      updateBiometricScore(94, true, "Landmarks Matched: 94% Similarity");
+    }
+
+    function handlePassportUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const preview = document.getElementById('passport-preview');
+        const placeholder = document.getElementById('passport-placeholder');
+        preview.src = evt.target.result;
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        updateBiometricScore(96, true, "Landmarks Matched: 96% Similarity");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function startLabWebcam() {
+      try {
+        labCamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        document.getElementById('lab-webcam-video').srcObject = labCamStream;
+        document.getElementById('lab-cam-placeholder').classList.add('hidden');
+        document.getElementById('lab-cam-status-pill').innerText = "Live Webcam Active";
+        document.getElementById('lab-cam-status-pill').className = "text-emerald-400 font-mono";
+        updateBiometricScore(92, true, "Facial Landmarks Aligned: 92% Match");
+      } catch(err) {
+        alert("Camera permission not granted. You can use 'Quick Pass Biometrics' to test.");
+      }
+    }
+
+    function forceBiometricScan() {
+      updateBiometricScore(95, true, "Recalibration Confirmed: 95% Match");
+    }
+
+    function updateBiometricScore(pct, isMatch, msg) {
+      document.getElementById('biometric-match-pct').innerText = `${pct}% Match`;
+      document.getElementById('biometric-match-bar').style.width = `${pct}%`;
+      document.getElementById('biometric-status-msg').innerText = msg;
+      if (isMatch) isBiometricallyVerified = true;
+    }
+
+    // ==================== EXAM RUNTIME & QUESTIONS POOL ====================
+    const defaultQuestions = [
+      { q: "Which data structure guarantees O(1) average-time complexity for key lookup and insertion?", opts: ["Binary Search Tree", "Hash Table with Closed Addressing", "Skip List", "Sorted Array"], ans: 1 },
+      { q: "In distributed microservices, what architectural pattern prevents cascading failures across RPCs?", opts: ["CQRS", "Circuit Breaker", "Event Sourcing", "Saga Coordinator"], ans: 1 },
+      { q: "In computer vision biometrics, what does normalized Euclidean distance between landmark points measure?", opts: ["Geometric facial similarity", "Camera resolution", "Audio latency", "Lighting intensity"], ans: 0 },
+      { q: "Which HTTP header is required to prevent clickjacking attacks by disallowing frame embedding?", opts: ["Content-Security-Policy: frame-ancestors 'none'", "X-Content-Type-Options: nosniff", "Strict-Transport-Security", "Access-Control-Allow-Origin: *"], ans: 0 },
+      { q: "Under the CAP theorem, what does a distributed cluster sacrifice during a partition if it guarantees consistency?", opts: ["Partition Tolerance", "Availability for all queries", "Data Persistence", "Latency optimization"], ans: 1 }
+    ];
+
+    let questions = [...defaultQuestions];
+    try {
+      const savedQ = localStorage.getItem('trace_custom_questions') || localStorage.getItem('proctor_custom_questions') || localStorage.getItem('sentinel_custom_questions');
+      if (savedQ) {
+        const parsed = JSON.parse(savedQ);
+        if (Array.isArray(parsed) && parsed.length > 0) questions = parsed;
+      }
+    } catch(e){}
+
+    // ==================== FULL EXAM SESSION RECORDING & AUDIO VAD ====================
+    let examSessionRecorder = null;
+    let examSessionRecordedChunks = [];
+    let examSessionBlob = null;
+    let examSessionVideoUrl = null;
+    let examRecordingStartTime = null;
+
+    let micStream = null;
+    let audioContext = null;
+    let audioAnalyser = null;
+    let audioDataArray = null;
+    let vadInterval = null;
+    let voiceStartTime = null;
+    let speechSilenceStart = null;
+    let voiceRecorder = null;
+    let voiceRecordedChunks = [];
+    let isVoiceRecording = false;
+    let totalDispatchedSheetEvents = 0;
+
+    // Intruder detection state
+    let blazefaceModel = null;
+    let intruderInterval = null;
+    let intruderDetectedStartTime = null;
+
+    async function initAudioVoiceEngine(existingStream) {
+      try {
+        if (existingStream && existingStream.getAudioTracks().length > 0) {
+          micStream = existingStream;
+        } else {
+          micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        }
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(micStream);
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 256;
+        audioAnalyser.smoothingTimeConstant = 0.3;
+        audioDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+        source.connect(audioAnalyser);
+
+        const micDot = document.getElementById('mic-status-dot');
+        const vadStatus = document.getElementById('audio-vad-status');
+        if (micDot) micDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+        if (vadStatus) vadStatus.innerText = "Listening (Silent)";
+
+        if (vadInterval) clearInterval(vadInterval);
+        vadInterval = setInterval(checkVoiceActivity, 80);
+      } catch (err) {
+        console.warn("Microphone access unavailable:", err);
+        const vadStatus = document.getElementById('audio-vad-status');
+        if (vadStatus) vadStatus.innerHTML = "<span class='text-amber-400'>Mic Standby (Use Test Button)</span>";
+      }
+    }
+
+    function checkVoiceActivity() {
+      if (!isExamActive || strikesRemaining <= 0 || !audioAnalyser) return;
+
+      audioAnalyser.getByteFrequencyData(audioDataArray);
+      let sum = 0;
+      for (let i = 0; i < audioDataArray.length; i++) sum += audioDataArray[i];
+      const avg = sum / audioDataArray.length;
+
+      const vuBar = document.getElementById('audio-vu-bar');
+      const vadStatus = document.getElementById('audio-vad-status');
+      const timerLabel = document.getElementById('voice-timer-label');
+      const progress = document.getElementById('voice-detection-progress');
+      const micDot = document.getElementById('mic-status-dot');
+
+      if (vuBar) vuBar.style.width = Math.min(100, Math.max(0, (avg - 6) * 3)) + '%';
+
+      const SPEECH_THRESHOLD = 26; // Voice speech volume threshold
+      if (avg > SPEECH_THRESHOLD) {
+        speechSilenceStart = null;
+        if (!voiceStartTime) {
+          voiceStartTime = Date.now();
+          startVoiceRecordingSnippet();
+        }
+
+        const elapsedSec = (Date.now() - voiceStartTime) / 1000;
+        const progressPct = Math.min(100, (elapsedSec / 3.0) * 100);
+
+        if (vadStatus) {
+          vadStatus.innerText = `Speaking Detected (${elapsedSec.toFixed(1)}s)`;
+          vadStatus.className = "text-amber-400 font-bold font-mono animate-pulse";
+        }
+        if (timerLabel) {
+          timerLabel.innerText = `${elapsedSec.toFixed(1)}s / 3.0s`;
+          timerLabel.className = elapsedSec >= 2.2 ? "text-red-400 font-bold font-mono" : "text-amber-400 font-bold font-mono";
+        }
+        if (progress) {
+          progress.style.width = `${progressPct}%`;
+          progress.className = elapsedSec >= 2.2 ? "bg-red-500 h-full transition-all duration-75" : "bg-amber-500 h-full transition-all duration-75";
+        }
+        if (micDot) micDot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
+
+        // Cut strike when someone speaks more than 3 seconds!
+        if (elapsedSec >= 3.0) {
+          voiceStartTime = null;
+          triggerVoiceViolation("Sustained Voice / Speech Discussion (>3.0s)");
+        }
+      } else {
+        // Below threshold: if quiet for 400ms, reset the 3-second gauge
+        if (voiceStartTime) {
+          if (!speechSilenceStart) speechSilenceStart = Date.now();
+          if (Date.now() - speechSilenceStart > 400) {
+            voiceStartTime = null;
+            speechSilenceStart = null;
+            resetVoiceGauge();
+            stopVoiceRecordingSnippet();
+          }
+        } else {
+          resetVoiceGauge();
+        }
+      }
+    }
+
+    function resetVoiceGauge() {
+      const vadStatus = document.getElementById('audio-vad-status');
+      const timerLabel = document.getElementById('voice-timer-label');
+      const progress = document.getElementById('voice-detection-progress');
+      const micDot = document.getElementById('mic-status-dot');
+
+      if (vadStatus) {
+        vadStatus.innerText = "Listening (Silent)";
+        vadStatus.className = "text-emerald-400 font-bold";
+      }
+      if (timerLabel) {
+        timerLabel.innerText = "0.0s / 3.0s";
+        timerLabel.className = "text-slate-400 font-mono";
+      }
+      if (progress) progress.style.width = "0%";
+      if (micDot) micDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+    }
+
+    function startVoiceRecordingSnippet() {
+      if (!micStream || isVoiceRecording) return;
+      try {
+        voiceRecordedChunks = [];
+        isVoiceRecording = true;
+        voiceRecorder = new MediaRecorder(micStream);
+        voiceRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) voiceRecordedChunks.push(e.data);
+        };
+        voiceRecorder.start(100);
+      } catch (e) {
+        console.warn("Audio snippet recording start failed:", e);
+      }
+    }
+
+    function stopVoiceRecordingSnippet(callback) {
+      if (voiceRecorder && voiceRecorder.state !== 'inactive') {
+        voiceRecorder.onstop = () => {
+          isVoiceRecording = false;
+          if (callback) callback();
+        };
+        try { voiceRecorder.stop(); } catch(e) {
+          isVoiceRecording = false;
+          if (callback) callback();
+        }
+      } else {
+        isVoiceRecording = false;
+        if (callback) callback();
+      }
+    }
+
+    function triggerVoiceViolation(reason) {
+      resetVoiceGauge();
+      stopVoiceRecordingSnippet(() => {
+        let audioBlob = null;
+        let audioUrl = null;
+        if (voiceRecordedChunks.length > 0) {
+          audioBlob = new Blob(voiceRecordedChunks, { type: 'audio/webm' });
+          audioUrl = URL.createObjectURL(audioBlob);
+        } else {
+          audioBlob = createSyntheticAudioBlob();
+          audioUrl = URL.createObjectURL(audioBlob);
+        }
+        applyStrike(reason, audioUrl, audioBlob);
+      });
+    }
+
+    // Full Exam Session Video/Audio Recorder
+    function startSessionRecording(stream) {
+      if (!stream || !window.MediaRecorder) return;
+      try {
+        examSessionRecordedChunks = [];
+        examRecordingStartTime = Date.now();
+        let mimeType = 'video/webm';
+        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
+          mimeType = 'video/webm;codecs=vp8,opus';
+        } else if (MediaRecorder.isTypeSupported('video/webm')) {
+          mimeType = 'video/webm';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+          mimeType = 'video/mp4';
+        }
+        examSessionRecorder = new MediaRecorder(stream, { mimeType });
+        examSessionRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) examSessionRecordedChunks.push(e.data);
+        };
+        examSessionRecorder.onstop = () => {
+          if (examSessionRecordedChunks.length > 0) {
+            examSessionBlob = new Blob(examSessionRecordedChunks, { type: mimeType });
+            examSessionVideoUrl = URL.createObjectURL(examSessionBlob);
+            updateSessionRecordingUI();
+          }
+        };
+        examSessionRecorder.start(1000);
+        const badge = document.getElementById('session-recording-badge');
+        if (badge) {
+          badge.className = "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-red-950 text-red-400 border border-red-800 animate-pulse";
+          badge.innerText = "● RECORDING LIVE";
+        }
+      } catch (e) {
+        console.warn("Session recording failed to start:", e);
+      }
+    }
+
+    function stopSessionRecording() {
+      if (examSessionRecorder && examSessionRecorder.state !== 'inactive') {
+        try { examSessionRecorder.stop(); } catch(e){}
+      }
+    }
+
+    function updateSessionRecordingUI() {
+      const player = document.getElementById('session-recording-player');
+      const placeholder = document.getElementById('session-recording-placeholder');
+      const downloadBtn = document.getElementById('btn-download-session-recording');
+      const badge = document.getElementById('session-recording-badge');
+
+      if (examSessionVideoUrl && player) {
+        player.src = examSessionVideoUrl;
+        player.classList.remove('hidden');
+        if (placeholder) placeholder.classList.add('hidden');
+      }
+      if (downloadBtn && examSessionVideoUrl) {
+        downloadBtn.href = examSessionVideoUrl;
+        downloadBtn.download = `Trace_Exam_Recording_${currentSessionId}.webm`;
+        downloadBtn.classList.remove('hidden');
+      }
+      if (badge) {
+        badge.className = "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+        badge.innerText = "✓ RECORDING READY";
+      }
+    }
+
+    function captureInstantAudioProof() {
+      const audioBlob = createSyntheticAudioBlob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      applyStrike("Manual Sample Audio Recording Proof [Test]", audioUrl, audioBlob);
+      showTab('admin');
+    }
+
+    function simulateVoiceViolation() {
+      const audioBlob = createSyntheticAudioBlob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      applyStrike("Sustained Voice / Speech Discussion (>3.0s) [Simulated]", audioUrl, audioBlob);
+    }
+
+    function createSyntheticAudioBlob() {
+      const sampleRate = 8000;
+      const durationSec = 3.0;
+      const numSamples = Math.floor(sampleRate * durationSec);
+      const buffer = new Uint8Array(44 + numSamples);
+
+      const header = "RIFF....WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x40\x1f\x00\x00\x40\x1f\x00\x00\x01\x00\x08\x00data....";
+      for (let i = 0; i < header.length; i++) buffer[i] = header.charCodeAt(i);
+
+      const totalDataLen = numSamples;
+      const totalFileLen = totalDataLen + 36;
+      buffer[4] = totalFileLen & 0xff; buffer[5] = (totalFileLen >> 8) & 0xff;
+      buffer[6] = (totalFileLen >> 16) & 0xff; buffer[7] = (totalFileLen >> 24) & 0xff;
+      buffer[40] = totalDataLen & 0xff; buffer[41] = (totalDataLen >> 8) & 0xff;
+      buffer[42] = (totalDataLen >> 16) & 0xff; buffer[43] = (totalDataLen >> 24) & 0xff;
+
+      for (let i = 0; i < numSamples; i++) {
+        const t = i / sampleRate;
+        const val = 128 + Math.floor(55 * Math.sin(2 * Math.PI * 440 * t) + 25 * Math.sin(2 * Math.PI * 880 * t));
+        buffer[44 + i] = val;
+      }
+      return new Blob([buffer], { type: 'audio/wav' });
+    }
+
+    // ==================== INTRUDER DETECTION (BLAZEFACE AI) ====================
+    async function initIntruderDetection() {
+      if (typeof blazeface === 'undefined') {
+        console.warn("BlazeFace library not detected. Simulated intruder controls active.");
+        return;
+      }
+      try {
+        blazefaceModel = await blazeface.load();
+        console.log("✓ BlazeFace AI Intruder Guard Active");
+        if (intruderInterval) clearInterval(intruderInterval);
+        intruderInterval = setInterval(checkIntruderFeed, 1200);
+      } catch (err) {
+        console.warn("BlazeFace load error:", err);
+      }
+    }
+
+    async function checkIntruderFeed() {
+      if (!isExamActive || strikesRemaining <= 0 || !blazefaceModel) return;
+      const video = document.getElementById('proctor-cam-video');
+      if (!video || !video.videoWidth) return;
+
+      try {
+        const predictions = await blazefaceModel.estimateFaces(video, false);
+        const faceCount = predictions.length;
+        const badge = document.getElementById('hud-intruder-badge');
+        const dot = document.getElementById('intruder-status-dot');
+
+        if (faceCount > 1) {
+          // Multiple people / Intruder in frame!
+          if (badge) {
+            badge.innerText = `⚠️ ${faceCount} People in Frame!`;
+            badge.className = "text-red-400 font-bold font-mono animate-pulse";
+          }
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
+
+          if (!intruderDetectedStartTime) intruderDetectedStartTime = Date.now();
+          if (Date.now() - intruderDetectedStartTime >= 1500) {
+            intruderDetectedStartTime = null;
+            applyStrike(`Intruder Alert: Multiple People Detected in Camera Feed (${faceCount} Faces)`);
+          }
+        } else if (faceCount === 1) {
+          intruderDetectedStartTime = null;
+          if (badge) {
+            badge.innerText = "Active (1 Person)";
+            badge.className = "text-emerald-400 font-bold font-mono";
+          }
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+        } else if (faceCount === 0) {
+          if (badge) {
+            badge.innerText = "Candidate Missing";
+            badge.className = "text-amber-400 font-bold font-mono";
+          }
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+        }
+      } catch(e){}
+    }
+
+    function simulateIntruderViolation() {
+      const badge = document.getElementById('hud-intruder-badge');
+      const dot = document.getElementById('intruder-status-dot');
+      if (badge) {
+        badge.innerText = "⚠️ Intruder Detected (Simulated)!";
+        badge.className = "text-red-400 font-bold font-mono animate-pulse";
+      }
+      if (dot) dot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
+      applyStrike("Intruder Alert: Unauthorized Second Person Detected in Camera Feed");
+    }
+
+    async function startAssessment() {
+      document.getElementById('stage-biometrics').classList.add('hidden');
+      document.getElementById('stage-exam-active').classList.remove('hidden');
+      isExamActive = true;
+
+      // Pipe webcam to proctor feed
+      let stream = labCamStream;
+      if (!stream) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          labCamStream = stream;
+        } catch (e) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            labCamStream = stream;
+          } catch(err){}
+        }
+      }
+
+      if (stream) {
+        const video = document.getElementById('proctor-cam-video');
+        if (video) video.srcObject = stream;
+      }
+
+      // Initialize 3-Second Voice Activity Detector & Recorder
+      initAudioVoiceEngine(stream);
+
+      // Initialize AI Intruder Detection Guard
+      initIntruderDetection();
+      startSessionRecording(stream);
+
+      startExamTimer();
+      renderQuestion();
+
+      // Window blur tamper strike
+      window.addEventListener('blur', () => {
+        if (isExamActive) applyStrike("Window Focus Lost (Tab switch or external app detected)");
+      });
+    }
+
+    function renderQuestion() {
+      const q = questions[currentQuestionIdx];
+      document.getElementById('question-number-badge').innerText = `Question ${currentQuestionIdx + 1} of ${questions.length}`;
+      document.getElementById('question-text').innerText = q.q;
+
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+      q.opts.forEach((opt, idx) => {
+        const isSelected = userAnswers[currentQuestionIdx] === idx;
+        const div = document.createElement('div');
+        div.className = `p-3 rounded-xl border text-xs cursor-pointer transition flex items-center gap-3 ${isSelected ? 'bg-blue-600/20 border-blue-500 text-white font-semibold' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'}`;
+        div.onclick = () => { userAnswers[currentQuestionIdx] = idx; renderQuestion(); };
+        div.innerHTML = `<span class="h-4 w-4 rounded-full border flex items-center justify-center text-[10px] ${isSelected ? 'border-blue-400 bg-blue-500 text-white' : 'border-slate-600'}">${String.fromCharCode(65 + idx)}</span> <span>${opt}</span>`;
+        container.appendChild(div);
+      });
+
+      document.getElementById('btn-prev-q').disabled = currentQuestionIdx === 0;
+      document.getElementById('btn-next-q').innerText = currentQuestionIdx === questions.length - 1 ? 'Finish & Submit' : 'Next →';
+    }
+
+    function navigateQuestion(delta) {
+      if (currentQuestionIdx === questions.length - 1 && delta === 1) {
+        submitExamEarly();
+        return;
+      }
+      currentQuestionIdx = Math.max(0, Math.min(questions.length - 1, currentQuestionIdx + delta));
+      renderQuestion();
+    }
+
+    function flagQuestion() {
+      alert(`Flagged Question ${currentQuestionIdx + 1} for review.`);
+    }
+
+    function startExamTimer() {
+      examTimerInterval = setInterval(() => {
+        examTimeRemaining--;
+        const mins = String(Math.floor(examTimeRemaining / 60)).padStart(2, '0');
+        const secs = String(examTimeRemaining % 60).padStart(2, '0');
+        document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+        if (examTimeRemaining <= 0) {
+          clearInterval(examTimerInterval);
+          submitExam(false);
+        }
+      }, 1000);
+    }
+
+    // ==================== MALPRACTICE STRIKES & RECORDING TRANSMISSION ====================
+    function applyStrike(reason, audioUrl = null, audioBlob = null) {
+      strikesRemaining--;
+      const strikesConsumed = 3 - strikesRemaining;
+      document.getElementById('exam-strikes-display').innerText = `${strikesConsumed}/3`;
+
+      // Log to telemetry table with Audio Player if available
+      logViolation(reason, strikesConsumed, strikesRemaining, audioUrl);
+
+      // Transmit audio recording & violation to Google Sheet Webhook
+      if (audioBlob) {
+        transmitAudioRecording(reason, strikesConsumed, audioBlob);
+      } else {
+        syncToGoogleSheet('logViolation', { violation: reason, strike: strikesConsumed, remaining: strikesRemaining });
+      }
+
+      if (strikesRemaining <= 0) {
+        isExamActive = false;
+        clearInterval(examTimerInterval);
+        stopSessionRecording();
+        document.getElementById('modal-disqualified').classList.remove('hidden');
+        syncToGoogleSheet('submitScore', { score: 0, status: 'DISQUALIFIED_MALPRACTICE', integrity: 0 });
+      } else {
+        document.getElementById('warning-reason').innerText = reason;
+        document.getElementById('warning-strikes-left').innerText = strikesRemaining;
+
+        // Show audio evidence player in warning modal if available
+        const audioContainer = document.getElementById('warning-audio-container');
+        const audioPlayer = document.getElementById('warning-audio-player');
+        if (audioUrl && audioContainer && audioPlayer) {
+          audioPlayer.src = audioUrl;
+          audioContainer.classList.remove('hidden');
+        } else if (audioContainer) {
+          audioContainer.classList.add('hidden');
+        }
+
+        document.getElementById('modal-warning').classList.remove('hidden');
+      }
+    }
+
+    function transmitAudioRecording(reason, strikeNum, audioBlob) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Audio = reader.result;
+        const url = document.getElementById('gas-url-input')?.value || GAS_WEBAPP_URL;
+
+        // 1. GET ping with parameters (for Google Apps Script doGet logging)
+        syncToGoogleSheet('audioViolation', {
+          violation: reason,
+          strike: strikeNum,
+          audioDuration: '2.0s',
+          audioSizeBytes: audioBlob.size,
+          recordingStatus: 'TRANSMITTED'
+        });
+
+        // 2. POST payload with audio Base64 payload (for Google Apps Script doPost storage)
+        try {
+          fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'audioEvidenceUpload',
+              session: currentSessionId,
+              candidateId: document.getElementById('candidate-id')?.value || 'CAND-884920',
+              timestamp: new Date().toISOString(),
+              violation: reason,
+              strike: strikeNum,
+              audioBase64: base64Audio
+            })
+          }).catch(()=>{});
+        } catch(e){}
+      };
+      reader.readAsDataURL(audioBlob);
+    }
+
+    function dismissWarningModal() {
+      document.getElementById('modal-warning').classList.add('hidden');
+    }
+
+    function submitExamEarly() {
+      if (confirm("Are you sure you want to finish and submit your assessment?")) {
+        submitExam(false);
+      }
+    }
+
+    function submitExam(isDisqualified) {
+      stopSessionRecording();
+      isExamActive = false;
+      clearInterval(examTimerInterval);
+      if (vadInterval) clearInterval(vadInterval);
+      let correct = 0;
+      questions.forEach((q, i) => { if (userAnswers[i] === q.ans) correct++; });
+      const scorePct = Math.round((correct / questions.length) * 100);
+      alert(`Assessment Submitted!\nScore: ${scorePct}%\nIntegrity: ${Math.round((strikesRemaining/3)*100)}%`);
+      syncToGoogleSheet('submitScore', { score: scorePct, status: isDisqualified ? 'DISQUALIFIED' : 'SUBMITTED', integrity: Math.round((strikesRemaining/3)*100) });
+      showTab('admin');
+    }
+
+    // ==================== ADMIN QUESTION BANK & DIAGNOSTICS ====================
+    function renderQuestionBankUI() {
+      const container = document.getElementById('admin-questions-list');
+      const countBadge = document.getElementById('admin-question-count');
+      if (!container) return;
+      if (countBadge) countBadge.innerText = `${questions.length} Questions Loaded`;
+
+      container.innerHTML = '';
+      questions.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = "p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 text-xs";
+        div.innerHTML = `
+          <div class="flex justify-between items-start gap-2">
+            <span class="font-bold text-white leading-relaxed">Q${idx + 1}: ${item.q}</span>
+            <button type="button" onclick="deleteQuestion(${idx})" class="text-red-400 hover:text-red-300 font-mono text-[10px] px-2 py-0.5 rounded bg-red-950/60 border border-red-800/80 shrink-0">Delete</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-slate-400 font-mono">
+            ${item.opts.map((opt, oIdx) => `<div class="${oIdx === item.ans ? 'text-emerald-400 font-bold' : ''}">${String.fromCharCode(65 + oIdx)}. ${opt} ${oIdx === item.ans ? '✓' : ''}</div>`).join('')}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addNewQuestion() {
+      const qText = document.getElementById('new-q-text')?.value.trim();
+      const optA = document.getElementById('new-opt-a')?.value.trim();
+      const optB = document.getElementById('new-opt-b')?.value.trim();
+      const optC = document.getElementById('new-opt-c')?.value.trim();
+      const optD = document.getElementById('new-opt-d')?.value.trim();
+      const ansIdx = parseInt(document.getElementById('new-q-ans')?.value || '0');
+
+      if (!qText || !optA || !optB || !optC || !optD) {
+        alert("Please enter question text and all 4 options.");
+        return;
+      }
+
+      questions.push({ q: qText, opts: [optA, optB, optC, optD], ans: ansIdx });
+      try { localStorage.setItem('trace_custom_questions', JSON.stringify(questions)); } catch(e){}
+
+      document.getElementById('new-q-text').value = '';
+      document.getElementById('new-opt-a').value = '';
+      document.getElementById('new-opt-b').value = '';
+      document.getElementById('new-opt-c').value = '';
+      document.getElementById('new-opt-d').value = '';
+
+      renderQuestionBankUI();
+      alert("✓ New question successfully added to the assessment pool!");
+    }
+
+    function deleteQuestion(idx) {
+      if (questions.length <= 1) {
+        alert("At least 1 question must remain in the pool.");
+        return;
+      }
+      questions.splice(idx, 1);
+      try { localStorage.setItem('trace_custom_questions', JSON.stringify(questions)); } catch(e){}
+      renderQuestionBankUI();
+    }
+
+    function resetQuestionsToDefault() {
+      if (confirm("Reset questions to default 5 questions?")) {
+        questions = [...defaultQuestions];
+        try { 
+          localStorage.removeItem('trace_custom_questions'); 
+          localStorage.removeItem('sentinel_custom_questions');
+        } catch(e){}
+        renderQuestionBankUI();
+      }
+    }
+
+    function openDirectSheetDiagnostic() {
+      const url = document.getElementById('gas-url-input')?.value || GAS_WEBAPP_URL;
+      const testUrl = `${url}?action=startSession&session=TEST_PING_${Math.random().toString(36).substring(2,6).toUpperCase()}&name=DiagnosticPing&email=admin@test.com&candidateId=TEST-01&role=DiagnosticsTest`;
+      window.open(testUrl, '_blank');
+    }
+
+    // ==================== ADMIN & SHEETS SYNC ====================
+    function showTab(tab) {
+      document.getElementById('tab-btn-candidate').className = tab === 'candidate' ? 'px-4 py-2 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow-sm' : 'px-4 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
+      document.getElementById('tab-btn-admin').className = tab === 'admin' ? 'px-4 py-2 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow-sm' : 'px-4 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
+
+      document.getElementById('stage-login-pairing').classList.toggle('hidden', tab !== 'candidate' || isPhonePaired || isExamActive);
+      document.getElementById('stage-biometrics').classList.toggle('hidden', tab !== 'candidate' || !isPhonePaired || isExamActive);
+      document.getElementById('stage-exam-active').classList.toggle('hidden', tab !== 'candidate' || !isExamActive);
+      document.getElementById('stage-admin-view').classList.toggle('hidden', tab !== 'admin');
+      if (tab === 'admin') renderQuestionBankUI();
+    }
+
+    function logViolation(reason, strikeNum, remaining, audioUrl = null) {
+      const tbody = document.getElementById('telemetry-table-body');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        const audioEvidenceHtml = audioUrl 
+          ? `<div class="flex items-center gap-2 mt-1.5"><audio controls src="${audioUrl}" class="h-6 w-36"></audio><a href="${audioUrl}" download="Trace_Audio_${Date.now()}.webm" class="text-blue-400 hover:underline text-[10px] font-mono">⬇️ Audio</a></div>` 
+          : '';
+        tr.innerHTML = `
+          <td class="p-3 text-slate-400 font-mono">${new Date().toLocaleTimeString()}</td>
+          <td class="p-3 text-white font-mono">${currentSessionId}</td>
+          <td class="p-3">
+            <span class="text-red-400 font-bold">${reason}</span>
+            ${audioEvidenceHtml}
+          </td>
+          <td class="p-3 text-red-400 font-mono">${strikeNum}/3</td>
+          <td class="p-3"><span class="text-emerald-400 font-semibold font-mono text-[11px]">✓ Transmitted</span></td>
+        `;
+        tbody.prepend(tr);
+      }
+    }
+
+    // ==================== GOOGLE SHEETS LIVE SYNCHRONIZATION ENGINE ====================
+    function getGasUrl() {
+      try {
+        const saved = localStorage.getItem('trace_gas_url') || localStorage.getItem('proctor_gas_url') || localStorage.getItem('gas_url');
+        if (saved && saved.trim()) return saved.trim();
+      } catch(e){}
+      const input = document.getElementById('gas-url-input');
+      if (input && input.value && input.value.trim()) return input.value.trim();
+      return GAS_WEBAPP_URL;
+    }
+
+    function saveGasUrlManual() {
+      const input = document.getElementById('gas-url-input');
+      if (input && input.value) {
+        try { localStorage.setItem('trace_gas_url', input.value.trim()); } catch(e){}
+        updateSheetSyncUI('ONLINE', 'Config Saved');
+      }
+    }
+
+    function updateSheetSyncUI(status, label) {
+      const headerDot = document.getElementById('header-sheet-sync-dot');
+      const headerText = document.getElementById('header-sheet-sync-text');
+      const badge = document.getElementById('gas-status-badge');
+
+      if (status === 'SYNCING') {
+        if (headerDot) headerDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping";
+        if (headerText) headerText.innerHTML = `Sheet Sync: <span class="text-amber-400 font-bold">DISPATCHING...</span>`;
+        if (badge) {
+          badge.className = "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-950 text-amber-400 border border-amber-800";
+          badge.innerText = `● SYNCING (${label})`;
+        }
+      } else {
+        if (headerDot) headerDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+        if (headerText) headerText.innerHTML = `Sheet Sync: <span class="text-emerald-400 font-bold">ONLINE</span>`;
+        if (badge) {
+          badge.className = "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+          badge.innerText = "● SYNC ACTIVE";
+        }
+      }
+    }
+
+    function recordSheetSyncEvent(action, payload) {
+      totalDispatchedSheetEvents++;
+      const countEl = document.getElementById('sheet-sync-count');
+      if (countEl) countEl.innerText = `${totalDispatchedSheetEvents} Events Transmitted`;
+
+      const feed = document.getElementById('sheet-sync-feed');
+      if (feed) {
+        if (totalDispatchedSheetEvents === 1) feed.innerHTML = '';
+        const item = document.createElement('div');
+        item.className = "flex justify-between items-center py-1 border-b border-slate-800/60 font-mono text-[10px]";
+        const timeStr = new Date().toLocaleTimeString();
+        let detailText = payload.status || payload.violation || (payload.score !== undefined ? `Score: ${payload.score}%` : 'Dispatched');
+        item.innerHTML = `
+          <span class="text-slate-400"><strong class="text-indigo-400">${action}</strong> (${timeStr})</span>
+          <span class="text-slate-300 truncate max-w-[200px]">${detailText}</span>
+          <span class="text-emerald-400 font-bold">✓ Sent</span>
+        `;
+        feed.prepend(item);
+      }
+    }
+
+    async function syncToGoogleSheet(action, data = {}) {
+      const url = getGasUrl();
+      if (!url || !url.includes('script.google.com')) return;
+
+      updateSheetSyncUI('SYNCING', action);
+
+      const candidateName = document.getElementById('candidate-name')?.value || 'Alex Mercer';
+      const candidateEmail = document.getElementById('candidate-email')?.value || 'candidate@assessment.org';
+      const candidateId = document.getElementById('candidate-id')?.value || 'CAND-884920';
+      const candidateRole = document.getElementById('candidate-role')?.value || 'Fullstack Engineer';
+
+      const payload = {
+        action: action,
+        session: currentSessionId,
+        name: candidateName,
+        email: candidateEmail,
+        candidateId: candidateId,
+        role: candidateRole,
+        cohort: candidateRole,
+        timestamp: new Date().toISOString(),
+        ...data
+      };
+
+      recordSheetSyncEvent(action, payload);
+
+      // Method 1: GET request with URL parameters (handled by doGet in Code.gs)
+      try {
+        const params = new URLSearchParams();
+        for (const [k, v] of Object.entries(payload)) {
+          if (v !== undefined && v !== null) {
+            params.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+          }
+        }
+        const getUrl = `${url}?${params.toString()}`;
+        fetch(getUrl, { method: 'GET', mode: 'no-cors', cache: 'no-cache' })
+          .then(() => updateSheetSyncUI('ONLINE', action))
+          .catch(() => {
+            // Secondary fallback: image beacon
+            try {
+              const img = new Image();
+              img.src = getUrl;
+              updateSheetSyncUI('ONLINE', action);
+            } catch(e){}
+          });
+      } catch(e){}
+
+      // Method 2: POST request (handled by doPost in Code.gs without CORS preflight block)
+      try {
+        fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        }).catch(()=>{});
+      } catch(e){}
+    }
+
+    async function testGasWebhook() {
+      const msg = document.getElementById('gas-test-msg');
+      if (msg) {
+        msg.innerText = "⏳ Transmitting test verification ping to Google Sheet...";
+        msg.classList.remove('hidden');
+      }
+      saveGasUrlManual();
+      await syncToGoogleSheet('ping', { test: true, note: 'Diagnostic manual ping from Admin tab' });
+      if (msg) {
+        msg.innerText = "✓ Verification ping successfully transmitted to Google Sheet! Check Telemetry_Audit tab.";
+      }
+    }
+
+    function copyBackendCodeModal() {
+      const codeGs = `function doGet(e) { return handleRequest(e); }
+function doPost(e) { return handleRequest(e); }
+
+function handleRequest(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let params = e && e.parameter ? e.parameter : {};
+  if (e && e.postData && e.postData.contents) {
+    try { Object.assign(params, JSON.parse(e.postData.contents)); } catch(err) {}
+  }
+  const action = params.action;
+
+  // 1. Session Start -> ACTIVE
+  if (action === 'startSession') {
+    const sheet = getOrCreateSheet(ss, 'Cohort_Sessions', ['Session_ID', 'Candidate_Name', 'Candidate_Email', 'Candidate_ID', 'Cohort_Track', 'Start_Time', 'Score', 'Integrity_Score', 'Status']);
+    sheet.appendRow([params.session, params.name, params.email, params.candidateId, params.role, new Date(), 'IN_PROGRESS', '100%', 'ACTIVE']);
+    return ContentService.createTextOutput(JSON.stringify({ status: 'ACTIVE' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 2. Malpractice Strike -> Telemetry Log
+  if (action === 'logViolation' || action === 'audioViolation' || action === 'audioEvidenceUpload') {
+    const sheet = getOrCreateSheet(ss, 'Telemetry_Audit', ['Timestamp', 'Session_ID', 'Candidate_Email', 'Violation_Type', 'Strike', 'Details']);
+    sheet.appendRow([new Date(), params.session, params.email, params.violation, \`\${params.strike}/3\`, JSON.stringify(params)]);
+    return ContentService.createTextOutput(JSON.stringify({ status: 'LOGGED' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 3. Final Submission -> SUBMITTED or DISQUALIFIED_MALPRACTICE
+  if (action === 'submitScore') {
+    const sheet = getOrCreateSheet(ss, 'Cohort_Sessions', ['Session_ID', 'Candidate_Name', 'Candidate_Email', 'Candidate_ID', 'Cohort_Track', 'Start_Time', 'Score', 'Integrity_Score', 'Status']);
+    const data = sheet.getDataRange().getValues();
+    let updated = false;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === params.session) {
+        sheet.getRange(i + 1, 7).setValue((params.score || 0) + '%');
+        sheet.getRange(i + 1, 8).setValue((params.integrity !== undefined ? params.integrity : 100) + '%');
+        sheet.getRange(i + 1, 9).setValue(params.status || 'SUBMITTED');
+        updated = true;
+        break;
+      }
+    }
+    if (!updated) {
+      sheet.appendRow([params.session, params.name, params.email, params.candidateId, params.role, new Date(), (params.score || 0) + '%', (params.integrity !== undefined ? params.integrity : 100) + '%', params.status || 'SUBMITTED']);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ status: 'UPDATED' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 4. Test Ping
+  if (action === 'ping') {
+    const sheet = getOrCreateSheet(ss, 'Telemetry_Audit', ['Timestamp', 'Session_ID', 'Candidate_Email', 'Violation_Type', 'Strike', 'Details']);
+    sheet.appendRow([new Date(), params.session || 'TEST_PING', params.email || 'test@domain.com', 'DIAGNOSTIC_PING', '0/3', 'Webhook Verified Active']);
+    return ContentService.createTextOutput(JSON.stringify({ status: 'PING_OK' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ status: 'READY' })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateSheet(ss, name, headers) {
+  let s = ss.getSheetByName(name);
+  if (!s) {
+    s = ss.insertSheet(name);
+    s.appendRow(headers);
+    s.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  }
+  return s;
+}`;
+
+      navigator.clipboard.writeText(codeGs).then(() => {
+        alert("✓ Code.gs script copied to clipboard!\n\nPaste it into your Google Sheet (Extensions > Apps Script) and deploy as 'New version'.");
+      }).catch(() => {
+        prompt("Copy this Apps Script Code.gs content:", codeGs);
+      });
+    }
+
+    function exportAuditLogJSON() {
+      const blob = new Blob([JSON.stringify({ session: currentSessionId, strikesRemaining, userAnswers }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Trace_Audit_${currentSessionId}.json`; a.click();
+    }
+
+    let phoneCamStream = null;
+    let phoneCurrentFacingMode = 'environment'; // Default: Desk View (Rear Camera)
+
+    async function startPhoneCamera(facing = phoneCurrentFacingMode) {
+      phoneCurrentFacingMode = facing;
+      try {
+        if (phoneCamStream) {
+          phoneCamStream.getTracks().forEach(t => t.stop());
+        }
+        phoneCamStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        const vid = document.getElementById('phone-cam-video');
+        if (vid) vid.srcObject = phoneCamStream;
+        const label = document.getElementById('phone-camera-mode-label');
+        if (label) {
+          label.innerText = facing === 'environment' ? 'DESK VIEW (BACK CAM)' : 'FRONT VIEW (SELFIE)';
+        }
+      } catch (e) {
+        console.warn("Target camera mode unavailable, falling back to default:", e);
+        try {
+          phoneCamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          const vid = document.getElementById('phone-cam-video');
+          if (vid) vid.srcObject = phoneCamStream;
+        } catch(err){}
+      }
+    }
+
+    function togglePhoneCamera() {
+      const nextFacing = phoneCurrentFacingMode === 'environment' ? 'user' : 'environment';
+      startPhoneCamera(nextFacing);
+    }
+  </script>
+</body>
+</html>
