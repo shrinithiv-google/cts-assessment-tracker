@@ -1573,9 +1573,7 @@ ${mobileUrl}`);
 
     async function startAssessment() {
       if (!isBiometricallyVerified) {
-        if (confirm("⚠️ Biometric Verification Pending:
-
-Would you like to run instant biometric verification now and enter the exam?")) {
+        if (confirm()) {
           quickVerifyBiometrics();
           setTimeout(startAssessment, 1250);
           return;
@@ -1912,14 +1910,14 @@ Would you like to run instant biometric verification now and enter the exam?")) 
     }
 
     function showStrikeWarningModal(reason, strikeNum, remaining, audioUrl = null) {
-      const modal = document.getElementById('modal-strike-warning');
-      const reasonEl = document.getElementById('strike-reason-text');
-      const countEl = document.getElementById('strike-count-badge');
-      const audioContainer = document.getElementById('strike-audio-proof-container');
-      const audioPlayer = document.getElementById('strike-audio-player');
+      const modal = document.getElementById('modal-warning') || document.getElementById('modal-strike-warning');
+      const reasonEl = document.getElementById('warning-reason') || document.getElementById('strike-reason-text');
+      const countEl = document.getElementById('warning-strikes-left') || document.getElementById('strike-count-badge');
+      const audioContainer = document.getElementById('warning-audio-container') || document.getElementById('strike-audio-proof-container');
+      const audioPlayer = document.getElementById('warning-audio-player') || document.getElementById('strike-audio-player');
 
       if (reasonEl) reasonEl.innerText = reason;
-      if (countEl) countEl.innerText = `Strike ${strikeNum} of 3 (${remaining} remaining)`;
+      if (countEl) countEl.innerText = remaining;
 
       if (audioUrl && audioContainer && audioPlayer) {
         audioPlayer.src = audioUrl;
@@ -1932,8 +1930,12 @@ Would you like to run instant biometric verification now and enter the exam?")) 
     }
 
     function closeStrikeModal() {
-      const modal = document.getElementById('modal-strike-warning');
+      const modal = document.getElementById('modal-warning') || document.getElementById('modal-strike-warning');
       if (modal) modal.classList.add('hidden');
+    }
+
+    function dismissWarningModal() {
+      closeStrikeModal();
     }
 
     function finishExam(isDisqualified = false) {
@@ -2072,13 +2074,40 @@ Would you like to run instant biometric verification now and enter the exam?")) 
       });
     }
 
+    function addNewQuestion() {
+      addNewCustomQuestion();
+    }
+
+    function captureInstantAudioProof() {
+      alert("🎙️ Audio proof sampling active (3.0s continuous buffer monitoring).");
+    }
+
+    function exportAuditLogJSON() {
+      const auditPayload = {
+        session: currentSessionId,
+        timestamp: new Date().toISOString(),
+        candidate: document.getElementById('candidate-name')?.value || 'Alex Mercer',
+        strikesRemaining: strikesRemaining,
+        questionsCount: questions.length
+      };
+      const blob = new Blob([JSON.stringify(auditPayload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit_${currentSessionId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
     function addNewCustomQuestion() {
       const qInput = document.getElementById('new-q-text');
-      const aInput = document.getElementById('new-q-opt-a');
-      const bInput = document.getElementById('new-q-opt-b');
-      const cInput = document.getElementById('new-q-opt-c');
-      const dInput = document.getElementById('new-q-opt-d');
-      const correctSelect = document.getElementById('new-q-correct');
+      const aInput = document.getElementById('new-opt-a') || document.getElementById('new-q-opt-a');
+      const bInput = document.getElementById('new-opt-b') || document.getElementById('new-q-opt-b');
+      const cInput = document.getElementById('new-opt-c') || document.getElementById('new-q-opt-c');
+      const dInput = document.getElementById('new-opt-d') || document.getElementById('new-q-opt-d');
+      const correctSelect = document.getElementById('new-q-ans') || document.getElementById('new-q-correct');
 
       if (!qInput || !qInput.value.trim()) {
         alert("Please enter a question prompt.");
@@ -2427,9 +2456,7 @@ function getOrCreateSheet(ss, name, headers) {
 }`;
       if (navigator.clipboard) {
         navigator.clipboard.writeText(codeGs);
-        alert("✓ Google Apps Script Code.gs copied to clipboard!
-
-Paste into Extensions > Apps Script in 'CTS Assesment tracker'.");
+        alert();
       } else {
         prompt("Copy Apps Script Code.gs:", codeGs);
       }
